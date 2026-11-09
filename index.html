@@ -728,7 +728,7 @@ function renderCam(){
 }
 function camStart(){
   if(LIVE.role!=='cam'||LIVE.code!==camCode())liveStart('cam',camCode(),d=>{if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>=LMts){const first=!LM;LM=d.M;LMts=d.ts;const cc=$('#ccode');if(cc&&screen==='cam')cc.style.display='none';liveStatus();if(first&&screen==='cam'&&!CAM.rec)camControls()}});
-  if(!CAM.raf)CAM.raf=requestAnimationFrame(camLoop);
+  if(!CAM.raf){CAM.gen++;const g=CAM.gen;CAM.raf=requestAnimationFrame(()=>camLoop(g))}
 }
 function camControls(){const el=$('#cbot');if(!el)return;let h='';
   if(!CAM.stream){
@@ -748,7 +748,7 @@ function camControls(){const el=$('#cbot');if(!el)return;let h='';
 async function openCam(){
   CAM.err='';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){CAM.err='This browser can’t use the camera. Open the app in Safari.';camControls();return}
-  const v={facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30}};
+  const big=CAM.q>=1080,v={facingMode:{ideal:'environment'},width:{ideal:big?1920:1280},height:{ideal:big?1080:720},frameRate:{ideal:30}};
   try{CAM.stream=await navigator.mediaDevices.getUserMedia({video:v,audio:true})}
   catch(e){try{CAM.stream=await navigator.mediaDevices.getUserMedia({video:v,audio:false})}catch(e2){CAM.err='Camera blocked. Allow camera access for this site (Settings → Safari → Camera), then try again.';camControls();return}}
   const vd=document.createElement('video');vd.muted=true;vd.playsInline=true;vd.setAttribute('playsinline','');vd.autoplay=true;vd.srcObject=CAM.stream;CAM.vid=vd;
@@ -756,19 +756,35 @@ async function openCam(){
   vd.addEventListener('resize',()=>{if(!CAM.rec)camControls()});
   camControls();
 }
-function camLoop(){
-  if(screen!=='cam'&&!CAM.rec){CAM.raf=0;return}
+const TK={c:null,key:''};
+function tickerLayer(W,H){
+  const key=LMts+'|'+W+'|'+H;
+  if(!TK.c)TK.c=document.createElement('canvas');
+  if(TK.key!==key){TK.key=key;TK.c.width=W;TK.c.height=H;const x=TK.c.getContext('2d');x.clearRect(0,0,W,H);
+    if(LM)try{withMatch(LM,()=>drawTicker(x,W,H,null))}catch(e){}}
+  return TK.c}
+function camFrame(){
   const v=CAM.vid,c=$('#cc');
   if(v&&v.videoWidth&&c){
     let W,H;
     if(CAM.rec){W=CAM.W;H=CAM.H}else{const vw=v.videoWidth,vh=v.videoHeight,sc=Math.min(1,CAM.q/Math.min(vw,vh));W=Math.round(vw*sc/2)*2;H=Math.round(vh*sc/2)*2}
     if(c.width!==W||c.height!==H){c.width=W;c.height=H}
-    const x=c.getContext('2d');const r=Math.max(W/v.videoWidth,H/v.videoHeight),dw=v.videoWidth*r,dh=v.videoHeight*r;
-    x.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh);
-    if(LM)try{withMatch(LM,()=>drawTicker(x,W,H,null))}catch(e){}
-    if(CAM.rec){const t=$('#rtime');if(t)t.textContent=`● ${fmt((Date.now()-CAM.t0)/1000)} · ${(CAM.size/1048576).toFixed(0)} MB`}
-  }
-  CAM.raf=requestAnimationFrame(camLoop)}
+    const x=c.getContext('2d',{alpha:false});
+    if(v.videoWidth===W&&v.videoHeight===H)x.drawImage(v,0,0);
+    else{const r=Math.max(W/v.videoWidth,H/v.videoHeight),dw=v.videoWidth*r,dh=v.videoHeight*r;x.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh)}
+    if(LM)x.drawImage(tickerLayer(W,H),0,0);
+  }}
+CAM.gen=0;CAM.last=0;
+function camLoop(g){
+  if(g===undefined||typeof g!=='number'||g<0)g=CAM.gen;
+  if(g!==CAM.gen)return;
+  if(screen!=='cam'&&!CAM.rec){CAM.raf=0;return}
+  CAM.last=Date.now();camFrame();
+  const v=CAM.vid;
+  if(v&&v.requestVideoFrameCallback&&v.videoWidth)v.requestVideoFrameCallback(()=>camLoop(g));
+  else CAM.raf=requestAnimationFrame(()=>camLoop(g))}
+setInterval(()=>{if((screen==='cam'||CAM.rec)&&Date.now()-CAM.last>800){CAM.gen++;const g=CAM.gen;CAM.raf=requestAnimationFrame(()=>camLoop(g))}},400);
+setInterval(()=>{if(CAM.rec){const t=$('#rtime');if(t)t.textContent=`● ${fmt((Date.now()-CAM.t0)/1000)} · ${(CAM.size/1048576).toFixed(0)} MB`}},500);
 async function camRecord(){
   const c=$('#cc');if(!c||!c.width){toast('Camera not ready yet');return}
   if(!window.MediaRecorder||!c.captureStream){toast("This browser can't record — use Safari");return}
