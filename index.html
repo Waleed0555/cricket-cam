@@ -347,7 +347,7 @@ function saveSetup(){
 function renderTeams(){const T=getTeams();
   let h=`<div class="wrap">${hdr('My teams')}<p class="mute">Saved teams stay on this phone. When you start a match, pick a team and tap who's playing.</p>`;
   h+=T.map(t=>`<div class="card" style="display:flex;align-items:center;gap:10px"><span style="width:16px;height:16px;border-radius:50%;flex:none;background:${esc(t.color)}"></span><div style="flex:1;min-width:0"><b>${esc(t.name)}</b><div class="mute" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.players.length} players${t.players.length?' · '+esc(t.players.slice(0,6).join(', '))+(t.players.length>6?'…':''):''}</div></div><button class="mini" onclick="editTeam('${t.id}')">Edit</button></div>`).join('')||'<div class="card mute">No saved teams yet. Add one here, or tick “Save this team” when you set up a match.</div>';
-  h+=`<button class="pri block" onclick="editTeam('')">+ Add a team</button></div>`;app.innerHTML=h}
+  h+=`<button class="pri block" onclick="editTeam('')">+ Add a team</button><div class="grid g2"><button onclick="shareTeams()">↗ Share teams</button><button onclick="importMenu('')">↙ Import teams</button></div><p class="mute">Teams are saved on this phone only. Use Share / Import to copy them to another phone. (On iPhone the home-screen icon and Safari keep separate copies too.)</p></div>`;app.innerHTML=h}
 function editTeam(id){const t=getTeams().find(a=>a.id===id)||{id:'',name:'',short:'',color:'#d62839',players:[]};ui.et=t;ui.delArm=false;
   ui.modal={title:id?'Edit team':'New team',html:`<label>Team name</label><input id="etn" value="${esc(t.name)}" autocapitalize="words">
   <div class="grid g2"><div><label>Short name on ticker</label><input id="ets" maxlength="4" placeholder="auto" value="${esc(t.short||'')}"></div><div><label>Colour</label><input type="color" id="etc" value="${esc(t.color)}"></div></div>
@@ -358,6 +358,35 @@ function saveTeamEd(){const n=cleanName($('#etn').value);if(!n){toast('Give the 
   upsertTeam({id:ui.et.id,name:n,short:$('#ets').value.trim().toUpperCase(),color:$('#etc').value,players:P});closeModal();render();toast('Team saved')}
 function delTeam(id){if(!ui.delArm){ui.delArm=true;const b=$('#delb');if(b)b.textContent='Tap again to delete';return}
   putTeams(getTeams().filter(t=>t.id!==id));closeModal();render();toast('Team deleted')}
+
+/* ================= SHARE / IMPORT TEAMS ================= */
+function b64e(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))}
+function isSite(){return !window.claude&&/^https?:$/.test(location.protocol)}
+function shareTeams(){const T=getTeams();if(!T.length){toast('No saved teams to share yet');return}
+  const raw=b64e(JSON.stringify(T.map(t=>({n:t.name,s:t.short||'',c:t.color,p:t.players})))),code='CCT1-'+raw;
+  const link=location.origin+location.pathname+'#teams='+raw;
+  ui.shareText=`Cricket Cam teams: ${T.map(t=>t.name).join(', ')}\n\nIn Cricket Cam go to My teams → Import teams and paste this code:\n${code}`+(isSite()?`\n\nOr open: ${link}`:'');
+  ui.modal={title:'Share teams',html:`<p class="mute">Send this to the other phone (WhatsApp, Messages or AirDrop). On that phone: <b>My teams → Import teams</b> → paste.</p>
+  <textarea id="shtx" rows="6" readonly style="font-size:13px">${esc(ui.shareText)}</textarea>
+  <div class="grid g2" style="margin-top:8px">${isSite()&&navigator.share?'<button class="pri" onclick="doShareTeams()">Share…</button>':''}<button ${isSite()&&navigator.share?'':'class="pri"'} onclick="copyShare()">Copy</button></div>`};showModal()}
+function doShareTeams(){navigator.share({text:ui.shareText}).catch(()=>{})}
+function copyShare(){const t=ui.shareText;const ok=()=>toast('Copied — paste it into a message');
+  try{navigator.clipboard.writeText(t).then(ok,()=>{selShare()})}catch(e){selShare()}}
+function selShare(){const e=$('#shtx');if(e){e.removeAttribute('readonly');e.focus();e.select();toast('Selected — tap Copy')}}
+function importMenu(pre){ui.modal={title:'Import teams',html:`<p class="mute">Paste the message or code from the other phone. Teams with the same name get any new players added.</p>
+  <textarea id="imtx" rows="6" placeholder="Paste here" style="font-size:13px">${esc(pre||'')}</textarea><button class="pri block" onclick="doImport()">Import teams</button>`};showModal()}
+function doImport(){const raw=$('#imtx').value;
+  const m=String(raw).match(/CCT1-([A-Za-z0-9_-]+)/)||String(raw).match(/#teams=([A-Za-z0-9_-]+)/);
+  let arr;try{if(!m)throw 0;arr=JSON.parse(b64d(m[1]));if(!Array.isArray(arr))throw 0}catch(e){toast("That code doesn't look right — paste the whole message");return}
+  const T=getTeams();let add=0,upd=0;
+  arr.forEach(a=>{if(!a||!a.n)return;const P=[...new Set((a.p||[]).map(cleanName).filter(Boolean))];const nm=cleanName(a.n);
+    const ex=T.find(t=>t.name.toLowerCase()===nm.toLowerCase());
+    if(ex){ex.players=[...new Set([...ex.players,...P])];if(a.c)ex.color=a.c;if(a.s)ex.short=a.s;upd++}
+    else{T.push({id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:nm,short:a.s||'',color:a.c||'#d62839',players:P});add++}});
+  putTeams(T);closeModal();if(screen!=='teams')go('teams');else render();
+  toast(`${add} team${add===1?'':'s'} added${upd?`, ${upd} updated`:''}`)}
+window.addEventListener('load',()=>{try{if(location.hash.indexOf('#teams=')===0){const h=location.hash;history.replaceState(null,'',location.pathname+location.search);go('teams');importMenu(h)}}catch(e){}});
 
 /* ================= SCORING SCREEN ================= */
 function nowT(){return M.t0?(Date.now()-M.t0)/1000:0}
