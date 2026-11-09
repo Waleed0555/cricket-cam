@@ -233,8 +233,9 @@ function compute(upto){
       }
       if(r%2===1)swp(I);
       S.balls.push({t:e.t,label:`${S.inns.length===1?'1st':'2nd'} inns ${no} · ${bn||'?'} to ${sn||'?'}: ${L.l}  [${fmt(e.t)}]`});
-      if(counts&&I.cnt%bpo===0){if(I.ovR===0&&I.ovBs.length===1&&w)w.m++;swp(I);I.last=I.bowler;I.bowler=null;I.prev=I.over;I.over=[];I.ovR=0;I.ovBs=[]}
+      const ovEnd=counts&&I.cnt%bpo===0;if(ovEnd){if(I.ovR===0&&I.ovBs.length===1&&w)w.m++;swp(I);I.last=I.bowler;I.bowler=null;I.prev=I.over;I.over=[];I.ovR=0;I.ovBs=[]}
       chk(I,st);
+      if(ovEnd&&!I.done)S.cards.push({type:'bat',inn:S.inns.length-1,t:e.t,dur:OVER_CARD},{type:'bowl',inn:S.inns.length-1,t:e.t+OVER_CARD,dur:OVER_CARD});
     }
   }
   cardsCheck(S);
@@ -282,7 +283,7 @@ function renderHome(){
   3. Hit record on the camera phone and score every ball — the scorecard appears on the video as it happens.<br>
   4. Stop, tap <b>Save video</b> → <b>Save Video</b>. Done.<br><br>
   Both phones need internet (Wi-Fi or data). Keep the camera phone on this app with the screen on, ideally plugged in. For long games, record one innings at a time.</div>
-  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v6</div>
+  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v7</div>
   ${navigator.standalone?'':'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>'}</div>`;
   app.innerHTML=h;liveStatus();
 }
@@ -400,11 +401,11 @@ function doImport(){const raw=$('#imtx').value;
 window.addEventListener('load',()=>{try{if(location.hash.indexOf('#teams=')===0){const h=location.hash;history.replaceState(null,'',location.pathname+location.search);go('teams');importMenu(h)}}catch(e){}});
 
 /* ================= VIDEO SCORECARDS (end of innings) ================= */
-const CARD_DUR={bat:15,bowl:15,result:12};
+const CARD_DUR={bat:10,bowl:10,result:10},OVER_CARD=3;
 function cardsCheck(S){const I=S.cur;if(I&&I.done&&!I._carded){I._carded=true;const idx=S.inns.indexOf(I),t=S._lastT||0;
   S.cards.push({type:'bat',inn:idx,t},{type:'bowl',inn:idx,t:t+CARD_DUR.bat});
   if(idx===1)S.cards.push({type:'result',inn:idx,t:t+CARD_DUR.bat+CARD_DUR.bowl})}}
-function activeCard(S,tm){let a=null;if(tm==null)return null;for(const c of S.cards){if(tm>=c.t&&tm<c.t+(CARD_DUR[c.type]||15))a=c}return a}
+function activeCard(S,tm){let a=null;if(tm==null)return null;for(const c of S.cards){if(tm>=c.t&&tm<c.t+(c.dur||CARD_DUR[c.type]||10))a=c}return a}
 function drawAll(c,W,H,tm){drawTicker(c,W,H,tm);const S=compute(tm),cd=activeCard(S,tm);if(cd)drawCard(c,W,H,S,cd)}
 function drawCard(c,W,H,S,cd){
   const I=S.inns[cd.inn];if(!I)return;
@@ -935,14 +936,17 @@ const CQ=[];let CQid=0;
 function camCardsOnMsg(oldM,newM){
   let nS;try{nS=withMatch(newM,()=>compute())}catch(e){return}
   CAM.S=nS;
-  if(!oldM||oldM.uid!==newM.uid){CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenEv=newM.events.length;return}
+  const ovOf=S=>S.inns.map(I=>Math.floor(I.cnt/((newM.settings&&newM.settings.bpo)||6)));
+  if(!oldM||oldM.uid!==newM.uid){CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenOv=ovOf(nS);CAM.seenEv=newM.events.length;return}
   const seen=CAM.seenDone||[],now=Date.now();
   let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
-  const push=(type,inn)=>{const d=(CARD_DUR[type]||15)*1000;CQ.push({id:++CQid,type,inn,start,end:start+d});start+=d};
+  const push=(type,inn,sec)=>{const d=(sec||CARD_DUR[type]||10)*1000;CQ.push({id:++CQid,type,inn,start,end:start+d});start+=d};
   for(let i=(CAM.seenEv||0);i<newM.events.length;i++){const e=newM.events[i];if(e.k==='card')push(e.what,e.inn==null?nS.inns.length-1:e.inn)}
-  nS.inns.forEach((I,i)=>{if(I.done&&!seen[i]){push('bat',i);push('bowl',i);if(i===1)push('result',i)}});
+  const sOv=CAM.seenOv||[],nOv=ovOf(nS);
+  nS.inns.forEach((I,i)=>{if(I.done&&!seen[i]){push('bat',i);push('bowl',i);if(i===1)push('result',i)}
+    else if(!I.done&&nOv[i]>(sOv[i]||0)){push('bat',i,OVER_CARD);push('bowl',i,OVER_CARD)}});
   if(newM.events.length<(CAM.seenEv||0)){CQ.length=0}
-  CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenEv=newM.events.length}
+  CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenOv=nOv;CAM.seenEv=newM.events.length}
 function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
   const key=LMts+'|'+W+'|'+H;
