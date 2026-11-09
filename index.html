@@ -282,6 +282,7 @@ function renderHome(){
   3. Hit record on the camera phone and score every ball — the scorecard appears on the video as it happens.<br>
   4. Stop, tap <b>Save video</b> → <b>Save Video</b>. Done.<br><br>
   Both phones need internet (Wi-Fi or data). Keep the camera phone on this app with the screen on, ideally plugged in. For long games, record one innings at a time.</div>
+  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v6</div>
   ${navigator.standalone?'':'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>'}</div>`;
   app.innerHTML=h;liveStatus();
 }
@@ -899,7 +900,7 @@ function renderCam(){
   camControls();liveStatus();
 }
 function camStart(){
-  if(LIVE.role!=='cam'||LIVE.code!==camCode())liveStart('cam',camCode(),d=>{if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>=LMts){const first=!LM;LM=d.M;LMts=d.ts;const cc=$('#ccode');if(cc&&screen==='cam')cc.style.display='none';liveStatus();if(first&&screen==='cam'&&!CAM.rec)camControls()}});
+  if(LIVE.role!=='cam'||LIVE.code!==camCode())liveStart('cam',camCode(),d=>{if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>=LMts){const first=!LM;camCardsOnMsg(LM,d.M);LM=d.M;LMts=d.ts;const cc=$('#ccode');if(cc&&screen==='cam')cc.style.display='none';liveStatus();if(first&&screen==='cam'&&!CAM.rec)camControls()}});
   if(!CAM.raf){CAM.gen++;const g=CAM.gen;CAM.raf=requestAnimationFrame(()=>camLoop(g))}
 }
 function camControls(){const el=$('#cbot');if(!el)return;let h='';
@@ -929,6 +930,20 @@ async function openCam(){
   camControls();
 }
 const TK={c:null,key:''};
+/* camera-side card queue: shown when the camera SEES an innings end (uses this phone's own clock) */
+const CQ=[];let CQid=0;
+function camCardsOnMsg(oldM,newM){
+  let nS;try{nS=withMatch(newM,()=>compute())}catch(e){return}
+  CAM.S=nS;
+  if(!oldM||oldM.uid!==newM.uid){CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenEv=newM.events.length;return}
+  const seen=CAM.seenDone||[],now=Date.now();
+  let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
+  const push=(type,inn)=>{const d=(CARD_DUR[type]||15)*1000;CQ.push({id:++CQid,type,inn,start,end:start+d});start+=d};
+  for(let i=(CAM.seenEv||0);i<newM.events.length;i++){const e=newM.events[i];if(e.k==='card')push(e.what,e.inn==null?nS.inns.length-1:e.inn)}
+  nS.inns.forEach((I,i)=>{if(I.done&&!seen[i]){push('bat',i);push('bowl',i);if(i===1)push('result',i)}});
+  if(newM.events.length<(CAM.seenEv||0)){CQ.length=0}
+  CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenEv=newM.events.length}
+function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
   const key=LMts+'|'+W+'|'+H;
   if(!TK.c)TK.c=document.createElement('canvas');
@@ -945,10 +960,8 @@ function camFrame(){
     if(v.videoWidth===W&&v.videoHeight===H)x.drawImage(v,0,0);
     else{const r=Math.max(W/v.videoWidth,H/v.videoHeight),dw=v.videoWidth*r,dh=v.videoHeight*r;x.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh)}
     if(LM){x.drawImage(tickerLayer(W,H),0,0);
-      if(LM.t0){if(CAM.sKey!==LMts){CAM.sKey=LMts;try{CAM.S=withMatch(LM,()=>compute())}catch(e){CAM.S=null}}
-        const S=CAM.S,cd=S&&activeCard(S,(Date.now()-LM.t0)/1000);
-        if(cd){const key=LMts+'|'+cd.type+cd.inn+'|'+cd.t+'|'+W+'x'+H;
-          if(CAM.cKey!==key){CAM.cKey=key;CAM.cc=CAM.cc||document.createElement('canvas');CAM.cc.width=W;CAM.cc.height=H;const y=CAM.cc.getContext('2d');y.clearRect(0,0,W,H);try{withMatch(LM,()=>drawCard(y,W,H,S,cd))}catch(e){}}
+      {const it=camActiveCard();if(it&&CAM.S){const key=LMts+'|'+it.id+'|'+W+'x'+H;
+          if(CAM.cKey!==key){CAM.cKey=key;CAM.cc=CAM.cc||document.createElement('canvas');CAM.cc.width=W;CAM.cc.height=H;const y=CAM.cc.getContext('2d');y.clearRect(0,0,W,H);try{withMatch(LM,()=>drawCard(y,W,H,CAM.S,it))}catch(e){}}
           x.drawImage(CAM.cc,0,0)}}}
   }}
 CAM.gen=0;CAM.last=0;
