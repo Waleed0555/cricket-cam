@@ -64,6 +64,9 @@ th{color:var(--mute);font-weight:600;font-size:12px}
 .filebtn{position:relative;overflow:hidden;display:block}
 .filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .big-start{padding:16px;font-size:19px}
+.pl{display:flex;flex-wrap:wrap;gap:6px}
+.pchip{padding:7px 12px;border-radius:16px;font-size:14px;background:#fff}
+.pchip.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
 .chip{display:inline-flex;min-width:38px;height:38px;padding:0 6px;border-radius:19px;align-items:center;justify-content:center;font-weight:700;font-size:14px;background:#8a94a6;color:#fff}
 .chip.four{background:#1d6fe0}.chip.six{background:#7a3ff0}.chip.w{background:var(--red)}.chip.ext{background:#b07a12}.chip.dot0{background:#c3cad6}
 /* scoring screen */
@@ -243,7 +246,7 @@ function infoLine(S){const I=S.cur,st=M.settings;
 
 /* ================= NAV ================= */
 function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;ui.modal=null;showModal();render();window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
-function render(){if(screen==='cam')return renderCam();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
+function render(){if(screen==='cam')return renderCam();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
 function hdr(t){return`<div class="hdr"><button class="mini" onclick="go('home')">‹ Home</button><b>${t}</b></div>`}
 
 /* ================= HOME ================= */
@@ -258,11 +261,13 @@ function renderHome(){
     if(!S.inns.length)h+=`<div class="mute" style="margin-top:6px">Not started yet</div>`;
     h+=`<button class="pri block" onclick="go('score')">✏️ Score this match</button></div>
     <button class="block" onclick="openSetup(false)">Teams, players &amp; rules</button>
+    <button class="block" onclick="go('teams')">👥 My teams</button>
     <button class="block" onclick="go('video')">🎬 Add score to a video I already filmed</button>
     <div class="grid g2"><button onclick="saveScore()">Save score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div>
     <button class="block dan" onclick="newMatchMenu()">New match</button>`;
   }else{
     h+=`<button class="block big-start" onclick="openSetup(true)">✏️ Scoring phone — new match</button>
+    <button class="block" onclick="go('teams')">👥 My teams</button>
     <label class="filebtn"><button class="block" style="pointer-events:none">Load a score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label>`;
   }
   h+=`<div class="card mute"><b style="color:var(--text)">Match day</b><br>
@@ -278,14 +283,49 @@ function newMatchMenu(){
   ui.modal={title:'Start a new match?',html:`<p class="mute">This replaces the current match on this phone. If you want to keep it, tap “Save score file” first.</p><button class="dan block" onclick="closeModal();openSetup(true)">Yes, new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
 
 /* ================= SETUP ================= */
-function openSetup(fresh,back){ui.draft=fresh?newMatch():JSON.parse(JSON.stringify(M));ui.draftFresh=fresh;ui.back=back||'home';go('setup')}
+/* ================= SAVED TEAMS ================= */
+function getTeams(){try{return JSON.parse(localStorage.getItem('cc.teams')||'[]')}catch(e){return[]}}
+function putTeams(T){try{localStorage.setItem('cc.teams',JSON.stringify(T))}catch(e){}}
+function upsertTeam(t){const T=getTeams();let x=t.id&&T.find(a=>a.id===t.id);
+  if(!x){x={id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)};T.push(x)}
+  Object.assign(x,{name:t.name,short:t.short||'',color:t.color,players:t.players.slice()});putTeams(T);return x.id}
+function addToSaved(sid,name){if(!sid)return;const T=getTeams(),t=T.find(a=>a.id===sid);if(t&&!t.players.includes(name)){t.players.push(name);putTeams(T)}}
+function cleanName(v){return String(v||'').trim().replace(/\s+/g,' ')}
+
+/* ================= SETUP ================= */
+function openSetup(fresh,back){
+  const base=fresh?newMatch():JSON.parse(JSON.stringify(M));
+  ui.draft=base;ui.draftFresh=fresh;ui.back=back||'home';
+  const T=getTeams();
+  ui.st=base.teams.map((t,i)=>{const sv=t.sid&&T.find(a=>a.id===t.sid);
+    return{sid:sv?t.sid:'',name:fresh?'':t.name,short:t.short||'',color:t.color,squad:[...new Set([...(sv?sv.players:[]),...t.players])],sel:t.players.slice(),save:true}});
+  go('setup')}
+function syncSetup(){
+  if(!ui.st||!$('#tn0'))return;
+  ui.st.forEach((s,i)=>{s.name=$('#tn'+i).value;s.short=$('#ts'+i).value;s.color=$('#tc'+i).value;s.save=$('#sv'+i).checked});
+  const st=ui.draft.settings,num=(id,d,min)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.max(min,v)};
+  st.overs=num('#so',6,1);st.bpo=num('#sb',6,1);st.extrasCount=$('#sx').checked;st.wideRuns=num('#sw',1,0);st.nbRuns=num('#sn',1,0);st.wicketPen=num('#sp',0,0);st.stayIn=$('#ss').checked}
+function reSetup(focus){const y=window.scrollY;renderSetup();window.scrollTo(0,y);if(focus){const e=$(focus);if(e)e.focus()}}
+function togP(i,j){syncSetup();const s=ui.st[i],p=s.squad[j];s.sel=s.sel.includes(p)?s.sel.filter(x=>x!==p):[...s.sel,p];reSetup()}
+function selAll(i,on){syncSetup();const s=ui.st[i];s.sel=on?s.squad.slice():[];reSetup()}
+function addP(i){syncSetup();const n=cleanName($('#np'+i).value);if(!n)return;const s=ui.st[i];if(!s.squad.includes(n))s.squad.push(n);if(!s.sel.includes(n))s.sel.push(n);reSetup('#np'+i)}
+function pickSaved(i,id){syncSetup();const t=getTeams().find(a=>a.id===id);if(!t)return;const s=ui.st[i];
+  Object.assign(s,{sid:t.id,name:t.name,short:t.short||'',color:t.color,squad:t.players.slice(),sel:[],save:true});reSetup();toast(`Loaded ${t.name} — now tap who's playing`)}
 function renderSetup(){
-  const D=ui.draft,st=D.settings;
+  const D=ui.draft,st=D.settings,T=getTeams();
   let h=`<div class="wrap"><div class="hdr"><button class="mini" onclick="go(ui.back||'home')">‹ Back</button><b>${ui.draftFresh?'New match':'Teams, players &amp; rules'}</b></div>`;
   if(!ui.draftFresh&&D.events.length)h+=`<div class="need" style="background:#f3f5f9;border-color:#e4e8ef;color:#0f172a">Game in progress — you can change anything here. Rule changes (like runs for a wide) apply to the whole match, including balls already scored.</div>`;
-  D.teams.forEach((t,i)=>{h+=`<div class="card"><label>Team ${i+1} name</label><input id="tn${i}" value="${esc(t.name)}">
-    <div class="grid g2"><div><label>Short name on ticker</label><input id="ts${i}" maxlength="4" placeholder="${esc(short(t))}" value="${esc(t.short)}"></div><div><label>Colour</label><input type="color" id="tc${i}" value="${esc(t.color)}"></div></div>
-    <label>Players — one per line (optional, you can add more during the game)</label><textarea id="tp${i}" rows="5">${esc(t.players.join('\n'))}</textarea></div>`});
+  ui.st.forEach((s,i)=>{
+    const n=s.sel.length;
+    h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Team ${i+1}</b>
+      ${T.length?`<select style="width:auto;max-width:60%" onchange="pickSaved(${i},this.value)"><option value="">${s.sid?'Switch saved team…':'Pick a saved team…'}</option>${T.map(t=>`<option value="${t.id}">${esc(t.name)} (${t.players.length})</option>`).join('')}</select>`:''}</div>
+      <label>Team name</label><input id="tn${i}" value="${esc(s.name)}" placeholder="Team ${i?'B':'A'}">
+      <div class="grid g2"><div><label>Short name on ticker</label><input id="ts${i}" maxlength="4" placeholder="auto" value="${esc(s.short)}"></div><div><label>Colour</label><input type="color" id="tc${i}" value="${esc(s.color)}"></div></div>
+      <label>Who's playing? <b style="color:var(--text)">${n} selected</b>${s.squad.length?` of ${s.squad.length} · tap names`:''}</label>
+      <div class="pl">${s.squad.map((p,j)=>`<button class="pchip ${s.sel.includes(p)?'on':''}" onclick="togP(${i},${j})">${s.sel.includes(p)?'✓ ':''}${esc(p)}</button>`).join('')||'<span class="mute">No players yet — add them below.</span>'}</div>
+      ${s.squad.length?`<div style="display:flex;gap:6px;margin-top:8px"><button class="mini" onclick="selAll(${i},1)">Select all</button><button class="mini" onclick="selAll(${i},0)">Clear</button></div>`:''}
+      <div class="addrow"><input id="np${i}" placeholder="Add a player" autocapitalize="words" autocomplete="off" onkeydown="if(event.key==='Enter')addP(${i})"><button onclick="addP(${i})">Add</button></div>
+      <label class="tog"><input type="checkbox" id="sv${i}" ${s.save?'checked':''}><span>Save this team for next time<div class="sm">${s.sid?'Updates the saved team with any new players':'Adds it to My teams'}</div></span></label></div>`});
   h+=`<div class="card"><b>Rules</b>
     <div class="grid g2"><div><label>Overs per innings</label><input id="so" type="number" inputmode="numeric" min="1" value="${st.overs}"></div><div><label>Balls per over</label><input id="sb" type="number" inputmode="numeric" min="1" value="${st.bpo}"></div></div>
     <label class="tog"><input type="checkbox" id="sx" ${st.extrasCount?'checked':''}><span>Wides &amp; no-balls count as a ball<div class="sm">The over always ends after the set number of balls, even if there were wides</div></span></label>
@@ -295,12 +335,29 @@ function renderSetup(){
   app.innerHTML=h;
 }
 function saveSetup(){
-  const D=ui.draft,num=(id,d,min)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.max(min,v)};
-  D.teams.forEach((t,i)=>{t.name=$('#tn'+i).value.trim()||('Team '+(i+1));t.short=$('#ts'+i).value.trim().toUpperCase();t.color=$('#tc'+i).value;
-    const seen=new Set();t.players=$('#tp'+i).value.split('\n').map(s=>s.trim().replace(/\s+/g,' ')).filter(s=>s&&!seen.has(s)&&seen.add(s))});
-  const st=D.settings;st.overs=num('#so',6,1);st.bpo=num('#sb',6,1);st.extrasCount=$('#sx').checked;st.wideRuns=num('#sw',1,0);st.nbRuns=num('#sn',1,0);st.wicketPen=num('#sp',0,0);st.stayIn=$('#ss').checked;
+  syncSetup();const D=ui.draft;
+  ui.st.forEach((s,i)=>{const name=cleanName(s.name)||('Team '+(i?'B':'A'));
+    const players=s.squad.filter(p=>s.sel.includes(p));
+    if(s.save&&s.squad.length)s.sid=upsertTeam({id:s.sid,name,short:s.short.trim().toUpperCase(),color:s.color,players:s.squad});
+    D.teams[i]={name,short:s.short.trim().toUpperCase(),color:s.color,players,sid:s.sid||''}});
   M=D;save();go(ui.draftFresh?'score':(ui.back||'home'));if(!ui.draftFresh)toast('Settings saved');
 }
+
+/* ================= MY TEAMS ================= */
+function renderTeams(){const T=getTeams();
+  let h=`<div class="wrap">${hdr('My teams')}<p class="mute">Saved teams stay on this phone. When you start a match, pick a team and tap who's playing.</p>`;
+  h+=T.map(t=>`<div class="card" style="display:flex;align-items:center;gap:10px"><span style="width:16px;height:16px;border-radius:50%;flex:none;background:${esc(t.color)}"></span><div style="flex:1;min-width:0"><b>${esc(t.name)}</b><div class="mute" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.players.length} players${t.players.length?' · '+esc(t.players.slice(0,6).join(', '))+(t.players.length>6?'…':''):''}</div></div><button class="mini" onclick="editTeam('${t.id}')">Edit</button></div>`).join('')||'<div class="card mute">No saved teams yet. Add one here, or tick “Save this team” when you set up a match.</div>';
+  h+=`<button class="pri block" onclick="editTeam('')">+ Add a team</button></div>`;app.innerHTML=h}
+function editTeam(id){const t=getTeams().find(a=>a.id===id)||{id:'',name:'',short:'',color:'#d62839',players:[]};ui.et=t;ui.delArm=false;
+  ui.modal={title:id?'Edit team':'New team',html:`<label>Team name</label><input id="etn" value="${esc(t.name)}" autocapitalize="words">
+  <div class="grid g2"><div><label>Short name on ticker</label><input id="ets" maxlength="4" placeholder="auto" value="${esc(t.short||'')}"></div><div><label>Colour</label><input type="color" id="etc" value="${esc(t.color)}"></div></div>
+  <label>Players — one per line</label><textarea id="etp" rows="10" autocapitalize="words">${esc(t.players.join('\n'))}</textarea>
+  <button class="pri block" onclick="saveTeamEd()">Save team</button>${id?`<button class="dan block" id="delb" onclick="delTeam('${id}')">Delete team</button>`:''}`};showModal()}
+function saveTeamEd(){const n=cleanName($('#etn').value);if(!n){toast('Give the team a name');return}
+  const seen=new Set(),P=$('#etp').value.split('\n').map(cleanName).filter(x=>x&&!seen.has(x)&&seen.add(x));
+  upsertTeam({id:ui.et.id,name:n,short:$('#ets').value.trim().toUpperCase(),color:$('#etc').value,players:P});closeModal();render();toast('Team saved')}
+function delTeam(id){if(!ui.delArm){ui.delArm=true;const b=$('#delb');if(b)b.textContent='Tap again to delete';return}
+  putTeams(getTeams().filter(t=>t.id!==id));closeModal();render();toast('Team deleted')}
 
 /* ================= SCORING SCREEN ================= */
 function nowT(){return M.t0?(Date.now()-M.t0)/1000:0}
@@ -404,7 +461,7 @@ function wkHtml(){
   h+=`<button class="pri block" style="margin-top:14px" ${ok?'':'disabled'} onclick="confirmWk()">${w.how==='rh'?'Confirm retired hurt':w.how==='ro'?'Confirm retired out':'Confirm wicket'}</button>`;
   return h}
 const FH={caught:'Caught by',runout:'Run out by',stumped:'Stumped by'};
-function addFielder(ti){const n=($('#nf').value||'').trim().replace(/\s+/g,' ');if(!n)return;const P=M.teams[ti].players;if(!P.includes(n))P.push(n);save();ui.wk.f=n;rewk()}
+function addFielder(ti){const n=($('#nf').value||'').trim().replace(/\s+/g,' ');if(!n)return;const P=M.teams[ti].players;if(!P.includes(n))P.push(n);addToSaved(M.teams[ti].sid,n);save();ui.wk.f=n;rewk()}
 function rewk(){ui.modal.html=wkHtml();showModal()}
 function confirmWk(){const w=ui.wk,ro=w.how==='runout',x=ui.x;if(w.how==='rh'||w.how==='ro'){closeModal();addEv({k:'ret',who:w.who,how:w.how});return}ui.x='';closeModal();addEv({k:'ball',r:ro?w.r:0,x,w:{how:w.how,who:ro?w.who:'s',f:FH[w.how]?w.f:null}})}
 const OUTTXT={bowled:'b',caught:'c',lbw:'lbw',stumped:'st',runout:'run out',hitwicket:'hit wkt',other:'out',rh:'retired hurt','retired out':'retired out'};
@@ -438,7 +495,7 @@ function showModal(){
 }
 function pickI(i){const m=ui.modal,n=m.items[i].name;closeModal();m.onPick(n)}
 function pickNew(){const m=ui.modal,n=($('#nn').value||'').trim().replace(/\s+/g,' ');if(!n)return;
-  if(m.teamIdx!=null){const P=M.teams[m.teamIdx].players;if(!P.includes(n))P.push(n);save()}
+  if(m.teamIdx!=null){const P=M.teams[m.teamIdx].players;if(!P.includes(n))P.push(n);addToSaved(M.teams[m.teamIdx].sid,n);save()}
   closeModal();m.onPick(n)}
 function closeModal(){ui.modal=null;showModal()}
 
