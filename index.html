@@ -204,7 +204,7 @@ function compute(upto){
     if(e.k==='max6'){S.ec=!!e.on;continue}
     if(e.k==='inn'){const I=newInn(e.bat);if(S.inns.length===1)I.target=S.inns[0].runs+1;S.inns.push(I);S.cur=I;continue}
     const I=S.cur;if(!I)continue;
-    if(e.k==='card'){S.cards.push({type:e.what,inn:e.inn==null?S.inns.length-1:e.inn,t:e.t,manual:true});continue}
+    if(e.k==='card'){enqueue(S,e.t,{type:e.what,inn:e.inn==null?S.inns.length-1:e.inn,dur:CARD_DUR[e.what]||10,manual:true});continue}
     if(e.k==='end'){I.done=true;continue}
     if(I.done)continue;
     if(e.k==='bat'){if(I.s===e.name||I.n===e.name)continue;gB(I,e.name).out=null;I[e.slot]=e.name;I.pr=0;I.pb=0;continue}
@@ -215,7 +215,7 @@ function compute(upto){
       const x=e.x||'',r=e.r||0,wd=x==='wd',nb=x==='nb';
       const pen=wd?st.wideRuns:nb?st.nbRuns:0,tr=r+pen;
       const no=Math.floor(I.cnt/bpo)+'.'+(I.cnt%bpo+1);
-      const sn=I.s,bn=I.bowler;
+      const sn=I.s,bn=I.bowler,pr0=I.runs,sr0=sn&&I.B[sn]?I.B[sn].r:0;let W0=null;
       I.runs+=tr;
       if(sn){const b=gB(I,sn);if(!wd)b.b++;if(!x||nb){b.r+=r;if(r===4)b.f4++;if(r===6)b.f6++}}
       const w=bn?gW(I,bn):null;
@@ -228,14 +228,20 @@ function compute(upto){
       if(e.w){
         I.wk++;const who=e.w.who==='n'?'n':'s',nm=I[who];
         if(st.wicketPen)I.runs-=st.wicketPen;
-        if(nm){const b=gB(I,nm);if(st.wicketPen)b.r-=st.wicketPen;if(!st.stayIn){b.out=e.w.how;b.bw=bn;b.f=e.w.f||null;I[who]=null}}
+        if(nm){const b=gB(I,nm);if(st.wicketPen)b.r-=st.wicketPen;if(!st.stayIn){b.out=e.w.how;b.bw=bn;b.f=e.w.f||null;I[who]=null}W0={nm,b,how:e.w.how}}
         if(w&&e.w.how!=='runout'&&e.w.how!=='other')w.w++;
       }
       if(r%2===1)swp(I);
       S.balls.push({t:e.t,label:`${S.inns.length===1?'1st':'2nd'} inns ${no} · ${bn||'?'} to ${sn||'?'}: ${L.l}  [${fmt(e.t)}]`});
       const ovEnd=counts&&I.cnt%bpo===0;if(ovEnd){if(I.ovR===0&&I.ovBs.length===1&&w)w.m++;swp(I);I.last=I.bowler;I.bowler=null;I.prev=I.over;I.over=[];I.ovR=0;I.ovBs=[]}
       chk(I,st);
-      if(ovEnd&&!I.done)S.cards.push({type:'bat',inn:S.inns.length-1,t:e.t,dur:OVER_CARD},{type:'bowl',inn:S.inns.length-1,t:e.t+OVER_CARD,dur:OVER_CARD});
+      {const ft=e.t;
+        if(sn&&(!x||nb)&&(r===6||r===4)){const b=I.B[sn];enqueue(S,ft,{type:r===6?'six':'four',dur:3,l1:sn,l2:`${b.r} (${b.b})  ·  ${ordn(r===6?b.f6:b.f4)} ${r===6?'six':'four'}`})}
+        if(sn&&I.B[sn]){const b=I.B[sn];[50,100].forEach(m=>{if(sr0<m&&b.r>=m)enqueue(S,ft,{type:'bm',dur:3,word:m===50?'FIFTY':'HUNDRED',l1:sn,l2:`${m} off ${b.b} balls  ·  ${b.f4} fours, ${b.f6} sixes`})})}
+        for(let m=50;m<=I.runs;m+=50){if(pr0<m)enqueue(S,ft,{type:'tm',dur:3,word:m+' UP',l1:M.teams[I.bat].name,l2:`${m} runs in ${ovs(I.cnt,bpo)} overs`})}
+        if(W0){const b=W0.b;if(b.r<=0&&!st.stayIn&&!st.wicketPen)enqueue(S,ft,{type:'duck',dur:5,variant:b.b<=0?'diamond':b.b===1?'golden':'normal',l1:W0.nm,l2:`0 (${b.b})  ·  ${howOut(b)}`});
+          else enqueue(S,ft,{type:'wkt',dur:3,word:WWORD[W0.how]||'OUT',l1:W0.nm,l2:`${st.stayIn?'out':howOut(b)}  ·  ${b.r} (${b.b})`})}}
+      if(ovEnd&&!I.done){enqueue(S,e.t,{type:'bat',inn:S.inns.length-1,dur:OVER_CARD});enqueue(S,e.t,{type:'bowl',inn:S.inns.length-1,dur:OVER_CARD})}
     }
   }
   cardsCheck(S);
@@ -283,7 +289,7 @@ function renderHome(){
   3. Hit record on the camera phone and score every ball — the scorecard appears on the video as it happens.<br>
   4. Stop, tap <b>Save video</b> → <b>Save Video</b>. Done.<br><br>
   Both phones need internet (Wi-Fi or data). Keep the camera phone on this app with the screen on, ideally plugged in. For long games, record one innings at a time.</div>
-  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v7</div>
+  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v8</div>
   ${navigator.standalone?'':'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>'}</div>`;
   app.innerHTML=h;liveStatus();
 }
@@ -291,6 +297,70 @@ function newMatchMenu(){
   ui.modal={title:'Start a new match?',html:`<p class="mute">This replaces the current match on this phone. If you want to keep it, tap “Save score file” first.</p><button class="dan block" onclick="closeModal();openSetup(true)">Yes, new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
 
 /* ================= SETUP ================= */
+/* ================= BROADCAST GRAPHICS (six, four, wickets, duck, milestones) ================= */
+const FX_TYPES={six:1,four:1,wkt:1,duck:1,tm:1,bm:1};
+const WWORD={bowled:'BOWLED',caught:'CAUGHT',runout:'RUN OUT',stumped:'STUMPED',lbw:'LBW',hitwicket:'HIT WICKET',other:'OUT'};
+function ordn(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+function enqueue(S,t,item){const st=Math.max(t,S._qEnd||0);item.t=st;S._qEnd=st+item.dur;S.cards.push(item)}
+function fxEase(p){return 1-Math.pow(1-p,3)}
+function fxBanner(c,BW,y,col,l1,l2,a,fade){
+  const bw=Math.min(600,BW-80),bh=66,bx=BW/2-bw/2-(1-fxEase(Math.min(1,Math.max(0,a-0.2)/0.4)))*(BW/2+bw);
+  c.save();c.globalAlpha=fade;rrPath(c,bx,y,bw,bh,12);c.fillStyle='rgba(11,18,32,.94)';c.fill();
+  c.save();rrPath(c,bx,y,bw,bh,12);c.clip();c.fillStyle=col;c.fillRect(bx,y,10,bh);c.restore();
+  c.textBaseline='middle';c.textAlign='left';c.fillStyle='#fff';c.font=`800 28px ${FONT}`;const n1=fit(c,l1,bw*0.42);c.fillText(n1,bx+30,y+bh/2);
+  c.textAlign='right';c.fillStyle='#c9d3e6';c.font=`600 20px ${FONT}`;c.fillText(fit(c,l2,bw-60-c.measureText(n1).width-30),bx+bw-22,y+bh/2+1);c.restore();c.textAlign='left'}
+function fxWord(c,x,y,word,col,a,size){const inP=Math.min(1,a/0.35),s=inP<1?fxEase(inP)*1.12:1;
+  c.save();c.translate(x,y);c.scale(s,s);c.textAlign='center';c.textBaseline='middle';const fs=word.length>7?size*0.72:word.length>5?size*0.85:size;
+  c.font=`900 ${fs}px ${FONT}`;c.lineWidth=16;c.lineJoin='round';c.strokeStyle='#0b1220';c.strokeText(word,0,0);c.fillStyle='#fff';c.fillText(word,0,0);c.lineWidth=5;c.strokeStyle=col;c.strokeText(word,0,0);c.restore()}
+function fxStumps(c,x,y,a){c.fillStyle='#c6f432';[-24,0,24].forEach((dx,i)=>{c.save();c.translate(x+dx,y);c.rotate((i-1)*0.35*Math.min(1,a*3));rrPath(c,-7,-110,14,110,5);c.fill();c.restore()});
+  c.fillStyle='#f5c518';const fly=Math.min(1,a*2);[[-12,-1],[12,1]].forEach(([dx,d])=>{c.save();c.translate(x+dx+d*fly*90,y-118-fly*90+fly*fly*60);c.rotate(d*fly*4);rrPath(c,-16,-4,32,8,3);c.fill();c.restore()})}
+function fxDuck(c,x,y,ph,variant,tt){
+  const bob=Math.abs(Math.sin(ph))*-10,tilt=Math.sin(ph)*0.08;
+  const P={normal:['#ffd84a','#e8b928','#f0c43a'],golden:['#f2c230','#c99a12','#d9a514'],diamond:['#9ad8ff','#5aaee0','#7cc6f2']}[variant]||['#ffd84a','#e8b928','#f0c43a'];
+  c.save();c.translate(x,y+bob);c.rotate(tilt);
+  const l1=Math.sin(ph)*16;c.strokeStyle='#f08a1c';c.lineWidth=8;c.lineCap='round';
+  [[-18,l1],[18,-l1]].forEach(([lx,o])=>{c.beginPath();c.moveTo(lx,40);c.lineTo(lx+o,82);c.stroke();c.fillStyle='#f08a1c';c.beginPath();c.ellipse(lx+o+10,86,18,7,0,0,7);c.fill()});
+  c.fillStyle=P[0];c.beginPath();c.ellipse(0,10,70,52,0,0,7);c.fill();c.fillStyle=P[1];c.beginPath();c.ellipse(-52,-6,26,14,-0.5,0,7);c.fill();
+  c.save();c.translate(18,-6);c.rotate(0.9);c.fillStyle='#e9c48a';rrPath(c,-10,-10,20,120,5);c.fill();c.fillStyle='#7a4a1c';rrPath(c,-6,-58,12,52,4);c.fill();c.restore();
+  c.fillStyle=P[2];c.beginPath();c.ellipse(8,16,34,22,0.5,0,7);c.fill();
+  c.save();c.translate(48,-34);c.rotate(0.35);c.fillStyle=P[0];c.beginPath();c.arc(0,0,40,0,7);c.fill();
+  c.fillStyle='#f08a1c';c.beginPath();c.ellipse(40,12,26,10,0.35,0,7);c.fill();c.fillStyle='#d9700f';c.beginPath();c.ellipse(38,18,20,5,0.35,0,7);c.fill();
+  c.strokeStyle='#2a2a2a';c.lineWidth=4;c.beginPath();c.arc(12,-4,9,0.2*Math.PI,0.85*Math.PI);c.stroke();c.beginPath();c.moveTo(2,-20);c.lineTo(22,-14);c.stroke();
+  const tp=(tt*1.6)%1,ty=8+tp*46;c.fillStyle='#5ab8ff';c.beginPath();c.moveTo(10,ty-10);c.quadraticCurveTo(18,ty+2,10,ty+6);c.quadraticCurveTo(2,ty+2,10,ty-10);c.fill();
+  if(variant!=='normal'){c.fillStyle=variant==='golden'?'#fff7c2':'#e8f8ff';for(let s=0;s<5;s++){const a=tt*3+s*1.3,r=62+10*Math.sin(tt*5+s);c.beginPath();c.arc(Math.cos(a)*r-40,Math.sin(a)*r+20,4.5,0,7);c.fill()}}
+  c.restore();c.restore()}
+function drawFx(c,W,H,it,el){
+  const s=Math.min(W/1280,H/720);c.save();c.scale(s,s);const BW=W/s,BH=H/s,a=Math.max(0,el),dur=it.dur||3;
+  const fade=el>dur-0.4?Math.max(0,(dur-el)/0.4):1,cx=BW/2;
+  if(it.type==='six'||it.type==='four'){
+    const four=it.type==='four',col=four?'#2563eb':'#7c3aed',col2=four?'#60a5fa':'#c084fc';
+    c.save();c.globalAlpha=fade;
+    if(a<0.9){const p=a/0.9,bx=cx+p*520,by=BH*0.42-Math.sin(p*Math.PI)*260-p*40;c.fillStyle='#e0313f';c.beginPath();c.arc(bx,by,12,0,7);c.fill()}
+    const ra=Math.max(0,a-0.3),rs=Math.min(1.1,fxEase(Math.min(1,ra/0.35))*1.1);
+    c.save();c.translate(cx,BH*0.35);for(let i=0;i<16;i++){const ang=i/16*Math.PI*2+ra*0.6,r1=120*rs,r2=(230+30*Math.sin(ra*6+i))*rs;c.strokeStyle=i%2?col:col2;c.lineWidth=10;c.lineCap='round';c.beginPath();c.moveTo(Math.cos(ang)*r1,Math.sin(ang)*r1*0.7);c.lineTo(Math.cos(ang)*r2,Math.sin(ang)*r2*0.7);c.stroke()}c.restore();
+    if(a>0.3)fxWord(c,cx,BH*0.35,four?'FOUR':'SIX',col,a-0.3,170);
+    c.restore();fxBanner(c,BW,BH*0.58,col,it.l1,it.l2,a,fade);
+  }else if(it.type==='wkt'){
+    c.save();c.globalAlpha=fade;const stp=/BOWLED|STUMPED|RUN OUT|HIT WICKET/.test(it.word||'');if(stp)fxStumps(c,cx,BH*0.53,a);fxWord(c,cx,stp?BH*0.22:BH*0.33,it.word||'OUT','#dc2626',a,stp?140:160);c.restore();
+    fxBanner(c,BW,BH*0.58,'#dc2626',it.l1,it.l2,a,fade);
+  }else if(it.type==='tm'||it.type==='bm'){
+    const col=it.type==='bm'?'#e8b923':'#0e7a3e';
+    c.save();c.globalAlpha=fade;c.translate(cx,BH*0.33);for(let i=0;i<20;i++){const ang=i/20*Math.PI*2+a;c.fillStyle=i%2?(it.type==='bm'?'#f5c518':'#34d399'):'#fff3b0';c.beginPath();c.arc(Math.cos(ang)*(150+a*40),Math.sin(ang)*(90+a*30),6,0,7);c.fill()}c.restore();
+    c.save();c.globalAlpha=fade;fxWord(c,cx,BH*0.33,it.word,col,a,150);c.restore();
+    fxBanner(c,BW,BH*0.58,col,it.l1,it.l2,a,fade);
+  }else if(it.type==='duck'){
+    const v=it.variant||'normal',col=v==='golden'?'#e8b923':v==='diamond'?'#38bdf8':'#d62839',p=Math.min(1,a/dur);
+    const bw=Math.min(600,BW-80),bh=96,bx=-bw+Math.min(1,p*3)*(bw+30)-Math.max(0,p-0.82)*5.5*(bw+40),by=BH-80-bh-26;
+    rrPath(c,bx,by,bw,bh,12);c.fillStyle='rgba(11,18,32,.95)';c.fill();c.save();rrPath(c,bx,by,bw,bh,12);c.clip();c.fillStyle=col;c.fillRect(bx,by,bw,40);c.restore();
+    c.textBaseline='middle';c.textAlign='left';c.fillStyle=v==='golden'?'#2b1d00':v==='diamond'?'#04263a':'#fff';c.font=`900 24px ${FONT}`;
+    c.fillText(v==='golden'?'GOLDEN DUCK':v==='diamond'?'DIAMOND DUCK':'OUT FOR A DUCK',bx+20,by+21);
+    c.fillStyle='#fff';c.font=`800 26px ${FONT}`;const n1=fit(c,it.l1,bw*0.45);c.fillText(n1,bx+20,by+68);
+    c.fillStyle='#c9d3e6';c.font=`600 19px ${FONT}`;c.fillText(fit(c,it.l2,bw-c.measureText(n1).width-70),bx+40+c.measureText(n1).width+10,by+69);
+    fxDuck(c,-140+p*(BW+300),BH-80-118,a*7,v,a);
+  }
+  c.restore();c.textAlign='left'}
+function drawItem(c,W,H,S,it,el){if(FX_TYPES[it.type])drawFx(c,W,H,it,el);else drawCard(c,W,H,S,it)}
+
 /* ================= SAVED TEAMS ================= */
 function getTeams(){try{return JSON.parse(localStorage.getItem('cc.teams')||'[]')}catch(e){return[]}}
 function putTeams(T){try{localStorage.setItem('cc.teams',JSON.stringify(T))}catch(e){}}
@@ -403,10 +473,10 @@ window.addEventListener('load',()=>{try{if(location.hash.indexOf('#teams=')===0)
 /* ================= VIDEO SCORECARDS (end of innings) ================= */
 const CARD_DUR={bat:10,bowl:10,result:10},OVER_CARD=3;
 function cardsCheck(S){const I=S.cur;if(I&&I.done&&!I._carded){I._carded=true;const idx=S.inns.indexOf(I),t=S._lastT||0;
-  S.cards.push({type:'bat',inn:idx,t},{type:'bowl',inn:idx,t:t+CARD_DUR.bat});
-  if(idx===1)S.cards.push({type:'result',inn:idx,t:t+CARD_DUR.bat+CARD_DUR.bowl})}}
+  enqueue(S,t,{type:'bat',inn:idx,dur:CARD_DUR.bat});enqueue(S,t,{type:'bowl',inn:idx,dur:CARD_DUR.bowl});
+  if(idx===1)enqueue(S,t,{type:'result',inn:idx,dur:CARD_DUR.result})}}
 function activeCard(S,tm){let a=null;if(tm==null)return null;for(const c of S.cards){if(tm>=c.t&&tm<c.t+(c.dur||CARD_DUR[c.type]||10))a=c}return a}
-function drawAll(c,W,H,tm){drawTicker(c,W,H,tm);const S=compute(tm),cd=activeCard(S,tm);if(cd)drawCard(c,W,H,S,cd)}
+function drawAll(c,W,H,tm){drawTicker(c,W,H,tm);const S=compute(tm),cd=activeCard(S,tm);if(cd)drawItem(c,W,H,S,cd,tm-cd.t)}
 function drawCard(c,W,H,S,cd){
   const I=S.inns[cd.inn];if(!I)return;
   const st=M.settings,bpo=st.bpo,bt=M.teams[I.bat],ft=M.teams[1-I.bat];
@@ -935,18 +1005,12 @@ const TK={c:null,key:''};
 const CQ=[];let CQid=0;
 function camCardsOnMsg(oldM,newM){
   let nS;try{nS=withMatch(newM,()=>compute())}catch(e){return}
-  CAM.S=nS;
-  const ovOf=S=>S.inns.map(I=>Math.floor(I.cnt/((newM.settings&&newM.settings.bpo)||6)));
-  if(!oldM||oldM.uid!==newM.uid){CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenOv=ovOf(nS);CAM.seenEv=newM.events.length;return}
-  const seen=CAM.seenDone||[],now=Date.now();
-  let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
-  const push=(type,inn,sec)=>{const d=(sec||CARD_DUR[type]||10)*1000;CQ.push({id:++CQid,type,inn,start,end:start+d});start+=d};
-  for(let i=(CAM.seenEv||0);i<newM.events.length;i++){const e=newM.events[i];if(e.k==='card')push(e.what,e.inn==null?nS.inns.length-1:e.inn)}
-  const sOv=CAM.seenOv||[],nOv=ovOf(nS);
-  nS.inns.forEach((I,i)=>{if(I.done&&!seen[i]){push('bat',i);push('bowl',i);if(i===1)push('result',i)}
-    else if(!I.done&&nOv[i]>(sOv[i]||0)){push('bat',i,OVER_CARD);push('bowl',i,OVER_CARD)}});
-  if(newM.events.length<(CAM.seenEv||0)){CQ.length=0}
-  CAM.seenDone=nS.inns.map(I=>I.done);CAM.seenOv=nOv;CAM.seenEv=newM.events.length}
+  CAM.S=nS;const n=nS.cards.length;
+  if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;return}
+  if(n<(CAM.seenN||0)){CQ.length=0;CAM.seenN=n;return}
+  const now=Date.now();let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
+  for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));start+=d}
+  CAM.seenN=n}
 function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
   const key=LMts+'|'+W+'|'+H;
@@ -964,7 +1028,8 @@ function camFrame(){
     if(v.videoWidth===W&&v.videoHeight===H)x.drawImage(v,0,0);
     else{const r=Math.max(W/v.videoWidth,H/v.videoHeight),dw=v.videoWidth*r,dh=v.videoHeight*r;x.drawImage(v,(W-dw)/2,(H-dh)/2,dw,dh)}
     if(LM){x.drawImage(tickerLayer(W,H),0,0);
-      {const it=camActiveCard();if(it&&CAM.S){const key=LMts+'|'+it.id+'|'+W+'x'+H;
+      {const it=camActiveCard();if(it&&CAM.S&&FX_TYPES[it.type]){try{withMatch(LM,()=>drawFx(x,W,H,it,(Date.now()-it.start)/1000))}catch(e){}}
+       else if(it&&CAM.S){const key=LMts+'|'+it.id+'|'+W+'x'+H;
           if(CAM.cKey!==key){CAM.cKey=key;CAM.cc=CAM.cc||document.createElement('canvas');CAM.cc.width=W;CAM.cc.height=H;const y=CAM.cc.getContext('2d');y.clearRect(0,0,W,H);try{withMatch(LM,()=>drawCard(y,W,H,CAM.S,it))}catch(e){}}
           x.drawImage(CAM.cc,0,0)}}}
   }}
