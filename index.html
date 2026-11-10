@@ -116,6 +116,34 @@ tr.on .nm{background:var(--hl);color:#111;font-weight:800}
 .pad .hint{color:#c6d3ee;font-size:13px;min-height:17px;text-align:center}
 .pad .bigsel{padding:18px;font-size:19px}
 .pad .need2{color:#fff;text-align:center;font-size:17px;font-weight:700;padding:6px}
+/* v10 layout */
+.card{box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.appbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:6px;margin:calc(-12px - env(safe-area-inset-top)) -16px 12px;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.appbar b{font-size:20px;font-weight:800}
+.appbar .abk{background:none;border:none;font-size:30px;line-height:1;color:var(--navy);padding:0 10px 4px}
+.hero{display:flex;align-items:center;gap:14px;background:var(--navy);color:#fff;border-radius:18px;padding:18px 18px;margin:4px 0 14px}
+.hero .logo{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+.hero .ht{font-size:24px;font-weight:900;letter-spacing:-.3px}
+.hero .hs{font-size:13px;opacity:.8;margin-top:2px}
+.livecard{border:2px solid var(--acc)}
+.livecard .pill{display:inline-block;font-size:12px;font-weight:700;color:#e0313f;background:#fdecee;border-radius:10px;padding:2px 8px}
+.livecard .lc-t{font-weight:800;font-size:17px;margin-top:6px}
+.livecard .lc-s{font-size:18px;margin:4px 0 6px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:14px;border-radius:14px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.06);min-height:104px}
+.tile .ti{font-size:26px;line-height:1;margin-bottom:6px}
+.tile b{font-size:16px}.tile small{font-size:12px;color:var(--mute)}
+.tile.prim{background:var(--acc);border-color:var(--acc);color:#fff}.tile.prim small{color:#d6e0ff}
+.mini{cursor:pointer}.mini .mh{display:flex;justify-content:space-between;align-items:center}
+.help summary{font-weight:700;cursor:pointer;list-style:none}.help summary::after{content:' ›';color:var(--mute)}.help[open] summary::after{content:' ⌄'}
+.help ol{padding-left:20px;margin:10px 0 0;color:var(--text);font-size:14px}.help li{margin:6px 0}
+.ver{text-align:center;margin:12px 0}
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:none;justify-content:space-around;background:rgba(255,255,255,.95);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 2px;color:var(--mute);flex:1;max-width:96px}
+#nav button span{font-size:21px;line-height:1.1;filter:grayscale(1);opacity:.7}
+#nav button small{font-size:11px;font-weight:600}
+#nav button.on{color:var(--acc)}#nav button.on span{filter:none;opacity:1}
+body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -256,29 +284,39 @@ function infoLine(S){const I=S.cur,st=M.settings;
   return`Run rate ${crr(I)}${I.ext?` · Extras ${I.ext}`:''}`}
 
 /* ================= NAV ================= */
-function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;ui.modal=null;showModal();render();window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
+function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
 function render(){if(screen==='cam')return renderCam();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
-function hdr(t){return`<div class="hdr"><button class="mini" onclick="go('home')">‹ Home</button><b>${t}</b></div>`}
+function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home" onclick="go('home')">‹</button><b>${t}</b></div>`}
 
 /* ================= HOME ================= */
 function renderHome(){
-  let h=`<div class="wrap"><h1>🏏 Cricket Cam</h1><p class="mute">Film with a live TV-style scorecard on the video. One device films, another scores.</p>`;
-  if(M&&!matchDone(M)){const S=compute();const I=S.cur;
-    h+=`<div class="card" style="border:2px solid var(--acc)"><div class="mute">Match in progress</div><b>${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</b>
-    <div style="font-size:22px;font-weight:800;margin:4px 0">${I?`${esc(M.teams[I.bat].name)} ${I.runs}-${I.wk} <span class="mute" style="font-size:15px">(${ovs(I.cnt,M.settings.bpo)} ov · ${S.inns.length===1?'1st':'2nd'} innings)</span>`:'<span class="mute" style="font-size:15px">Not started yet</span>'}</div>
+  const hasCam=typeof renderCam==='function',live=M&&!matchDone(M);
+  let h=`<div class="wrap"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket Cam</div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
+  if(live){const S=compute(),I=S.cur;
+    h+=`<div class="card livecard"><div class="pill">● Match in progress</div><div class="lc-t">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div>
+    <div class="lc-s">${I?`${esc(M.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> <span class="mute">${ovs(I.cnt,M.settings.bpo)} ov · ${S.inns.length===1?'1st':'2nd'} innings</span>`:'<span class="mute">Not started yet</span>'}</div>
     <button class="pri block" onclick="go('score')">▶ Continue scoring</button></div>`}
-  h+=`<button class="pri block big-start" onclick="go('cam')">📷 Camera phone<div class="sm">Film the match with the live score on it</div></button>
-  <button class="block big-start" onclick="newMatchMenu()">✏️ Start new match</button>
-  <div class="grid g2"><button onclick="go('teams')">👥 My teams</button><button onclick="go('tour')">🏆 Tournament</button></div>
-  <button class="block" onclick="go('past')">📋 Past matches</button>
-  <div class="card mute"><b style="color:var(--text)">Match day</b><br>
-  1. <b>Camera phone:</b> tap 📷 Camera phone, allow the camera, turn it sideways and put it somewhere safe. It shows a code.<br>
-  2. <b>Scoring device:</b> start a new match, then on the scoring screen tap <b>Link camera</b> and type the code.<br>
-  3. Hit record and score every ball — graphics and scorecards appear on the video as it happens.<br>
-  4. When the match ends, wait for the scorecards and table to finish, then stop and tap <b>Save video</b>.</div>
-  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v9</div>
-  ${navigator.standalone?'':'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>'}</div>`;
-  app.innerHTML=h;liveStatus();
+  h+=`<div class="tiles">
+    ${hasCam?`<button class="tile prim" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
+    <button class="tile ${hasCam?'':'prim'}" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
+    <button class="tile" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
+    <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table and leaders</small></button>
+    ${hasCam?'':`<button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>`}
+  </div>`;
+  try{const T=getTours();if(T.length){const t=T.find(x=>M&&x.id===M.tour)||T[0],sd=standings(t);
+    h+=`<div class="card mini" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View ›</span></div>
+    <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b></td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table></div>`}}catch(e){}
+  try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=result(S)||'';sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
+    h+=`<div class="card mini" onclick="go('past')"><div class="mh"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div></div>`}}catch(e){}
+  h+=`<details class="card help"><summary>How match day works</summary><ol>
+    ${hasCam?'<li><b>Camera phone:</b> tap 📷 Camera, allow the camera, turn it sideways and put it somewhere safe. It shows a code.</li>':''}
+    <li><b>Scoring device:</b> tap ✏️ New match, pick your teams and who’s playing${hasCam?', then tap <b>Link camera</b> and type the code':''}.</li>
+    <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
+    <li>When the match ends, wait for the summary and table to finish${hasCam?', then stop and tap <b>Save video</b>':''}.</li></ol>
+    ${hasCam?'<p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
+  <div class="mute ver">Cricket Cam v10</div>
+  ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
+  app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
 
 /* ================= SETUP ================= */
@@ -423,6 +461,16 @@ function pastVideo(i){const m=ui.past[i];if(!m)return;if(M&&M.uid!==m.uid)archiv
 function newMatchMenu(){
   if(!M||matchDone(M)||!M.events.length){openSetup(true);return}
   ui.modal={title:'Start a new match?',html:`<p class="mute">Your current match isn't finished. It'll be moved to Past matches, so nothing is lost.</p><button class="pri block" onclick="closeModal();openSetup(true)">Start new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+
+/* ================= BOTTOM NAV ================= */
+function renderNav(){
+  let n=document.getElementById('nav');if(!n){n=document.createElement('nav');n.id='nav';document.body.appendChild(n)}
+  const show=['home','teams','tour','past','video'].includes(screen);n.style.display=show?'flex':'none';document.body.classList.toggle('hasnav',show);if(!show)return;
+  const hasCam=typeof renderCam==='function',live=M&&!matchDone(M);
+  const items=[['home','🏠','Home',"go('home')"],['score','✏️',live?'Score':'New',live?"go('score')":"newMatchMenu()"],
+    hasCam?['cam','📷','Camera',"go('cam')"]:['teams','👥','Teams',"go('teams')"],['tour','🏆','Table',"go('tour')"],['past','📋','Past',"go('past')"]];
+  n.innerHTML=items.map(([k,i,l,a])=>`<button class="${screen===k?'on':''}" onclick="${a}"><span>${i}</span><small>${l}</small></button>`).join('')}
+window.addEventListener('load',()=>{try{renderNav()}catch(e){}});
 
 /* ================= SAVED TEAMS ================= */
 function getTeams(){try{return JSON.parse(localStorage.getItem('cc.teams')||'[]')}catch(e){return[]}}
@@ -1140,7 +1188,7 @@ function camLeave(){
 window.addEventListener('beforeunload',e=>{if(CAM.rec||(CAM.blob&&!CAM.saved)){e.preventDefault();e.returnValue=''}});
 
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
-render();
+render();try{renderNav()}catch(e){}
 
 </script>
 </body>
