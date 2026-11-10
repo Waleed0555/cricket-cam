@@ -144,6 +144,26 @@ tr.on .nm{background:var(--hl);color:#111;font-weight:800}
 #nav button small{font-size:11px;font-weight:600}
 #nav button.on{color:var(--acc)}#nav button.on span{filter:none;opacity:1}
 body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+/* v12 scoring layout */
+.tabs{display:flex;justify-content:center;gap:4px;border-bottom:1px solid var(--line);padding:0 8px}
+.tabs button{background:none;border:none;border-radius:0;padding:12px 14px 10px;font-size:16px;color:var(--mute);font-weight:600;border-bottom:3px solid transparent}
+.tabs button.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:800}
+.tabbody{padding:4px 16px 30px}
+.hrow{display:flex;justify-content:space-between;align-items:center;margin:2px 16px 8px}
+.hic{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:6px 12px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
+.ochip{display:inline-flex;min-width:46px;height:46px;padding:0 6px;border-radius:23px;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:#8a94a6;color:#fff;flex:none}
+.ochip.w{background:var(--red)}.ochip.four{background:#1d6fe0}.ochip.six{background:#7a3ff0}.ochip.ext{background:#b07a12;font-size:13px}.ochip.dot0{background:#c3cad6}
+.odash{font-size:22px;color:var(--mute);padding:0 6px}
+.selpad{background:var(--hl);gap:12px;padding-top:16px}
+.selpad .selhd{display:flex;align-items:center;gap:16px;color:#111;font-size:22px;font-weight:600}
+.selpad .x{background:none!important;border:none;font-size:26px;color:#111!important;padding:0 6px;font-weight:400}
+.selpad .selbtn{align-self:center;background:transparent!important;border:2px solid #8a6d00!important;color:#111!important;font-size:20px;padding:12px 26px;border-radius:10px;margin:18px 0}
+.selpad .acts button{border-color:#8a6d00;color:#111}
+.stcard{border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0;background:#fff}
+.sth{display:flex;justify-content:space-between;align-items:center;padding-left:10px}.sth span{color:var(--mute);font-size:13px}
+.stg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.stg div{background:var(--card2);border-radius:9px;padding:8px 10px}.stg small{display:block;color:var(--mute);font-size:12px}.stg b{font-size:20px}
+.str{font-size:14px;margin:6px 2px}.str span{color:var(--mute)}.str.chase{color:var(--red);font-weight:700}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -218,10 +238,10 @@ function gB(I,n){if(!I.B[n]){I.B[n]={r:0,b:0,f4:0,f6:0,out:null};I.bO.push(n)}re
 function gW(I,n){if(!I.W[n]){I.W[n]={balls:0,r:0,w:0,m:0};I.wO.push(n)}return I.W[n]}
 function swp(I){const t=I.s;I.s=I.n;I.n=t}
 function lab(e,st){const x=e.x||'',r=e.r||0;
-  if(e.w)return{l:'W',c:'w'};
-  if(x==='wd')return{l:(r?r+st.wideRuns:'')+'wd',c:'ext'};
-  if(x==='nb')return{l:(r?r:'')+'nb',c:'ext'};
-  if(x==='b'||x==='lb')return{l:r+x,c:'ext'};
+  if(e.w)return{l:'W',c:'w',s:r?r+'+W':'W'};
+  if(x==='wd')return{l:(r?r+st.wideRuns:'')+'wd',c:'ext',s:r?r+'+Wd':'Wd'};
+  if(x==='nb')return{l:(r?r:'')+'nb',c:'ext',s:r?r+'+Nb':'Nb'};
+  if(x==='b'||x==='lb')return{l:r+x,c:'ext',s:r+(x==='b'?'B':'Lb')};
   return{l:String(r),c:r===4?'four':r===6?'six':r===0?'dot0':''}}
 function chk(I,st){if(I.cnt>=st.overs*st.bpo)I.done=true;if(!st.stayIn&&I.wk>=maxWk(I))I.done=true;if(I.target!=null&&I.runs>=I.target)I.done=true}
 function compute(upto){
@@ -284,7 +304,7 @@ function infoLine(S){const I=S.cur,st=M.settings;
   return`Run rate ${crr(I)}${I.ext?` · Extras ${I.ext}`:''}`}
 
 /* ================= NAV ================= */
-function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
+function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;if(s==='score')ui.tab='score';ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
 function render(){if(screen==='cam')return renderCam();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
 function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home" onclick="go('home')">‹</button><b>${t}</b></div>`}
 
@@ -314,7 +334,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, wait for the summary and table to finish${hasCam?', then stop and tap <b>Save video</b>':''}.</li></ol>
     ${hasCam?'<p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v10</div>
+  <div class="mute ver">Cricket Cam v12</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -453,9 +473,18 @@ function renderPast(){const L=pastList();ui.past=L;
   let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
   h+=L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=result(S)||'Not finished';sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
-    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div></div>`}).join('')||'<div class="card mute">No finished matches yet.</div>';
+    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')||'<div class="card mute">No finished matches yet.</div>';
   h+=`<div class="grid g2"><button onclick="saveScore()">Save current score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
   app.innerHTML=h}
+function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
+  ui.modal={title:'Delete this match?',html:`<p class="mute">${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}. This can't be undone.</p>
+  ${inTour?'<label class="tog"><input type="checkbox" id="deltour" checked><span>Also remove it from the tournament table<div class="sm">Takes its points, NRR, runs and wickets back out</div></span></label>':''}
+  <button class="dan block" onclick="doPastDel(${i})">Delete match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+function doPastDel(i){const m=ui.past[i];if(!m)return;const rmT=$('#deltour')?$('#deltour').checked:false;
+  putHist(getHist().filter(x=>x.uid!==m.uid));
+  if(rmT){const T=getTours();T.forEach(t=>{t.matches=t.matches.filter(x=>x.uid!==m.uid)});putTours(T)}
+  if(M&&M.uid===m.uid){M=null;try{localStorage.removeItem(KEY)}catch(e){}}
+  closeModal();render();toast(rmT?'Match deleted and removed from the table':'Match deleted')}
 function pastCard(i){const m=ui.past[i];if(m)withMatch(m,()=>openCard(true))}
 function pastVideo(i){const m=ui.past[i];if(!m)return;if(M&&M.uid!==m.uid)archiveMatch(M);M=m;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}go('video')}
 function newMatchMenu(){
@@ -761,15 +790,46 @@ function batRow(I,slot){
   if(!nm)return`<tr><td colspan="6"><button class="add" onclick="pickBatter('${slot}')">+ Select ${slot==='s'?'striker':'batter'}</button></td></tr>`;
   const b=I.B[nm];
   return`<tr class="row ${slot==='s'?'on':''}" onclick="swapStrike()"><td><span class="nm">${esc(nm)}${slot==='s'?' *':''}</span></td><td class="w">${b.r}</td><td class="w">${b.b}</td><td class="w">${b.f4}</td><td class="w">${b.f6}</td><td style="width:62px">${sr(b)}</td></tr>`}
+function cardHtml(noVideo){
+  const S=compute(),st=M.settings;let h='';
+  S.inns.forEach(I=>{const t=M.teams[I.bat];
+    h+=`<h3>${esc(t.name)} ${I.runs}-${I.wk} <span class="mute">(${ovs(I.cnt,st.bpo)} ov)</span></h3><table><tr><th>Batter</th><th></th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>`;
+    I.bO.forEach(n=>{const b=I.B[n];const o=howOut(b);
+      h+=`<tr><td>${esc(n)}${I.s===n?' *':''}</td><td class="mute" style="text-align:left">${esc(o)}</td><td><b>${b.r}</b></td><td>${b.b}</td><td>${b.f4}</td><td>${b.f6}</td></tr>`});
+    h+=`</table><div class="mute">Extras ${I.ext}</div><table><tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th></tr>`;
+    I.wO.forEach(n=>{const w=I.W[n];h+=`<tr><td>${esc(n)}</td><td>${ovs(w.balls,st.bpo)}</td><td>${w.m||0}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
+    h+=`</table>`});
+  if(S.inns.length&&!noVideo)h=`<div class="grid g2" style="margin:8px 0 6px"><button onclick="showCardOnVideo('bat')">📺 Batting card on video</button><button onclick="showCardOnVideo('bowl')">📺 Bowling card on video</button>${M.tour?`<button onclick="showCardOnVideo('table')">📺 Table on video</button><button onclick="showCardOnVideo('leaders')">📺 Leaders on video</button>`:''}</div>`+h;
+  return h}
+function openCard(noVideo){const h=cardHtml(noVideo);ui.modal={title:'Scorecard',html:h||'<p class="mute">Nothing scored yet.</p>'};showModal()}
+function statsHtml(S){
+  const st=M.settings;if(!S.inns.length)return'<p class="mute" style="padding:16px 0">No stats yet — start scoring.</p>';
+  let h='';
+  S.inns.forEach((I,k)=>{const t=M.teams[I.bat];let f4=0,f6=0;I.bO.forEach(n=>{f4+=I.B[n].f4;f6+=I.B[n].f6});
+    const top=I.bO.slice().sort((a,b)=>I.B[b].r-I.B[a].r)[0],bw=I.wO.slice().sort((a,b)=>I.W[b].w-I.W[a].w||I.W[a].r-I.W[b].r)[0];
+    h+=`<div class="stcard"><div class="sth" style="border-left:5px solid ${esc(t.color)}"><b>${esc(t.name)}</b><span>${k===0?'1st':'2nd'} innings</span></div>
+    <div class="stg"><div><small>Score</small><b>${I.runs}-${I.wk}</b></div><div><small>Overs</small><b>${ovs(I.cnt,st.bpo)}</b></div><div><small>Run rate</small><b>${crr(I)}</b></div>
+    <div><small>Fours</small><b>${f4}</b></div><div><small>Sixes</small><b>${f6}</b></div><div><small>Extras</small><b>${I.ext}</b></div></div>
+    ${top?`<div class="str">🏏 Top scorer <b>${esc(top)}</b> <span>${I.B[top].r} (${I.B[top].b})</span></div>`:''}
+    ${bw?`<div class="str">🎯 Best bowler <b>${esc(bw)}</b> <span>${I.W[bw].w}-${I.W[bw].r} (${ovs(I.W[bw].balls,st.bpo)})</span></div>`:''}
+    ${I.target!=null&&!I.done?`<div class="str chase">Need ${I.target-I.runs} off ${st.overs*st.bpo-I.cnt} balls · Req. rate ${((I.target-I.runs)/Math.max(1,(st.overs*st.bpo-I.cnt))*st.bpo).toFixed(2)}</div>`:''}</div>`});
+  const r=result(S);if(r)h+=`<div class="need" style="margin-top:10px">${esc(r)}</div>`;
+  return h}
+function ochip(L){return`<span class="ochip ${L.c}">${esc(L.s||L.l)}</span>`}
 function renderScore(){
-  const S=compute(),I=S.cur,st=M.settings;
-  let h=`<div class="sc"><div class="top"><button class="ib" onclick="go('home')">‹</button><div class="ttl">Match Centre</div><button class="ib" onclick="openSetup(false,'score')">⚙︎</button></div>`;
-  h+=`<div class="rec"><span class="livedot"></span><span class="livest">${liveText()}</span><button class="mini" style="margin-left:6px" onclick="linkMenu()">${LIVE.code?'Camera link':'Link camera'}</button></div>`;
+  const S=compute(),I=S.cur,st=M.settings,tab=ui.tab||'score',hasLink=typeof linkMenu==='function';
+  let h=`<div class="sc"><div class="top"><button class="ib" aria-label="Back" onclick="go('home')">‹</button><div class="ttl">Match Centre</div><span class="ib" style="visibility:hidden">‹</span></div>
+  <div class="tabs">${[['score','Scoring'],['card','Scorecard'],['stats','Stats']].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="ui.tab='${k}';render()">${l}</button>`).join('')}</div>`;
+  if(tab==='card'){h+=`<div class="tabbody">${cardHtml(false)||'<p class="mute" style="padding:16px 0">Nothing scored yet.</p>'}</div></div>`;app.innerHTML=h;return}
+  if(tab==='stats'){h+=`<div class="tabbody">${statsHtml(S)}</div></div>`;app.innerHTML=h;return}
+  const linked=hasLink&&LIVE.code&&liveOn();
+  const icons=`<div class="hrow"><button class="hic" onclick="openSetup(false,'score')" aria-label="Settings">⚙︎</button>${hasLink?`<button class="hic" onclick="linkMenu()" aria-label="Camera link"><span class="livedot"></span> 📷 ${LIVE.code?(linked?'Linked':'Linking…'):'Link'}</button>`:''}</div>`;
   if(!I){
-    h+=`<div class="pad"><div class="need2">Who's batting first?</div>${M.teams.map((t,i)=>`<button class="bigsel" onclick="addEv({k:'inn',bat:${i}})">${esc(t.name)}</button>`).join('')}</div></div>`;
-    app.innerHTML=h;return}
+    h+=`<div class="teamhd"><div class="tn">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div><div class="inn">Ready to start</div></div>${icons}`;
+    h+=`<div class="pad selpad"><div class="selhd"><button class="x" aria-label="Close" onclick="go('home')">✕</button><span>Who's batting first?</span></div>${M.teams.map((t,i)=>`<button class="selbtn" onclick="addEv({k:'inn',bat:${i}})">${esc(t.name)}</button>`).join('')}</div></div>`;
+    app.innerHTML=h;if(hasLink)liveStatus();return}
   const bt=M.teams[I.bat];
-  h+=`<div class="teamhd"><div class="tn">${esc(bt.name)}</div><div class="inn">${S.inns.length===1?'1st':'2nd'} Innings</div><div class="bigscore">${I.runs}-${I.wk}</div></div>
+  h+=`<div class="teamhd"><div class="tn">${esc(bt.name)}</div><div class="inn">${S.inns.length===1?'1st':'2nd'} Innings</div><div class="bigscore">${I.runs}-${I.wk}</div></div>${icons}
   <div class="stats"><span>Extras - ${I.ext}</span><span>Overs - ${ovs(I.cnt,st.bpo)} / ${st.overs}</span><span>CRR - ${crr(I)}</span></div>
   <div class="stats2">Partnership - ${I.pr}(${I.pb})${I.target!=null&&!I.done?`<div class="chase">Need ${I.target-I.runs} off ${st.overs*st.bpo-I.cnt} balls · Target ${I.target}</div>`:''}</div>
   <table class="tbl"><tr><th><button class="pen" onclick="batMenu()">✎</button>Batsman</th><th class="w">R</th><th class="w">B</th><th class="w">4s</th><th class="w">6s</th><th style="width:62px">SR</th></tr>${batRow(I,'s')}${batRow(I,'n')}</table>
@@ -779,29 +839,30 @@ function renderScore(){
   ${w?`<tr><td><span class="nm">${esc(bn)}</span></td><td class="w">${ovs(w.balls,st.bpo)}</td><td class="w">${w.m}</td><td class="w">${w.r}</td><td class="w">${w.w}</td><td style="width:62px">${eco(w)}</td></tr>`:`<tr><td>-</td><td class="w">-</td><td class="w">-</td><td class="w">-</td><td class="w">-</td><td>-</td></tr>`}</table>
   <div class="sep"></div>`;
   const ov=I.over.length?I.over:[];
-  h+=`<div class="overrow">${ov.map(chip).join('')}${ov.length<st.bpo?'<span class="mute">-</span>':''}</div>`;
-  h+=`<div class="pad">`;
+  h+=`<div class="overrow">${ov.map(ochip).join('')}${!I.done?'<span class="odash">-</span>':''}</div>`;
+  const acts=`<div class="grid g3 acts"><button onclick="undo()">↶ Undo</button><button onclick="ui.tab='card';render()">Scorecard</button>${I.done?'<button onclick="ui.tab=\'stats\';render()">Stats</button>':'<button onclick="endInnMenu()">End innings</button>'}</div>`;
   if(I.done){
+    h+=`<div class="pad">`;
     if(S.inns.length===1){const ot=M.teams[1-I.bat];
       h+=`<div class="need2">Innings over — ${esc(ot.name)} need ${I.runs+1} to win</div><button class="bigsel" onclick="addEv({k:'inn',bat:${1-I.bat}})">Start 2nd innings</button>`;
     }else{
-      h+=`<div class="need2">${esc(result(S))}</div><button class="bigsel" onclick="go('video')">🎬 Add ticker to video</button><button onclick="saveScore()">Save score file</button>`;
+      h+=`<div class="need2">${esc(result(S))}</div><button class="bigsel" onclick="go('home')">🏠 Done — back to Home</button>`;
     }
-    h+=`<div class="grid g2 acts"><button onclick="undo()">↶ Undo</button><button onclick="openCard()">Scorecard</button></div>`;
-  }else if(!I.s||!I.n){
-    h+=`<button class="bigsel" onclick="pickBatter('${!I.s?'s':'n'}')">Select ${!I.s?'Striker':'Batter'}</button><div class="grid g2 acts"><button onclick="undo()">↶ Undo</button><button onclick="openCard()">Scorecard</button></div>`;
-  }else if(!I.bowler){
-    h+=`<button class="bigsel" onclick="pickBowler(false)">Select Bowler</button><div class="grid g2 acts"><button onclick="undo()">↶ Undo</button><button onclick="openCard()">Scorecard</button></div>`;
+    h+=acts+`</div>`;
+  }else if(!I.s||!I.n||!I.bowler){
+    const need=!I.s?['s','Select Striker']:!I.n?['n','Select Batter']:null;
+    h+=`<div class="pad selpad"><div class="selhd"><button class="x" aria-label="Close" onclick="go('home')">✕</button><span>Select Players</span></div>
+    ${need?`<button class="selbtn" onclick="pickBatter('${need[0]}')">${need[1]}</button>`:`<button class="selbtn" onclick="pickBowler(false)">Select Bowler</button>`}
+    <div class="grid g2 acts"><button onclick="undo()">↶ Undo</button><button onclick="ui.tab='card';render()">Scorecard</button></div></div>`;
   }else{
     const xs=[['wd','Wide'],['nb','No ball'],['b','Bye'],['lb','Leg bye']];
-    h+=`<div class="m6"><div>Max ${st.bpo} balls per over<div class="sm">${S.ec?'On — wides & no-balls count as a ball':'Off — wides & no-balls are re-bowled'}</div></div><button class="sw ${S.ec?'on':''}" aria-label="Max balls per over" onclick="addEv({k:'max6',on:${!S.ec}});toast('Max ${st.bpo} balls ${S.ec?'off':'on'} — from this ball on')"></button></div>`;
+    h+=`<div class="pad"><div class="m6"><div>Max ${st.bpo} balls per over<div class="sm">${S.ec?'On — wides & no-balls count as a ball':'Off — wides & no-balls are re-bowled'}</div></div><button class="sw ${S.ec?'on':''}" aria-label="Max balls per over" onclick="addEv({k:'max6',on:${!S.ec}});toast('Max ${st.bpo} balls ${S.ec?'off':'on'} — from this ball on')"></button></div>`;
     h+=`<div class="grid g4 xs">${xs.map(([k,l])=>`<button class="${ui.x===k?'sel':''}" onclick="tx('${k}')">${l}</button>`).join('')}</div>
     <div class="hint">${ui.x?({wd:'Wide — tap 0, or the runs they ran',nb:'No ball — tap the runs off the bat',b:'Bye — tap the runs',lb:'Leg bye — tap the runs'})[ui.x]:'Tap a batter to change strike'}</div>
-    <div class="grid g4 runs">${[0,1,2,3,4,5,6].map(r=>`<button onclick="ball(${r})">${r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>
-    <div class="grid g3 acts"><button onclick="undo()">↶ Undo</button><button onclick="openCard()">Scorecard</button><button onclick="endInnMenu()">End innings</button></div>`;
+    <div class="grid g4 runs">${[0,1,2,3,4,5,6].map(r=>`<button onclick="ball(${r})">${r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>${acts}</div>`;
   }
-  h+=`</div></div>`;
-  app.innerHTML=h;
+  h+=`</div>`;
+  app.innerHTML=h;if(hasLink)liveStatus();
 }
 function batMenu(){const I=compute().cur;if(!I||I.done)return;
   let h=`<div class="grid">`;
@@ -857,17 +918,6 @@ function howOut(b){if(!b.out)return'not out';const bw=b.bw||'',f=b.f||'';
   if(b.out==='runout')return f?`run out (${f})`:'run out';
   if(['bowled','lbw','hitwicket'].includes(b.out))return`${OUTTXT[b.out]} ${bw}`;
   return OUTTXT[b.out]||b.out}
-function openCard(noVideo){
-  const S=compute(),st=M.settings;let h='';
-  S.inns.forEach(I=>{const t=M.teams[I.bat];
-    h+=`<h3>${esc(t.name)} ${I.runs}-${I.wk} <span class="mute">(${ovs(I.cnt,st.bpo)} ov)</span></h3><table><tr><th>Batter</th><th></th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>`;
-    I.bO.forEach(n=>{const b=I.B[n];const o=howOut(b);
-      h+=`<tr><td>${esc(n)}${I.s===n?' *':''}</td><td class="mute" style="text-align:left">${esc(o)}</td><td><b>${b.r}</b></td><td>${b.b}</td><td>${b.f4}</td><td>${b.f6}</td></tr>`});
-    h+=`</table><div class="mute">Extras ${I.ext}</div><table><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th></tr>`;
-    I.wO.forEach(n=>{const w=I.W[n];h+=`<tr><td>${esc(n)}</td><td>${ovs(w.balls,st.bpo)}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
-    h+=`</table>`});
-  if(S.inns.length&&!noVideo)h=`<div class="grid g2" style="margin-bottom:6px"><button onclick="showCardOnVideo('bat')">📺 Batting card on video</button><button onclick="showCardOnVideo('bowl')">📺 Bowling card on video</button>${M.tour?`<button onclick="showCardOnVideo('table')">📺 Table on video</button><button onclick="showCardOnVideo('leaders')">📺 Leaders on video</button>`:''}</div>`+h;
-  ui.modal={title:'Scorecard',html:h||'<p class="mute">Nothing scored yet.</p>'};showModal()}
 
 /* ================= MODAL ================= */
 function picker(title,items,onPick,teamIdx,note){ui.modal={title,items,onPick,teamIdx,note};showModal();}
