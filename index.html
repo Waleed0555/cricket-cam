@@ -222,7 +222,7 @@ let screen='home';
 const ui={x:'',modal:null,wk:null,draft:null};
 
 function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null}catch(e){return null}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}try{syncTour()}catch(e){}publishLive()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}try{syncTour()}catch(e){}publishLive();try{pubMatch()}catch(e){}}
 function newMatch(){return{v:1,teams:[{name:'Team A',short:'',color:'#d62839',players:[]},{name:'Team B',short:'',color:'#2563eb',players:[]}],
   settings:{overs:6,bpo:6,extrasCount:false,wideRuns:1,nbRuns:1,wicketPen:0,stayIn:false},events:[],t0:null,offset:0,uid:'m'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('on'),2600)}
@@ -322,6 +322,7 @@ function renderHome(){
     <button class="tile" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
     <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table and leaders</small></button>
     ${hasCam?'':`<button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>`}
+    ${typeof contMenu==='function'?`<button class="tile" onclick="contMenu()"><span class="ti">↪️</span><b>Continue a match</b><small>From another device</small></button><button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>`:''}
   </div>`;
   try{const T=getTours();if(T.length){const t=T.find(x=>M&&x.id===M.tour)||T[0],sd=standings(t);
     h+=`<div class="card mini" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View ›</span></div>
@@ -334,7 +335,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, wait for the summary and table to finish${hasCam?', then stop and tap <b>Save video</b>':''}.</li></ol>
     ${hasCam?'<p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v12</div>
+  <div class="mute ver">Cricket Cam v13</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -823,7 +824,7 @@ function renderScore(){
   if(tab==='card'){h+=`<div class="tabbody">${cardHtml(false)||'<p class="mute" style="padding:16px 0">Nothing scored yet.</p>'}</div></div>`;app.innerHTML=h;return}
   if(tab==='stats'){h+=`<div class="tabbody">${statsHtml(S)}</div></div>`;app.innerHTML=h;return}
   const linked=hasLink&&LIVE.code&&liveOn();
-  const icons=`<div class="hrow"><button class="hic" onclick="openSetup(false,'score')" aria-label="Settings">⚙︎</button>${hasLink?`<button class="hic" onclick="linkMenu()" aria-label="Camera link"><span class="livedot"></span> 📷 ${LIVE.code?(linked?'Linked':'Linking…'):'Link'}</button>`:''}</div>`;
+  const icons=`<div class="hrow"><span style="display:flex;gap:6px"><button class="hic" onclick="openSetup(false,'score')" aria-label="Settings">⚙︎</button>${typeof syncPill==='function'?syncPill():''}</span>${hasLink?`<button class="hic" onclick="linkMenu()" aria-label="Camera link"><span class="livedot"></span> 📷 ${LIVE.code?(linked?'Linked':'Linking…'):'Link'}</button>`:''}</div>`;
   if(!I){
     h+=`<div class="teamhd"><div class="tn">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div><div class="inn">Ready to start</div></div>${icons}`;
     h+=`<div class="pad selpad"><div class="selhd"><button class="x" aria-label="Close" onclick="go('home')">✕</button><span>Who's batting first?</span></div>${M.teams.map((t,i)=>`<button class="selbtn" onclick="addEv({k:'inn',bat:${i}})">${esc(t.name)}</button>`).join('')}</div></div>`;
@@ -1117,7 +1118,7 @@ function linkMenu(){
   <input id="lcode" placeholder="e.g. 4KX9P" value="${esc(LIVE.code||'')}" autocapitalize="characters" autocomplete="off" style="font-size:24px;letter-spacing:4px;text-transform:uppercase;text-align:center">
   <button class="pri block" onclick="doLink()">Link</button>${LIVE.code?'<button class="block dan" onclick="unLink()">Unlink</button>':''}`};showModal()}
 function doLink(){const c=($('#lcode').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){toast('Type the code from the camera phone');return}
-  try{localStorage.setItem('cc.scorerCode',c)}catch(e){}closeModal();liveStart('score',c);render();toast('Linking to camera '+c+'…')}
+  try{localStorage.setItem('cc.scorerCode',c)}catch(e){}if(M){M.camCode=c;save()}closeModal();liveStart('score',c);render();toast('Linking to camera '+c+'…')}
 function unLink(){try{localStorage.removeItem('cc.scorerCode')}catch(e){}closeModal();liveStop();render()}
 
 /* ================= CAMERA PHONE ================= */
@@ -1236,6 +1237,42 @@ function camLeave(){
   if(LIVE.role==='cam')liveStop();
   return true}
 window.addEventListener('beforeunload',e=>{if(CAM.rec||(CAM.blob&&!CAM.saved)){e.preventDefault();e.returnValue=''}});
+
+
+/* ================= MATCH CODE: continue scoring on another device ================= */
+const SYNC={cls:[]};
+function genCode(n){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<n;i++)c+=A[Math.floor(Math.random()*A.length)];return c}
+function matchTopic(c){return'cricket-cam-match/v1/'+c}
+function syncConnect(){if(SYNC.cls.length||!window.mqtt)return;
+  BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'crs_'+Math.random().toString(36).slice(2,10),reconnectPeriod:5000,connectTimeout:10000,clean:true});SYNC.cls.push(cl);cl.on('connect',()=>pubMatch(true))}catch(e){}})}
+let syncT=0;
+function pubMatch(now){
+  if(!M||!M.events||!M.events.length||!window.mqtt)return;
+  if(!M.code){M.code=genCode(6);try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}}
+  syncConnect();clearTimeout(syncT);
+  syncT=setTimeout(()=>{const p=JSON.stringify({ts:Date.now(),M});SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(matchTopic(M.code),p,{retain:true,qos:0})}catch(e){}})},now?0:300)}
+function syncPill(){if(!window.mqtt||!M)return'';const c=M.code;return`<button class="hic" onclick="codeInfo()" aria-label="Match code">☁️ ${c?esc(c):'…'}</button>`}
+function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:var(--navy)">${esc(M&&M.code||'…')}</div>
+  <p class="mute">This match saves online after every ball. To carry on scoring on another device, open Cricket Cam there, tap <b>↪️ Continue a match</b> on Home, and type this code.</p>
+  <p class="mute">Only score on one device at a time.</p><button class="block" onclick="closeModal()">OK</button>`};showModal()}
+function contMenu(){ui.modal={title:'Continue a match',html:`<p class="mute">Type the match code from the other device's scoring screen (the ☁️ button next to ⚙︎).</p>
+  <input id="mcode" placeholder="e.g. K7P2QX" autocapitalize="characters" autocomplete="off" style="font-size:26px;letter-spacing:5px;text-transform:uppercase;text-align:center">
+  <button class="pri block" onclick="doCont()">Continue scoring</button><div id="cst" class="mute" style="text-align:center;min-height:20px"></div>`};showModal();setTimeout(()=>{const e=$('#mcode');if(e)e.focus()},50)}
+function doCont(){
+  const c=($('#mcode').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){toast('Type the match code');return}
+  if(!window.mqtt){toast('No connection to the internet');return}
+  const st=$('#cst');if(st)st.textContent='Looking for the match…';
+  const tmp=[];let done=false;
+  const finish=m=>{if(done)return;done=true;tmp.forEach(cl=>{try{cl.end(true)}catch(e){}});contDone(m,c)};
+  BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'crc_'+Math.random().toString(36).slice(2,10),connectTimeout:10000,reconnectPeriod:0,clean:true});tmp.push(cl);
+    cl.on('connect',()=>cl.subscribe(matchTopic(c)));
+    cl.on('message',(t,p)=>{try{const d=JSON.parse(new TextDecoder().decode(p));if(d&&d.M&&Array.isArray(d.M.events))finish(d.M)}catch(e){}})}catch(e){}});
+  setTimeout(()=>{if(!done){done=true;tmp.forEach(cl=>{try{cl.end(true)}catch(e){}});const s2=$('#cst');if(s2)s2.textContent="Couldn't find that match. Check the code, and that both devices have internet."}},12000)}
+function contDone(m,c){
+  if(M&&M.uid!==m.uid)archiveMatch(M);
+  m.code=c;M=m;save();closeModal();
+  if(m.camCode){try{localStorage.setItem('cc.scorerCode',m.camCode)}catch(e){}liveStart('score',m.camCode)}
+  go('score');toast('Match loaded — carry on scoring')}
 
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 render();try{renderNav()}catch(e){}
