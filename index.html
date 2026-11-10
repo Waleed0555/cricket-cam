@@ -257,44 +257,29 @@ function infoLine(S){const I=S.cur,st=M.settings;
 
 /* ================= NAV ================= */
 function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;ui.modal=null;showModal();render();window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
-function render(){if(screen==='cam')return renderCam();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
+function render(){if(screen==='cam')return renderCam();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
 function hdr(t){return`<div class="hdr"><button class="mini" onclick="go('home')">‹ Home</button><b>${t}</b></div>`}
 
 /* ================= HOME ================= */
 function renderHome(){
-  let h=`<div class="wrap"><h1>🏏 Cricket Cam</h1><p class="mute">Film with a live TV-style scorecard on the video. One phone films, another phone scores.</p>
-  <button class="pri block big-start" onclick="go('cam')">📷 Camera phone<div class="sm">Film the match with the live score on it</div></button>`;
-  if(M){
-    const S=compute();
-    h+=`<div class="card"><b>${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</b>`;
-    S.inns.forEach(I=>{h+=`<div style="margin-top:6px">${esc(M.teams[I.bat].name)}: <b>${I.runs}-${I.wk}</b> <span class="mute">(${ovs(I.cnt,M.settings.bpo)} ov)</span></div>`});
-    const r=result(S);if(r)h+=`<div class="need" style="margin-top:10px">${esc(r)}</div>`;
-    if(!S.inns.length)h+=`<div class="mute" style="margin-top:6px">Not started yet</div>`;
-    h+=`<button class="pri block" onclick="go('score')">✏️ Score this match</button></div>
-    <button class="block" onclick="openSetup(false)">Teams, players &amp; rules</button>
-    <button class="block" onclick="go('teams')">👥 My teams</button>
-    <button class="block" onclick="go('tour')">🏆 Tournament</button>
-    <button class="block" onclick="go('video')">🎬 Add score to a video I already filmed</button>
-    <div class="grid g2"><button onclick="saveScore()">Save score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div>
-    <button class="block dan" onclick="newMatchMenu()">New match</button>`;
-  }else{
-    h+=`<button class="block big-start" onclick="openSetup(true)">✏️ Scoring phone — new match</button>
-    <button class="block" onclick="go('teams')">👥 My teams</button>
-    <button class="block" onclick="go('tour')">🏆 Tournament</button>
-    <label class="filebtn"><button class="block" style="pointer-events:none">Load a score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label>`;
-  }
-  h+=`<div class="card mute"><b style="color:var(--text)">Match day</b><br>
-  1. <b>Camera phone:</b> tap 📷 Camera phone, allow the camera, turn the phone sideways and put it somewhere safe. It shows a code.<br>
-  2. <b>Scoring phone:</b> set up the match, then on the scoring screen tap <b>Link camera</b> and type the code.<br>
-  3. Hit record on the camera phone and score every ball — the scorecard appears on the video as it happens.<br>
-  4. Stop, tap <b>Save video</b> → <b>Save Video</b>. Done.<br><br>
-  Both phones need internet (Wi-Fi or data). Keep the camera phone on this app with the screen on, ideally plugged in. For long games, record one innings at a time.</div>
-  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v8</div>
+  let h=`<div class="wrap"><h1>🏏 Cricket Cam</h1><p class="mute">Film with a live TV-style scorecard on the video. One device films, another scores.</p>`;
+  if(M&&!matchDone(M)){const S=compute();const I=S.cur;
+    h+=`<div class="card" style="border:2px solid var(--acc)"><div class="mute">Match in progress</div><b>${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</b>
+    <div style="font-size:22px;font-weight:800;margin:4px 0">${I?`${esc(M.teams[I.bat].name)} ${I.runs}-${I.wk} <span class="mute" style="font-size:15px">(${ovs(I.cnt,M.settings.bpo)} ov · ${S.inns.length===1?'1st':'2nd'} innings)</span>`:'<span class="mute" style="font-size:15px">Not started yet</span>'}</div>
+    <button class="pri block" onclick="go('score')">▶ Continue scoring</button></div>`}
+  h+=`<button class="pri block big-start" onclick="go('cam')">📷 Camera phone<div class="sm">Film the match with the live score on it</div></button>
+  <button class="block big-start" onclick="newMatchMenu()">✏️ Start new match</button>
+  <div class="grid g2"><button onclick="go('teams')">👥 My teams</button><button onclick="go('tour')">🏆 Tournament</button></div>
+  <button class="block" onclick="go('past')">📋 Past matches</button>
+  <div class="card mute"><b style="color:var(--text)">Match day</b><br>
+  1. <b>Camera phone:</b> tap 📷 Camera phone, allow the camera, turn it sideways and put it somewhere safe. It shows a code.<br>
+  2. <b>Scoring device:</b> start a new match, then on the scoring screen tap <b>Link camera</b> and type the code.<br>
+  3. Hit record and score every ball — graphics and scorecards appear on the video as it happens.<br>
+  4. When the match ends, wait for the scorecards and table to finish, then stop and tap <b>Save video</b>.</div>
+  <div class="mute" style="text-align:center;margin-top:10px">Cricket Cam v9</div>
   ${navigator.standalone?'':'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>'}</div>`;
   app.innerHTML=h;liveStatus();
 }
-function newMatchMenu(){
-  ui.modal={title:'Start a new match?',html:`<p class="mute">This replaces the current match on this phone. If you want to keep it, tap “Save score file” first.</p><button class="dan block" onclick="closeModal();openSetup(true)">Yes, new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
 
 /* ================= SETUP ================= */
 /* ================= BROADCAST GRAPHICS (six, four, wickets, duck, milestones) ================= */
@@ -361,6 +346,84 @@ function drawFx(c,W,H,it,el){
   c.restore();c.textAlign='left'}
 function drawItem(c,W,H,S,it,el){if(FX_TYPES[it.type])drawFx(c,W,H,it,el);else drawCard(c,W,H,S,it)}
 
+/* ================= END-OF-MATCH CARDS (summary, table, leaders) + match history ================= */
+function withMatch(mm,fn){const o=M;M=mm;try{return fn()}finally{M=o}}
+function tourSnapshot(){
+  if(!M||!M.tour||typeof getTours!=='function')return null;const t=getTours().find(x=>x.id===M.tour);if(!t)return null;
+  const rows=standings(t).map(r=>({name:r.name,short:r.short,p:r.p,w:r.w,l:r.l,tie:r.tie,pts:r.pts,nrr:r.nrr,est:r.est}));
+  const all=[];t.teams.forEach((tm,i)=>playerTotals(t,i).forEach(p=>all.push({n:p.n,s:tm.short,r:p.r,w:p.w})));
+  return{name:t.name,rows,bat:all.slice().sort((a,b)=>b.r-a.r).slice(0,5).map(p=>({n:p.n,s:p.s,v:p.r})),
+    bowl:all.slice().sort((a,b)=>b.w-a.w||b.r-a.r).slice(0,5).map(p=>({n:p.n,s:p.s,v:p.w}))}}
+function getSnap(){return(M&&M.tourSnap)||tourSnapshot()}
+function cardPanel(c,x0,y0,pw,ph){c.save();c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=24;rrPath(c,x0,y0,pw,ph,14);c.fillStyle='rgba(11,18,32,.95)';c.fill();c.restore()}
+function cardTitle(c,x0,y0,pw,txt,sub){c.save();rrPath(c,x0,y0,pw,56,14);c.clip();c.fillStyle='#f3f5f9';c.fillRect(x0,y0,pw,56);c.restore();
+  c.fillStyle='#0b1220';c.font=`900 28px ${FONT}`;c.textAlign='center';c.textBaseline='middle';c.fillText(txt,x0+pw/2,y0+29);
+  if(sub){c.font=`600 14px ${FONT}`;c.fillStyle='#55627a';c.textAlign='right';c.fillText(fit(c,sub,pw/2-170),x0+pw-16,y0+29)}c.textAlign='left'}
+function drawEndCard(c,W,H,S,cd){
+  const s=Math.min(W/1280,H/720);c.save();c.scale(s,s);const BW=W/s,BH=H/s;c.textBaseline='middle';
+  if(cd.type==='summary'){
+    const pw=Math.min(1000,BW-40),x0=(BW-pw)/2,hh=44,rh=34,n=4,ph=56+S.inns.length*(hh+n*rh)+50,y0=Math.max(10,(BH-100-ph)/2);
+    cardPanel(c,x0,y0,pw,ph);cardTitle(c,x0,y0,pw,'MATCH SUMMARY');
+    let y=y0+56;const half=pw/2;
+    S.inns.forEach((I,k)=>{const tm=M.teams[I.bat];
+      c.fillStyle=tm.color||'#1340a8';c.fillRect(x0,y,pw,hh);
+      c.fillStyle='#fff';c.font=`900 24px ${FONT}`;c.textAlign='left';c.fillText(fit(c,tm.name.toUpperCase(),half),x0+18,y+hh/2);
+      c.textAlign='right';c.font=`900 26px ${FONT}`;const sc=`${I.runs}-${I.wk}`;c.fillText(sc,x0+pw-18,y+hh/2);const sw=c.measureText(sc).width;
+      c.font=`600 17px ${FONT}`;c.fillText(`${ovs(I.cnt,M.settings.bpo)} OVERS  |  `,x0+pw-24-sw,y+hh/2+1);
+      y+=hh;
+      const bats=I.bO.slice().sort((a,b)=>I.B[b].r-I.B[a].r||I.B[a].b-I.B[b].b).slice(0,n);
+      const bwls=I.wO.slice().sort((a,b)=>I.W[b].w-I.W[a].w||I.W[a].r-I.W[b].r).slice(0,n);
+      for(let i=0;i<n;i++){
+        c.fillStyle=i%2?'rgba(255,255,255,.03)':'rgba(255,255,255,.07)';c.fillRect(x0,y,pw,rh);
+        const bn=bats[i];if(bn){const b=I.B[bn],no=!b.out;c.textAlign='left';c.fillStyle='#fff';c.font=`700 19px ${FONT}`;c.fillText(fit(c,bn.toUpperCase()+(no?'*':''),half-150),x0+18,y+rh/2);
+          c.textAlign='right';c.font=`800 20px ${FONT}`;c.fillText(String(b.r),x0+half-80,y+rh/2);c.fillStyle='#c9d3e6';c.font=`500 18px ${FONT}`;c.fillText(String(b.b),x0+half-22,y+rh/2)}
+        const wn=bwls[i];if(wn){const w=I.W[wn];c.textAlign='left';c.fillStyle='#fff';c.font=`700 19px ${FONT}`;c.fillText(fit(c,wn.toUpperCase(),half-180),x0+half+18,y+rh/2);
+          c.textAlign='right';c.font=`800 20px ${FONT}`;c.fillText(`${w.w}-${w.r}`,x0+pw-90,y+rh/2);c.fillStyle='#c9d3e6';c.font=`500 18px ${FONT}`;c.fillText(ovs(w.balls,M.settings.bpo),x0+pw-22,y+rh/2)}
+        y+=rh}
+      c.fillStyle='rgba(255,255,255,.15)';c.fillRect(x0+half,y-n*rh,1.5,n*rh)});
+    c.save();rrPath(c,x0,y0,pw,ph,14);c.clip();c.fillStyle='#f5c518';c.fillRect(x0,y,pw,50);c.restore();
+    c.fillStyle='#111';c.font=`900 24px ${FONT}`;c.textAlign='center';c.fillText(fit(c,(result(S)||'').toUpperCase(),pw-40),x0+pw/2,y+26);
+  }else if(cd.type==='table'){
+    const sn=getSnap();if(!sn){c.restore();return}
+    const pw=Math.min(900,BW-40),x0=(BW-pw)/2,rh=62,ph=56+40+sn.rows.length*rh+40,y0=Math.max(10,(BH-110-ph)/2);
+    cardPanel(c,x0,y0,pw,ph);cardTitle(c,x0,y0,pw,'POINTS TABLE',sn.name);
+    const cols=[['P',pw-420],['W',pw-340],['L',pw-260],['PTS',pw-170],['NRR',pw-30]];
+    let y=y0+56;c.font=`700 15px ${FONT}`;c.fillStyle='#8fa0bd';c.textAlign='left';c.fillText('TEAM',x0+24,y+20);c.textAlign='right';cols.forEach(([t,x])=>c.fillText(t,x0+x,y+20));y+=40;
+    sn.rows.forEach((r,i)=>{c.fillStyle=i===0?'rgba(245,197,24,.16)':'rgba(255,255,255,.05)';c.fillRect(x0,y,pw,rh);
+      c.textAlign='left';c.fillStyle='#fff';c.font=`800 24px ${FONT}`;c.fillText(fit(c,`${i+1}  ${r.name.toUpperCase()}`,pw-470),x0+24,y+rh/2);
+      c.textAlign='right';[r.p,r.w,r.l,r.pts,(r.nrr>=0?'+':'')+r.nrr.toFixed(2)+(r.est?'*':'')].forEach((v,j)=>{c.fillStyle=j===3?'#f5c518':'#fff';c.font=`${j===3?900:700} ${j===3?26:22}px ${FONT}`;c.fillText(String(v),x0+cols[j][1],y+rh/2)});y+=rh});
+    c.textAlign='center';c.fillStyle='#8fa0bd';c.font=`600 14px ${FONT}`;c.fillText(`After ${sn.rows[0]?sn.rows[0].p:0} games${sn.rows.some(r=>r.est)?'  ·  * NRR estimated':''}`,x0+pw/2,y+20);
+  }else if(cd.type==='leaders'){
+    const sn=getSnap();if(!sn){c.restore();return}
+    const pw=Math.min(1000,BW-40),x0=(BW-pw)/2,rh=38,n=Math.max(sn.bat.length,sn.bowl.length,1),ph=56+44+n*rh+16,y0=Math.max(10,(BH-110-ph)/2),half=pw/2;
+    cardPanel(c,x0,y0,pw,ph);cardTitle(c,x0,y0,pw,'TOURNAMENT LEADERS',sn.name);
+    let y=y0+56;c.font=`800 17px ${FONT}`;c.textAlign='left';c.fillStyle='#c084fc';c.fillText('MOST RUNS',x0+20,y+22);c.fillStyle='#f87171';c.fillText('MOST WICKETS',x0+half+20,y+22);y+=44;
+    for(let i=0;i<n;i++){c.fillStyle=i%2?'rgba(255,255,255,.03)':'rgba(255,255,255,.07)';c.fillRect(x0,y,pw,rh);
+      [[sn.bat[i],x0],[sn.bowl[i],x0+half]].forEach(([p,x])=>{if(!p)return;c.textAlign='left';c.fillStyle='#fff';c.font=`700 19px ${FONT}`;c.fillText(fit(c,`${i+1}. ${p.n}`,half-150),x+20,y+rh/2);
+        c.fillStyle='#8fa0bd';c.font=`600 15px ${FONT}`;c.fillText(p.s,x+half-110,y+rh/2+1);c.textAlign='right';c.fillStyle=i===0?'#f5c518':'#fff';c.font=`900 22px ${FONT}`;c.fillText(String(p.v),x+half-20,y+rh/2)});
+      y+=rh}
+    c.fillStyle='rgba(255,255,255,.15)';c.fillRect(x0+half,y0+56,1.5,ph-56);
+  }
+  c.textAlign='left';c.restore()}
+/* ---- match history ---- */
+function getHist(){try{return JSON.parse(localStorage.getItem('cc.history')||'[]')}catch(e){return[]}}
+function putHist(h){try{localStorage.setItem('cc.history',JSON.stringify(h.slice(0,20)))}catch(e){}}
+function archiveMatch(m){if(!m||!m.events||!m.events.length)return;m.uid=m.uid||('m'+Date.now().toString(36));const h=getHist().filter(x=>x.uid!==m.uid);h.unshift(JSON.parse(JSON.stringify(m)));putHist(h)}
+function matchDone(m){if(!m)return false;try{return withMatch(m,()=>{const S=compute();return S.inns.length===2&&S.inns[1].done})}catch(e){return false}}
+function pastList(){const L=[];if(M&&matchDone(M))L.push(M);getHist().forEach(h=>{if(!L.some(x=>x.uid===h.uid))L.push(h)});return L}
+function renderPast(){const L=pastList();ui.past=L;
+  let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
+  h+=L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=result(S)||'Not finished';sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
+    return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
+    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div></div>`}).join('')||'<div class="card mute">No finished matches yet.</div>';
+  h+=`<div class="grid g2"><button onclick="saveScore()">Save current score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
+  app.innerHTML=h}
+function pastCard(i){const m=ui.past[i];if(m)withMatch(m,()=>openCard(true))}
+function pastVideo(i){const m=ui.past[i];if(!m)return;if(M&&M.uid!==m.uid)archiveMatch(M);M=m;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}go('video')}
+function newMatchMenu(){
+  if(!M||matchDone(M)||!M.events.length){openSetup(true);return}
+  ui.modal={title:'Start a new match?',html:`<p class="mute">Your current match isn't finished. It'll be moved to Past matches, so nothing is lost.</p><button class="pri block" onclick="closeModal();openSetup(true)">Start new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+
 /* ================= SAVED TEAMS ================= */
 function getTeams(){try{return JSON.parse(localStorage.getItem('cc.teams')||'[]')}catch(e){return[]}}
 function putTeams(T){try{localStorage.setItem('cc.teams',JSON.stringify(T))}catch(e){}}
@@ -422,6 +485,7 @@ function saveSetup(){
     const players=s.squad.filter(p=>s.sel.includes(p));
     if(s.save&&s.squad.length)s.sid=upsertTeam({id:s.sid,name,short:s.short.trim().toUpperCase(),color:s.color,players:s.squad});
     D.teams[i]={name,short:s.short.trim().toUpperCase(),color:s.color,players,sid:s.sid||''}});
+  if(ui.draftFresh&&M&&M.uid!==D.uid)archiveMatch(M);
   M=D;save();go(ui.draftFresh?'score':(ui.back||'home'));if(!ui.draftFresh)toast('Settings saved');
 }
 
@@ -471,13 +535,15 @@ function doImport(){const raw=$('#imtx').value;
 window.addEventListener('load',()=>{try{if(location.hash.indexOf('#teams=')===0){const h=location.hash;history.replaceState(null,'',location.pathname+location.search);go('teams');importMenu(h)}}catch(e){}});
 
 /* ================= VIDEO SCORECARDS (end of innings) ================= */
-const CARD_DUR={bat:10,bowl:10,result:10},OVER_CARD=3;
+const CARD_DUR={bat:10,bowl:10,result:10,summary:10,table:10,leaders:8},OVER_CARD=3;
 function cardsCheck(S){const I=S.cur;if(I&&I.done&&!I._carded){I._carded=true;const idx=S.inns.indexOf(I),t=S._lastT||0;
-  enqueue(S,t,{type:'bat',inn:idx,dur:CARD_DUR.bat});enqueue(S,t,{type:'bowl',inn:idx,dur:CARD_DUR.bowl});
-  if(idx===1)enqueue(S,t,{type:'result',inn:idx,dur:CARD_DUR.result})}}
+  if(idx===1){enqueue(S,t,{type:'bat',inn:idx,dur:3,keep:1});enqueue(S,t,{type:'bowl',inn:idx,dur:3,keep:1});enqueue(S,t,{type:'summary',inn:idx,dur:10,keep:1});
+    if(M.tour){enqueue(S,t,{type:'table',inn:idx,dur:10,keep:1});enqueue(S,t,{type:'leaders',inn:idx,dur:8,keep:1})}}
+  else{enqueue(S,t,{type:'bat',inn:idx,dur:CARD_DUR.bat,keep:1});enqueue(S,t,{type:'bowl',inn:idx,dur:CARD_DUR.bowl,keep:1})}}}
 function activeCard(S,tm){let a=null;if(tm==null)return null;for(const c of S.cards){if(tm>=c.t&&tm<c.t+(c.dur||CARD_DUR[c.type]||10))a=c}return a}
 function drawAll(c,W,H,tm){drawTicker(c,W,H,tm);const S=compute(tm),cd=activeCard(S,tm);if(cd)drawItem(c,W,H,S,cd,tm-cd.t)}
 function drawCard(c,W,H,S,cd){
+  if(cd.type==='summary'||cd.type==='table'||cd.type==='leaders')return drawEndCard(c,W,H,S,cd);
   const I=S.inns[cd.inn];if(!I)return;
   const st=M.settings,bpo=st.bpo,bt=M.teams[I.bat],ft=M.teams[1-I.bat];
   const s=Math.min(W/1280,H/720);c.save();c.scale(s,s);
@@ -530,7 +596,7 @@ function drawCard(c,W,H,S,cd){
   c.textAlign='left';c.restore();
 }
 function showCardOnVideo(what){const S=compute();let idx=S.inns.length-1;if(idx<0){toast('No innings yet');return}
-  closeModal();addEv({k:'card',what,inn:idx});toast(`${what==='bat'?'Batting':'Bowling'} card showing on the video for ${CARD_DUR[what]}s`)}
+  closeModal();addEv({k:'card',what,inn:idx});toast(`${({bat:'Batting card',bowl:'Bowling card',table:'Table',leaders:'Leaders'})[what]} showing on the video for ${CARD_DUR[what]}s`)}
 
 /* ================= TOURNAMENT ================= */
 function getTours(){try{return JSON.parse(localStorage.getItem('cc.tours')||'[]')}catch(e){return[]}}
@@ -743,7 +809,7 @@ function howOut(b){if(!b.out)return'not out';const bw=b.bw||'',f=b.f||'';
   if(b.out==='runout')return f?`run out (${f})`:'run out';
   if(['bowled','lbw','hitwicket'].includes(b.out))return`${OUTTXT[b.out]} ${bw}`;
   return OUTTXT[b.out]||b.out}
-function openCard(){
+function openCard(noVideo){
   const S=compute(),st=M.settings;let h='';
   S.inns.forEach(I=>{const t=M.teams[I.bat];
     h+=`<h3>${esc(t.name)} ${I.runs}-${I.wk} <span class="mute">(${ovs(I.cnt,st.bpo)} ov)</span></h3><table><tr><th>Batter</th><th></th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>`;
@@ -752,7 +818,7 @@ function openCard(){
     h+=`</table><div class="mute">Extras ${I.ext}</div><table><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th></tr>`;
     I.wO.forEach(n=>{const w=I.W[n];h+=`<tr><td>${esc(n)}</td><td>${ovs(w.balls,st.bpo)}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
     h+=`</table>`});
-  if(S.inns.length)h=`<div class="grid g2" style="margin-bottom:6px"><button onclick="showCardOnVideo('bat')">📺 Batting card on video</button><button onclick="showCardOnVideo('bowl')">📺 Bowling card on video</button></div>`+h;
+  if(S.inns.length&&!noVideo)h=`<div class="grid g2" style="margin-bottom:6px"><button onclick="showCardOnVideo('bat')">📺 Batting card on video</button><button onclick="showCardOnVideo('bowl')">📺 Bowling card on video</button>${M.tour?`<button onclick="showCardOnVideo('table')">📺 Table on video</button><button onclick="showCardOnVideo('leaders')">📺 Leaders on video</button>`:''}</div>`+h;
   ui.modal={title:'Scorecard',html:h||'<p class="mute">Nothing scored yet.</p>'};showModal()}
 
 /* ================= MODAL ================= */
@@ -940,7 +1006,7 @@ function liveStart(role,code,onMsg){liveStop();Object.assign(LIVE,{role,code,onM
 function liveStop(){(LIVE.cls||[]).forEach(c=>{try{c.end(true)}catch(e){}});LIVE.cls=[];LIVE.code=null;LIVE.role=null;liveStatus()}
 function liveOn(){return(LIVE.cls||[]).some(c=>c.connected)}
 function liveTopic(){return'cricket-cam-live/v1/'+LIVE.code}
-function pubOne(cl){if(M&&cl.connected){try{cl.publish(liveTopic(),JSON.stringify({ts:Date.now(),M:{teams:M.teams,settings:M.settings,events:M.events,t0:M.t0,uid:M.uid}}),{retain:true,qos:0})}catch(e){}}}
+function pubOne(cl){if(M&&cl.connected){try{cl.publish(liveTopic(),JSON.stringify({ts:Date.now(),M:{teams:M.teams,settings:M.settings,events:M.events,t0:M.t0,uid:M.uid,tour:M.tour||'',tourSnap:tourSnapshot()}}),{retain:true,qos:0})}catch(e){}}}
 let pubT=0;function publishLive(){if(LIVE.role!=='score'||!LIVE.code)return;clearTimeout(pubT);pubT=setTimeout(()=>LIVE.cls.forEach(pubOne),120)}
 function liveText(){if(!LIVE.code)return'Camera not linked';if(!window.mqtt)return'Live link unavailable';
   return liveOn()?(LIVE.role==='cam'?(LM?'Receiving score ✓':'Connected — waiting for scorer'):'Camera linked ✓ '+LIVE.code):'Connecting…'}
@@ -959,7 +1025,6 @@ function unLink(){try{localStorage.removeItem('cc.scorerCode')}catch(e){}closeMo
 /* ================= CAMERA PHONE ================= */
 let LM=null,LMts=0;
 const CAM={stream:null,vid:null,rec:null,chunks:[],size:0,t0:0,blob:null,ext:'mp4',W:0,H:0,q:720,raf:0,wl:null,err:'',saved:false};
-function withMatch(mm,fn){const o=M;M=mm;try{return fn()}finally{M=o}}
 function camCode(){let c='';try{c=localStorage.getItem('cc.camCode')||''}catch(e){}
   if(!c){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];try{localStorage.setItem('cc.camCode',c)}catch(e){}}return c}
 function renderCam(){
@@ -1009,7 +1074,7 @@ function camCardsOnMsg(oldM,newM){
   if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;return}
   if(n<(CAM.seenN||0)){CQ.length=0;CAM.seenN=n;return}
   const now=Date.now();let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
-  for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));start+=d}
+  for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=it.keep||(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));start+=d}
   CAM.seenN=n}
 function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
