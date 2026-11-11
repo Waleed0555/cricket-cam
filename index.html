@@ -183,6 +183,19 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
  .sc>*{grid-column:1}.sc>.top,.sc>.tabs,.sc>.tabbody{grid-column:1 / -1}
  .sc>.pad{grid-column:2;grid-row:3 / span 30;margin-top:0;min-height:calc(100vh - 110px);justify-content:flex-start;border-radius:0}
 }
+.plist2{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.prow{display:flex;align-items:center;gap:10px;border:none;border-bottom:1px solid var(--line);border-radius:0;background:#fff;padding:11px 12px;text-align:left;margin:0;font-size:16px}.prow:last-child{border-bottom:none}
+.prow .ck{width:22px;height:22px;border-radius:6px;border:2px solid #b8c2d4;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex:none}
+.prow.on{background:#eef4ff}.prow.on .ck{background:var(--acc);border-color:var(--acc)}.prow .pn{flex:1}
+.capb{font-size:11px;font-weight:800;background:#fef3c7;color:#92400e;border-radius:6px;padding:2px 7px}
+.teamcard{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 10px;font:inherit;color:inherit;cursor:pointer}
+.tbadge{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 4px;border-radius:50%;color:#fff;font-weight:900;font-size:12px;flex:none;vertical-align:middle}.tbadge.big{min-width:50px;height:50px;font-size:15px}
+.chev{font-size:24px;color:var(--mute)}
+.phd{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.plrows{margin-top:4px}.plr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.plr:last-child{border-bottom:none}
+.pnum{width:22px;color:var(--mute);font-size:13px;text-align:right}.plr .pn{flex:1;font-size:16px}
+.dots{background:none;border:none;font-size:22px;padding:0 8px;color:var(--mute);margin:0}
+.err{color:#dc2626;font-size:13px;min-height:16px;margin:2px 0 6px}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -214,9 +227,15 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .offst{display:flex;align-items:center;gap:6px;font-size:13px;color:#55627a;margin:0 0 10px}
 .livenow{border:2px solid #e0313f}.pill.red{background:#e0313f;color:#fff}.warnc{border:2px solid #f59e0b;background:#fffbeb}
 .wcv{border-radius:12px;overflow:hidden;margin:0 0 12px;background:#000}.wcv canvas{display:block;width:100%;height:auto}
+/* ---- v17 background ---- */
+body{background:linear-gradient(180deg,#cfe4ff 0%,#dcecff 22%,#e3f4ec 60%,#d4efdc 100%) fixed!important;min-height:100vh}
+body:before{content:'';position:fixed;left:0;right:0;bottom:0;height:38vh;z-index:-1;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(34,139,34,.07) 0 70px,rgba(34,139,34,0) 70px 140px)}
+.sc,.tabs{background:transparent}.sheet{background:#f7faff}
+.wtip{text-align:center;margin:-4px 0 10px;font-size:13px}
+@media (orientation:landscape) and (max-height:520px){body.watching .wcv{position:fixed;inset:0;z-index:60;margin:0;border-radius:0;display:flex;align-items:center;justify-content:center;background:#000}
+ body.watching .wcv canvas{width:auto;height:100vh;max-width:100vw}body.watching #nav{display:none!important}}
 /* ---- v16 colours ---- */
 :root{--bg:#e9eef7;--line:#dbe2ee}
-body{background:linear-gradient(180deg,#dfe7f5 0,#eef2f9 320px,#f2f5fa 100%) fixed}
 .hero{background:linear-gradient(115deg,#0a1a44 0%,#1340a8 60%,#2b5ce0 100%);position:relative;overflow:hidden;box-shadow:0 10px 24px -14px rgba(10,26,68,.8)}
 .hero:before{content:'';position:absolute;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8505b,#a3111e);opacity:.9}
 .hero:after{content:'';position:absolute;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;border:3px dashed rgba(255,255,255,.55);box-sizing:border-box;transform:scale(.62) rotate(25deg)}
@@ -363,7 +382,7 @@ function infoLine(S){const I=S.cur,st=M.settings;
 
 /* ================= NAV ================= */
 function go(s){if(typeof goHook==='function'&&goHook(screen,s)===false)return;screen=s;if(s==='score')ui.tab='score';ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(typeof goAfter==='function')goAfter(s)}
-function render(){if(screen==='cam')return renderCam();if(screen==='watch')return renderWatch();if(screen==='recs')return renderRecs();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
+function render(){if(screen==='cam')return renderCam();if(screen==='watch')return renderWatch();if(screen==='recs')return renderRecs();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='team')return renderTeam();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
 function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home" onclick="go('home')">‹</button><b>${t}</b></div>`}
 
 /* ================= HOME ================= */
@@ -406,7 +425,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v16</div>
+  <div class="mute ver">Cricket Cam v17</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -622,7 +641,7 @@ function renderSetup(){
       <label>Team name</label><input id="tn${i}" value="${esc(s.name)}" placeholder="Team ${i?'B':'A'}">
       <div class="grid g2"><div><label>Short name on ticker</label><input id="ts${i}" maxlength="4" placeholder="auto" value="${esc(s.short)}"></div><div><label>Colour</label><input type="color" id="tc${i}" value="${esc(s.color)}"></div></div>
       <label>Who's playing? <b style="color:var(--text)">${n} selected</b>${s.squad.length?` of ${s.squad.length} · tap names`:''}</label>
-      <div class="pl">${s.squad.map((p,j)=>`<button class="pchip ${s.sel.includes(p)?'on':''}" onclick="togP(${i},${j})">${s.sel.includes(p)?'✓ ':''}${esc(p)}</button>`).join('')||'<span class="mute">No players yet — add them below.</span>'}</div>
+      <div class="plist2">${s.squad.map((p,j)=>`<button class="prow ${s.sel.includes(p)?'on':''}" onclick="togP(${i},${j})"><span class="ck">${s.sel.includes(p)?'✓':''}</span><span class="pn">${esc(p)}</span>${(getTeams().find(t=>t.id===s.sid)||{}).captain===p?'<span class="capb">C</span>':''}</button>`).join('')||'<span class="mute">No players yet — add them below.</span>'}</div>
       ${s.squad.length?`<div style="display:flex;gap:6px;margin-top:8px"><button class="mini" onclick="selAll(${i},1)">Select all</button><button class="mini" onclick="selAll(${i},0)">Clear</button></div>`:''}
       <div class="addrow"><input id="np${i}" placeholder="Add a player" autocapitalize="words" autocomplete="off" onkeydown="if(event.key==='Enter')addP(${i})"><button onclick="addP(${i})">Add</button></div>
       <label class="tog"><input type="checkbox" id="sv${i}" ${s.save?'checked':''}><span>Save this team for next time<div class="sm">${s.sid?'Updates the saved team with any new players':'Adds it to My teams'}</div></span></label></div>`});
@@ -643,28 +662,62 @@ function saveSetup(){
   ui.st.forEach((s,i)=>{const name=cleanName(s.name)||('Team '+(i?'B':'A'));
     const players=s.squad.filter(p=>s.sel.includes(p));
     if(s.save&&s.squad.length)s.sid=upsertTeam({id:s.sid,name,short:s.short.trim().toUpperCase(),color:s.color,players:s.squad});
-    D.teams[i]={name,short:s.short.trim().toUpperCase(),color:s.color,players,sid:s.sid||''}});
+    const sv=getTeams().find(t=>t.id===s.sid),cap=(sv&&sv.captain)||(D.teams[i]&&D.teams[i].captain)||'';
+    D.teams[i]={name,short:s.short.trim().toUpperCase(),color:s.color,players,sid:s.sid||'',captain:players.includes(cap)?cap:''}});
   if(ui.draftFresh&&M&&M.uid!==D.uid)archiveMatch(M);
   M=D;save();go(ui.draftFresh?'score':(ui.back||'home'));if(!ui.draftFresh)toast('Settings saved');
 }
 
 /* ================= MY TEAMS ================= */
-function renderTeams(){const T=getTeams();
-  let h=`<div class="wrap">${hdr('My teams')}<p class="mute">Saved teams stay on this phone. When you start a match, pick a team and tap who's playing.</p>`;
-  h+=T.map(t=>`<div class="card" style="display:flex;align-items:center;gap:10px"><span style="width:16px;height:16px;border-radius:50%;flex:none;background:${esc(t.color)}"></span><div style="flex:1;min-width:0"><b>${esc(t.name)}</b><div class="mute" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.players.length} players${t.players.length?' · '+esc(t.players.slice(0,6).join(', '))+(t.players.length>6?'…':''):''}</div></div><button class="mini" onclick="editTeam('${t.id}')">Edit</button></div>`).join('')||'<div class="card mute">No saved teams yet. Add one here, or tick “Save this team” when you set up a match.</div>';
-  h+=`<button class="pri block" onclick="editTeam('')">+ Add a team</button><div class="grid g2"><button onclick="shareTeams()">↗ Share teams</button><button onclick="importMenu('')">↙ Import teams</button></div><p class="mute">Teams are saved on this phone only. Use Share / Import to copy them to another phone. (On iPhone the home-screen icon and Safari keep separate copies too.)</p></div>`;app.innerHTML=h}
-function editTeam(id){const t=getTeams().find(a=>a.id===id)||{id:'',name:'',short:'',color:'#d62839',players:[]};ui.et=t;ui.delArm=false;
-  ui.modal={title:id?'Edit team':'New team',html:`<label>Team name</label><input id="etn" value="${esc(t.name)}" autocapitalize="words">
-  <div class="grid g2"><div><label>Short name on ticker</label><input id="ets" maxlength="4" placeholder="auto" value="${esc(t.short||'')}"></div><div><label>Colour</label><input type="color" id="etc" value="${esc(t.color)}"></div></div>
-  <label>Players — one per line</label><textarea id="etp" rows="10" autocapitalize="words">${esc(t.players.join('\n'))}</textarea>
-  <button class="pri block" onclick="saveTeamEd()">Save team</button>${id?`<button class="dan block" id="delb" onclick="delTeam('${id}')">Delete team</button>`:''}`};showModal()}
-function saveTeamEd(){const n=cleanName($('#etn').value);if(!n){toast('Give the team a name');return}
-  const seen=new Set(),P=$('#etp').value.split('\n').map(cleanName).filter(x=>x&&!seen.has(x)&&seen.add(x));
-  upsertTeam({id:ui.et.id,name:n,short:$('#ets').value.trim().toUpperCase(),color:$('#etc').value,players:P});closeModal();render();toast('Team saved')}
-function delTeam(id){if(!ui.delArm){ui.delArm=true;const b=$('#delb');if(b)b.textContent='Tap again to delete';return}
-  putTeams(getTeams().filter(t=>t.id!==id));closeModal();render();toast('Team deleted')}
-
-/* ================= SHARE / IMPORT TEAMS ================= */
+function canEditTeams(){return true}
+function teamsNote(){return'Saved teams stay on this device. When you start a match, pick a team and tick who\'s playing.'}
+function renderTeams(){const T=getTeams(),ed=canEditTeams();
+  let h=`<div class="wrap">${hdr('My teams')}<p class="mute">${teamsNote()}</p><div class="cgrid">`;
+  h+=T.map(t=>`<button class="card teamcard" onclick="openTeam('${t.id}')"><span class="tbadge" style="background:${esc(t.color)}">${esc((t.short||short(t)).slice(0,3))}</span><div style="flex:1;min-width:0;text-align:left"><b>${esc(t.name)}</b><div class="mute">${t.players.length} player${t.players.length===1?'':'s'}${t.captain?' · Captain '+esc(t.captain):''}</div></div><span class="chev">›</span></button>`).join('')||'<div class="card mute">No teams yet.</div>';
+  h+=`</div>${ed?'<button class="pri block" onclick="teamInfo(\'\')">+ New team</button>':''}</div>`;app.innerHTML=h}
+function openTeam(id){ui.teamId=id;go('team')}
+function curTeam(){return getTeams().find(t=>t.id===ui.teamId)}
+function renderTeam(){const t=curTeam();if(!t){go('teams');return}const ed=canEditTeams();
+  let h=`<div class="wrap"><div class="appbar"><button class="abk" aria-label="Back" onclick="go('teams')">‹</button><b>${ed?'Edit team':'Team'}</b></div>
+  <div class="card"><div style="display:flex;align-items:center;gap:12px"><span class="tbadge big" style="background:${esc(t.color)}">${esc((t.short||short(t)).slice(0,3))}</span>
+  <div style="flex:1;min-width:0"><b style="font-size:18px">${esc(t.name)}</b><div class="mute">Short name ${esc(t.short||short(t))}</div></div>${ed?`<button class="mini" onclick="teamInfo('${t.id}')">✎ Edit</button>`:''}</div>
+  <div class="phd"><b>Players</b><span class="mute">${t.players.length} player${t.players.length===1?'':'s'}</span></div>
+  <div class="plrows">${t.players.map((p,j)=>`<div class="plr"><span class="pnum">${j+1}</span><span class="pn">${esc(p)}</span>${t.captain===p?'<span class="capb">Captain</span>':''}${ed?`<button class="dots" aria-label="Options for ${esc(p)}" onclick="playerMenu(${j})">⋮</button>`:''}</div>`).join('')||'<p class="mute">No players yet.</p>'}</div>
+  ${ed?'<button class="pri block" style="margin-top:12px" onclick="addPlayerMenu()">+ Add player</button>':''}</div>
+  ${ed?`<button class="block dan" onclick="delTeamAsk()">🗑 Delete team</button>`:''}</div>`;app.innerHTML=h}
+function saveTeamObj(t){const T=getTeams(),i=T.findIndex(x=>x.id===t.id);if(i>=0)T[i]=t;else T.push(t);putTeams(T)}
+function teamInfo(id){const t=getTeams().find(a=>a.id===id)||{id:'',name:'',short:'',color:'#d62839',players:[]};
+  ui.modal={title:id?'Edit team':'New team',html:`<label>Team name</label><input id="etn" value="${esc(t.name)}" autocapitalize="words" placeholder="Rising Stars">
+  <div class="grid g2"><div><label>Short name</label><input id="ets" maxlength="4" placeholder="RS" value="${esc(t.short||'')}"></div><div><label>Colour</label><input type="color" id="etc" value="${esc(t.color)}"></div></div>
+  <button class="pri block" onclick="saveTeamInfo('${id}')">${id?'Save':'Create team'}</button>`};showModal();setTimeout(()=>{const e=$('#etn');if(e&&!id)e.focus()},50)}
+function saveTeamInfo(id){const n=cleanName($('#etn').value);if(!n){toast('Give the team a name');return}
+  const T=getTeams();if(T.some(x=>x.id!==id&&PK(x.name)===PK(n))){toast('There is already a team called '+n);return}
+  const t=T.find(a=>a.id===id)||{id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),players:[]};
+  t.name=n;t.short=$('#ets').value.trim().toUpperCase();t.color=$('#etc').value;saveTeamObj(t);closeModal();
+  if(!id){ui.teamId=t.id;go('team');setTimeout(addPlayerMenu,100)}else render();toast(id?'Team saved':'Team created — now add the players')}
+function addPlayerMenu(){ui.modal={title:'Add player',html:`<label>Player name</label><input id="apn" autocapitalize="words" autocomplete="off" placeholder="Player name" onkeydown="if(event.key==='Enter')addPlayer(true)">
+  <label class="tog"><input type="checkbox" id="apc"><span>Make captain</span></label><div id="aperr" class="err"></div>
+  <div class="grid g2"><button onclick="addPlayer(true)">Add and next</button><button class="pri" onclick="addPlayer(false)">Add player</button></div>`};showModal();setTimeout(()=>{const e=$('#apn');if(e)e.focus()},50)}
+function addPlayer(next){const t=curTeam();if(!t)return;const n=cleanName($('#apn').value),er=$('#aperr');
+  if(!n){if(er)er.textContent='Type a name first';return}
+  if(t.players.some(p=>PK(p)===PK(n))){if(er)er.textContent=n+' is already in the team';return}
+  t.players.push(n);if($('#apc').checked)t.captain=n;saveTeamObj(t);toast(n+' added');
+  if(next){render();addPlayerMenu()}else{closeModal();render()}}
+function playerMenu(j){const t=curTeam();if(!t)return;const p=t.players[j];
+  ui.modal={title:p,html:`<div class="grid"><button onclick="renamePlayer(${j})">✎ Rename</button>
+  <button onclick="toggleCaptain(${j})">${t.captain===p?'Remove as captain':'⭐ Make captain'}</button>
+  <button class="dan" onclick="removePlayerAsk(${j})">Remove from team</button><button onclick="closeModal()">Cancel</button></div>`};showModal()}
+function renamePlayer(j){const t=curTeam();const p=t.players[j];
+  ui.modal={title:'Rename player',html:`<input id="rpn" value="${esc(p)}" autocapitalize="words"><div id="rperr" class="err"></div><button class="pri block" onclick="doRename(${j})">Save</button>`};showModal()}
+function doRename(j){const t=curTeam();const o=t.players[j],n=cleanName($('#rpn').value);if(!n)return;
+  if(n!==o&&t.players.some(p=>PK(p)===PK(n)&&p!==o)){$('#rperr').textContent=n+' is already in the team';return}
+  t.players[j]=n;if(t.captain===o)t.captain=n;saveTeamObj(t);closeModal();render();toast('Renamed')}
+function toggleCaptain(j){const t=curTeam();const p=t.players[j];t.captain=t.captain===p?'':p;saveTeamObj(t);closeModal();render();toast(t.captain?p+' is captain':'Captain removed')}
+function removePlayerAsk(j){const t=curTeam();const p=t.players[j];
+  ui.modal={title:'Remove '+p+'?',html:`<p class="mute">They'll be taken off ${esc(t.name)}. Past scores and the table aren't affected.</p><button class="dan block" onclick="removePlayer(${j})">Remove</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+function removePlayer(j){const t=curTeam();const p=t.players.splice(j,1)[0];if(t.captain===p)t.captain='';saveTeamObj(t);closeModal();render();toast(p+' removed')}
+function delTeamAsk(){const t=curTeam();ui.modal={title:'Delete '+t.name+'?',html:`<p class="mute">The team and its player list are deleted${canEditTeams()&&typeof isAdmin==='function'?' for everyone':''}. Past scores and the table aren't affected.</p><button class="dan block" onclick="delTeam('${t.id}')">🗑 Yes, delete it</button><button class="block" onclick="closeModal()">No, go back</button>`};showModal()}
+function delTeam(id){putTeams(getTeams().filter(t=>t.id!==id));closeModal();go('teams');toast('Team deleted')}
 function b64e(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function b64d(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return decodeURIComponent(escape(atob(s)))}
 function isSite(){return !window.claude&&/^https?:$/.test(location.protocol)}
@@ -739,11 +792,11 @@ function drawCard(c,W,H,S,cd){
     if(i%2===0){c.fillStyle='rgba(255,255,255,.04)';c.fillRect(x0,y,pw,rh)}
     c.textAlign='left';
     if(bat){const b=I.B[nm],atCrease=(I.s===nm||I.n===nm)&&!b.out;
-      c.font=`700 ${fs}px ${FONT}`;c.fillStyle='#fff';c.fillText(fit(c,nm+(atCrease?' *':''),250),x0+20,y+rh/2);
+      c.font=`700 ${fs}px ${FONT}`;c.fillStyle='#fff';c.fillText(fit(c,nm+capTag(I.bat,nm)+(atCrease?' *':''),250),x0+20,y+rh/2);
       c.font=`500 ${fs-2}px ${FONT}`;c.fillStyle=b.out?'#c9d3e6':'#7ee2a8';c.fillText(fit(c,howOut(b),pw-300-150),x0+290,y+rh/2);
       R(String(b.r),x0+pw-110,`800 ${fs}px ${FONT}`,'#fff');R(String(b.b),x0+pw-30,`500 ${fs}px ${FONT}`,'#c9d3e6');
     }else{const w=I.W[nm];
-      c.font=`700 ${fs}px ${FONT}`;c.fillStyle='#fff';c.fillText(fit(c,nm,pw-380),x0+20,y+rh/2);
+      c.font=`700 ${fs}px ${FONT}`;c.fillStyle='#fff';c.fillText(fit(c,nm+capTag(1-I.bat,nm),pw-380),x0+20,y+rh/2);
       [ovs(w.balls,bpo),String(w.m||0),String(w.r),String(w.w)].forEach((v,j)=>R(v,x0+pw-30-(3-j)*80,`${j===3?800:600} ${fs}px ${FONT}`,j===3?'#f5c518':'#fff'));
     }
     y+=rh});
@@ -769,11 +822,11 @@ function seedRSSS(){
     base:{t:[{p:4,w:3,l:1,tie:0,nrr:0.24},{p:4,w:1,l:3,tie:0,nrr:-0.24}],pl:[pl(ss),pl(rs)]},matches:[]}}
 function tourTeamIdx(t,team,pos){const n=PK(team.name),sh=PK(team.short||short(team));
   let i=t.teams.findIndex(x=>PK(x.name)===n);if(i<0)i=t.teams.findIndex(x=>PK(x.short)===sh||PK(x.short)===n);
-  if(i<0)i=t.teams.findIndex(x=>n.includes(PK(x.name))||PK(x.name).includes(n));return i<0?pos:i}
+  if(i<0)i=t.teams.findIndex(x=>n.includes(PK(x.name))||PK(x.name).includes(n));return i<0?(t.teams.length<=2?pos:-1):i}
 function summarizeMatch(S,t){
   const st=M.settings,bpo=st.bpo,map=[tourTeamIdx(t,M.teams[0],0),tourTeamIdx(t,M.teams[1],1)];
-  if(map[0]===map[1])map[1]=1-map[0];
-  const tt=[{rf:0,of:0,ra:0,ob:0},{rf:0,of:0,ra:0,ob:0}],pl=[{},{}];
+  if(map[0]===map[1]&&t.teams.length===2)map[1]=1-map[0];const N=t.teams.length;
+  const tt=Array.from({length:N},()=>({rf:0,of:0,ra:0,ob:0})),pl=Array.from({length:N},()=>({}));
   const P=(ti,nm)=>{const p=pl[ti],k=PK(nm);return p[k]=p[k]||{w:0,r:0,b:0,f4:0,f6:0,inn:0,out:0,hs:0,hsNo:0,duck:0,bb:0,rc:0,bw:null}};
   S.inns.forEach(I=>{const a=map[I.bat],d=map[1-I.bat];
     const allOut=!st.stayIn&&I.wk>=maxWk(I);const ov=(allOut?st.overs*bpo:I.cnt)/bpo;
@@ -782,10 +835,11 @@ function summarizeMatch(S,t){
       if(b.r>x.hs||(b.r===x.hs&&!out)){x.hs=b.r;x.hsNo=out?0:1}if(out&&b.r<=0&&!st.stayIn)x.duck++});
     I.wO.forEach(n=>{const w=I.W[n],x=P(d,n);x.w+=w.w;x.bb+=w.balls;x.rc+=w.r;if(!x.bw||w.w>x.bw[0]||(w.w===x.bw[0]&&w.r<x.bw[1]))x.bw=[w.w,w.r]})});
   const[x,y]=S.inns;let win=-1;if(y.runs>x.runs)win=map[y.bat];else if(y.runs<x.runs)win=map[x.bat];
-  return{uid:M.uid,date:new Date(M.t0||Date.now()).toISOString().slice(0,10),win,t:tt,pl,res:result(S),potm:potmText(S),at:Date.now(),
+  return{uid:M.uid,date:new Date(M.t0||Date.now()).toISOString().slice(0,10),win,t:tt,pl,res:result(S),potm:potmText(S),at:Date.now(),ix:map,
     score:`${M.teams[x.bat].name} ${x.runs}-${x.wk} v ${M.teams[y.bat].name} ${y.runs}-${y.wk}`}}
 function syncTour(){
   if(!M||!M.tour||!M.uid)return;const T=getTours(),t=T.find(x=>x.id===M.tour);if(!t)return;
+  {const mp=[tourTeamIdx(t,M.teams[0],0),tourTeamIdx(t,M.teams[1],1)];if(mp.includes(-1)||mp[0]===mp[1]&&t.teams.length>2)return}
   let S;try{S=compute()}catch(e){return}
   const done=!M.abandoned&&S.inns.length===2&&S.inns[1].done,i=t.matches.findIndex(m=>m.uid===M.uid);
   if(!done){if(i>=0){tourRemove(t,M.uid);putTours(T)}return}
@@ -796,7 +850,7 @@ function setupTours(){return getTours()}
 function standings(t){
   return t.teams.map((tm,i)=>{const b=t.base.t[i]||{p:0,w:0,l:0,tie:0,nrr:0};
     let p=b.p,w=b.w,l=b.l,tie=b.tie||0,rf=0,of=0,ra=0,ob=0,n=0;
-    t.matches.forEach(m=>{n++;p++;if(m.win===i)w++;else if(m.win===-1)tie++;else l++;const x=m.t[i];rf+=x.rf;of+=x.of;ra+=x.ra;ob+=x.ob});
+    t.matches.forEach(m=>{if(m.ix&&!m.ix.includes(i))return;const x=m.t[i];if(!x)return;n++;p++;if(m.win===i)w++;else if(m.win===-1)tie++;else l++;rf+=x.rf;of+=x.of;ra+=x.ra;ob+=x.ob});
     let nrr,est=false;
     if(b.rf!=null&&b.of){const RF=b.rf+rf,OF=b.of+of,RA=b.ra+ra,OB=b.ob+ob;nrr=(OF?RF/OF:0)-(OB?RA/OB:0)}
     else if(!n)nrr=b.nrr||0;
@@ -809,7 +863,7 @@ function playerTotals(t,i){const o={};const g=k=>o[k]=o[k]||{n:k,w:0,r:0,b:0,f4:
     if(s.bw&&(!x.best||s.bw[0]>x.best[0]||(s.bw[0]===x.best[0]&&s.bw[1]<x.best[1])))x.best=s.bw.slice()}});
   return Object.values(o).sort((a,b)=>b.r-a.r||b.w-a.w)}
 function allPlayers(t){const L=[];t.teams.forEach((tm,i)=>playerTotals(t,i).forEach(p=>L.push(Object.assign(p,{ti:i,s:tm.short||short(tm)}))));return L}
-function formGuide(t,i){return t.matches.slice(-5).map(m=>m.win===i?'W':m.win===-1?'T':'L')}
+function formGuide(t,i){return t.matches.filter(m=>!m.ix||m.ix.includes(i)).slice(-5).map(m=>m.win===i?'W':m.win===-1?'T':'L')}
 function canEditTour(t){return true}
 function teamCol(name,i){const T=getTeams().find(t=>PK(t.name)===PK(name));if(T&&T.color)return T.color;if(/seasoned/i.test(name))return'#0e7a3e';if(/rising/i.test(name))return'#d62839';return['#0e7a3e','#d62839','#2563eb','#9333ea'][(i||0)%4]}
 function tourStatusHtml(t){return''}
@@ -845,8 +899,12 @@ function renderTour(){
   if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
   h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.slice().reverse().map(m=>{const j=t.matches.indexOf(m);return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}${m.potm?' · ⭐ '+esc(m.potm):''}</div></div>${ed?`<button class="mini" onclick="rmMatch(${j})">Remove</button>`:''}</div>`}).join(''):'<p class="mute">None yet. Games are added automatically when they finish.</p>'}</div>`;
   h+=`<button class="pri block" onclick="shareTour()">Share table (WhatsApp)</button>
-  ${ed?'<button class="block" onclick="editBase()">Edit starting numbers</button>':''}${tourAdminHtml(t)}</div>`;
+  ${ed?'<button class="block" onclick="addTourTeam()">+ Add a team to this tournament</button><button class="block" onclick="editBase()">Edit starting numbers</button>':''}${tourAdminHtml(t)}</div>`;
   app.innerHTML=h}
+function addTourTeam(){const[,t]=curTour();const L=getTeams().filter(x=>!t.teams.some(y=>PK(y.name)===PK(x.name)));
+  ui.modal={title:'Add a team',html:L.length?`<p class="mute">Pick a team from My teams. It starts on 0 points and joins the table, runs and wickets.</p><div class="grid">${L.map(x=>`<button onclick="doAddTourTeam('${x.id}')"><span class="tbadge" style="background:${esc(x.color)}">${esc((x.short||short(x)).slice(0,3))}</span> ${esc(x.name)}</button>`).join('')}</div>`:'<p class="mute">Every saved team is already in this tournament. Make a new team in 👥 My teams first.</p><button class="block" onclick="closeModal();go(\'teams\')">Go to My teams</button>'};showModal()}
+function doAddTourTeam(id){const[T,t]=curTour();const x=getTeams().find(a=>a.id===id);if(!x)return;
+  t.teams.push({name:x.name,short:x.short||short(x)});t.base.t.push({p:0,w:0,l:0,tie:0,nrr:0});t.base.pl.push({});t.baseTs=Date.now();putTours(T);closeModal();render();toast(x.name+' added to the tournament')}
 function createSeed(){const T=getTours();T.push(seedRSSS());putTours(T);render();toast('Tournament loaded 🏆')}
 function curTour(){const T=getTours();return[T,T.find(x=>x.id===ui.tourId)||T[0]]}
 function rmMatch(j){if(ui.rmArm!==j){ui.rmArm=j;toast('Tap Remove again to take this game out of the table');return}
@@ -891,6 +949,7 @@ function autoPick(){const I=compute().cur;if(!I||I.done)return;
 function undo(ok){if(!M.events.length)return;const L=M.events[M.events.length-1];
   if(!ok&&((L.k==='ball'&&L.w)||(L.k==='ret'&&L.how==='ro'))){ui.modal={title:'Undo this wicket?',html:`<p class="mute">The last ball was a wicket. Undoing it brings the batter back in.</p><button class="dan block" onclick="closeModal();undo(true)">Yes, undo the wicket</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal();return}
   const e=M.events.pop();save();render();toast('Undone: '+({ball:'last ball',bat:'batter choice',bowl:'bowler choice',strike:'strike change',ret:'retirement',end:'end of innings',inn:'innings start'}[e.k]||'last action'))}
+function capTag(ti,nm){const t=M&&M.teams&&M.teams[ti];return t&&t.captain&&t.captain===nm?' (C)':''}
 function chip(L){return`<span class="chip ${L.c}">${esc(L.l)}</span>`}
 function sr(b){return b.b?(b.r/b.b*100).toFixed(1):'0.0'}
 function eco(w){return w.balls?(w.r/(w.balls/M.settings.bpo)).toFixed(1):'0.0'}
@@ -898,15 +957,15 @@ function batRow(I,slot){
   const nm=I[slot];
   if(!nm)return`<tr><td colspan="6"><button class="add" onclick="pickBatter('${slot}')">+ Select ${slot==='s'?'striker':'batter'}</button></td></tr>`;
   const b=I.B[nm];
-  return`<tr class="row ${slot==='s'?'on':''}" onclick="swapStrike()"><td><span class="nm">${esc(nm)}${slot==='s'?' *':''}</span></td><td class="w">${b.r}</td><td class="w">${b.b}</td><td class="w">${b.f4}</td><td class="w">${b.f6}</td><td style="width:62px">${sr(b)}</td></tr>`}
+  return`<tr class="row ${slot==='s'?'on':''}" onclick="swapStrike()"><td><span class="nm">${esc(nm)}${capTag(I.bat,nm)}${slot==='s'?' *':''}</span></td><td class="w">${b.r}</td><td class="w">${b.b}</td><td class="w">${b.f4}</td><td class="w">${b.f6}</td><td style="width:62px">${sr(b)}</td></tr>`}
 function cardHtml(noVideo){
   const S=compute(),st=M.settings;let h='';
   S.inns.forEach(I=>{const t=M.teams[I.bat];
     h+=`<h3>${esc(t.name)} ${I.runs}-${I.wk} <span class="mute">(${ovs(I.cnt,st.bpo)} ov)</span></h3><table><tr><th>Batter</th><th></th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>`;
     I.bO.forEach(n=>{const b=I.B[n];const o=howOut(b);
-      h+=`<tr><td>${esc(n)}${I.s===n?' *':''}</td><td class="mute" style="text-align:left">${esc(o)}</td><td><b>${b.r}</b></td><td>${b.b}</td><td>${b.f4}</td><td>${b.f6}</td></tr>`});
+      h+=`<tr><td>${esc(n)}${capTag(I.bat,n)}${I.s===n?' *':''}</td><td class="mute" style="text-align:left">${esc(o)}</td><td><b>${b.r}</b></td><td>${b.b}</td><td>${b.f4}</td><td>${b.f6}</td></tr>`});
     h+=`</table><div class="mute">Extras ${I.ext}</div><table><tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th></tr>`;
-    I.wO.forEach(n=>{const w=I.W[n];h+=`<tr><td>${esc(n)}</td><td>${ovs(w.balls,st.bpo)}</td><td>${w.m||0}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
+    I.wO.forEach(n=>{const w=I.W[n];h+=`<tr><td>${esc(n)}${capTag(1-I.bat,n)}</td><td>${ovs(w.balls,st.bpo)}</td><td>${w.m||0}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
     h+=`</table>`});
   if(S.inns.length&&!noVideo)h=`<div class="grid g2" style="margin:8px 0 6px"><button onclick="showCardOnVideo('bat')">📺 Batting card on video</button><button onclick="showCardOnVideo('bowl')">📺 Bowling card on video</button>${M.tour?`<button onclick="showCardOnVideo('table')">📺 Table on video</button><button onclick="showCardOnVideo('leaders')">📺 Leaders on video</button>`:''}</div>`+h;
   return h}
@@ -1313,12 +1372,17 @@ const CQ=[];let CQid=0;
 function camCardsOnMsg(oldM,newM){
   let nS;try{nS=withMatch(newM,()=>compute())}catch(e){return}
   CAM.S=nS;const n=nS.cards.length;
-  if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;CAM.finUid=(nS.inns.length===2&&nS.inns[1].done)?newM.uid:null;return}
+  if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;CAM.innN=nS.inns.length;CAM.finUid=(nS.inns.length===2&&nS.inns[1].done)?newM.uid:null;return}
   if(n<(CAM.seenN||0)){CQ.length=0;CAM.seenN=n;return}
   const now=Date.now();let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
-  for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=it.keep||(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));start+=d}
+  for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=it.keep||(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));camChap(it,start,nS);start+=d}
+  if(CAM.rec&&CAM.meta&&nS.inns.length>(CAM.innN||0)&&nS.cur){(CAM.meta.ch=CAM.meta.ch||[]).push({t:Math.max(0,(now-CAM.t0)/1000),l:withMatch(newM,()=>M.teams[nS.cur.bat].name)+' batting'})}CAM.innN=nS.inns.length;
   CAM.seenN=n;
   try{const fin=nS.inns.length===2&&nS.inns[1].done&&!newM.abandoned;if(fin&&!CAM.finUid){CAM.finUid=newM.uid;const w=Math.max(0,(CQ.length?CQ[CQ.length-1].end:now)-now)+1500;clearTimeout(CAM.askT);CAM.askT=setTimeout(camAskStop,w)}if(!fin&&CAM.finUid===newM.uid)CAM.finUid=null}catch(e){}}
+function camChap(it,start,S){if(!CAM.rec||!CAM.meta)return;const t=Math.max(0,(start-CAM.t0)/1000),tc=w=>String(w||'').toLowerCase().replace(/(^|\s)\S/g,x=>x.toUpperCase());let l='';
+  if(it.type==='six')l='SIX – '+it.l1;else if(it.type==='wkt')l='WICKET – '+it.l1+' ('+tc(it.word)+')';else if(it.type==='duck')l='DUCK – '+it.l1;else if(it.type==='bm')l=tc(it.word)+' – '+it.l1;
+  else if(it.type==='bat'&&it.keep)l=it.inn===0?'Innings break':'Match scorecards';else if(it.type==='summary')l='Result'+(()=>{try{return': '+withMatch(LM||M,()=>result(S))}catch(e){return''}})();
+  if(l)(CAM.meta.ch=CAM.meta.ch||[]).push({t,l})}
 function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
   const key=LMts+'|'+W+'|'+H;
@@ -1435,7 +1499,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=16;
+const APP_VER=17;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -1465,10 +1529,15 @@ async function recBack(id){const m=(await recAll()).find(x=>x.id===id);if(m&&scr
 async function recDelYes(id){closeModal();await recDel(id);await recRefresh();toast('Recording deleted');if(screen==='recs')render();else camControls()}
 async function recPlay(id){const m=(await recAll()).find(x=>x.id===id);if(!m)return;const b=await recBlob(m);const u=URL.createObjectURL(b);
   ui.modal={title:m.title,html:`<video src="${u}" controls playsinline style="width:100%;border-radius:10px;background:#000"></video><button class="block" onclick="closeModal()">Close</button>`};showModal()}
+function chapText(ch){const L=[{t:0,l:'Start'}];ch.slice().sort((a,b)=>a.t-b.t).forEach(c=>{const p=L[L.length-1];if(c.t-p.t<10)p.l+=' / '+c.l;else L.push({t:c.t,l:c.l})});
+  return L.map(c=>fmt(c.t)+' '+c.l).join('\n')}
+async function recChapters(id){const m=(await recAll()).find(x=>x.id===id);if(!m)return;ui.shareText=chapText(m.ch||[]);
+  ui.modal={title:'YouTube chapters',html:`<p class="mute">Paste this into your YouTube video's description. YouTube turns it into clickable chapters.</p><textarea id="shtx" rows="10" readonly style="font-size:14px">${esc(ui.shareText)}</textarea><button class="pri block" onclick="copyShare()">Copy</button>`};showModal()}
 async function renderRecs(){let h=`<div class="wrap">${hdr('Recordings')}<p class="mute">Videos recorded with the camera. They stay here until you save or delete them.</p><div id="rl" class="cgrid"><div class="card mute">Loading…</div></div></div>`;app.innerHTML=h;
   const L=await recRefresh();if(screen!=='recs')return;const el=$('#rl');if(!el)return;
   el.innerHTML=L.filter(m=>!(CAM.rec&&m.id===CAM.rid)).map(m=>`<div class="card"><b>${esc(m.title)}</b>${m.state==='recovered'?' <span class="pill" style="background:#fef3c7;color:#92400e">🛟 Recovered</span>':''}
     <div class="mute">${new Date(m.start).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${fmt(m.dur||0)} · ${((m.size||0)/1048576).toFixed(0)} MB</div>
+    ${m.ch&&m.ch.length?`<button class="block mini" style="margin:8px 0 0" onclick="recChapters('${m.id}')">📋 YouTube chapters (${m.ch.length})</button>`:''}
     <div class="grid g3" style="margin-top:8px"><button class="pri" onclick="recSave('${m.id}')">💾 Save</button><button onclick="recPlay('${m.id}')">▶ Play</button><button class="dan" onclick="recDelAsk('${m.id}')">🗑 Delete</button></div></div>`).join('')||'<div class="card mute">No recordings. Everything has been saved or deleted.</div>';
   try{const e=await navigator.storage.estimate();el.insertAdjacentHTML('afterend',`<p class="mute">This app is using ${((e.usage||0)/1073741824).toFixed(1)} GB of your phone's storage.</p>`)}catch(e){}}
 
@@ -1500,10 +1569,11 @@ async function offPublish(){if(!isAdmin()||!window.mqtt)return;const t=offLocal(
   offConnect();OFF.cls.forEach(cl=>{if(cl.connected)try{cl.publish(OFF_T,p,{retain:true,qos:1})}catch(e){}})}
 function offConnect(){if(OFF.cls.length||!window.mqtt)return;OFF.on=true;
   BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'cro_'+Math.random().toString(36).slice(2,10),reconnectPeriod:6000,connectTimeout:10000,clean:true});OFF.cls.push(cl);
-    cl.on('connect',()=>{cl.subscribe([OFF_T,OFF_LT]);if(isAdmin())setTimeout(()=>{const t=offLocal();if(!OFF.got&&t&&t.ts>0)offPublish()},7000)});
+    cl.on('connect',()=>{cl.subscribe([OFF_T,OFF_LT,TEAM_T]);if(isAdmin())setTimeout(()=>{if(!TM.got&&getTeams().length)teamsPublish()},7000);if(isAdmin())setTimeout(()=>{const t=offLocal();if(!OFF.got&&t&&t.ts>0)offPublish()},7000)});
     cl.on('message',(tp,p)=>offMsg(tp,new TextDecoder().decode(p)))}catch(e){}})}
 function offStop(){OFF.cls.forEach(c=>{try{c.end(true)}catch(e){}});OFF.cls=[];OFF.on=false}
 async function offMsg(tp,raw){if(!raw)return;const d=await offVerify(raw);if(!d)return;
+  if(tp===TEAM_T){teamsMsg(d);return}
   if(tp===OFF_LT){if(!OFF.live||d.ts>=OFF.live.ts){OFF.live=d;if(screen==='home')render()}return}
   if(!d.tour||d.tour.id!==OFF_ID)return;OFF.got=true;OFF.lastSeen=Date.now();const loc=offLocal();
   if(isAdmin()){const mg=offMerge(loc,d.tour);const same=loc&&JSON.stringify(mg)===JSON.stringify(loc);if(!same){offStore(mg);rerenderTourish()}
@@ -1545,6 +1615,37 @@ function adoptLegacy(){const T=getTours();let off=T.find(x=>x.id===OFF_ID);const
   off.ts=Date.now();const R=T.filter(x=>x.id!==OFF_ID&&!leg.includes(x));R.unshift(off);_putTours(R)}
 function createSeed(){offEnsure();render()}
 
+/* ---------- shared teams (everyone sees them; only code devices change them) ---------- */
+const TEAM_T=OFF_T+'/teams',TM={got:false,pubT:0};
+function teamsMeta(){try{return JSON.parse(localStorage.getItem('cc.teamsMeta')||'{}')}catch(e){return{}}}
+function teamsMetaPut(m){try{localStorage.setItem('cc.teamsMeta',JSON.stringify(m))}catch(e){}}
+const _putTeams=putTeams;
+putTeams=function(T){if(!isAdmin()){toast('Enter the team code to change teams');return}
+  const prev=getTeams(),now=Date.now(),meta=teamsMeta();meta.del=meta.del||{};
+  const strip=x=>JSON.stringify(Object.assign({},x,{ts:0,rmP:0}));
+  T.forEach(t=>{const p=prev.find(x=>x.id===t.id);if(!p||strip(p)!==strip(t)){t.ts=now;t.rmP=Object.assign({},(p&&p.rmP)||{});
+    if(p)p.players.forEach(n=>{if(!t.players.includes(n))t.rmP[n]=now});t.players.forEach(n=>{delete t.rmP[n]})}});
+  prev.forEach(p=>{if(!T.some(t=>t.id===p.id))meta.del[p.id]=now});
+  _putTeams(T);teamsMetaPut(meta);clearTimeout(TM.pubT);TM.pubT=setTimeout(teamsPublish,300)};
+function teamsMerge(A,Ad,B,Bd){const del=Object.assign({},Ad||{});for(const k in(Bd||{}))del[k]=Math.max(del[k]||0,Bd[k]);
+  const ids=[...new Set([...A.map(t=>t.id),...B.map(t=>t.id)])],out=[];
+  ids.forEach(id=>{const a=A.find(t=>t.id===id),b=B.find(t=>t.id===id);let t;
+    if(a&&b){const nw=(a.ts||0)>=(b.ts||0)?a:b,ol=nw===a?b:a;const rm=Object.assign({},ol.rmP||{},nw.rmP||{});
+      t=Object.assign({},nw,{rmP:rm,players:[...nw.players,...ol.players.filter(p=>!nw.players.includes(p)&&!((nw.rmP||{})[p]>=(ol.ts||0)))]})}
+    else t=Object.assign({},a||b);
+    if(!(del[id]>=(t.ts||0)))out.push(t)});
+  return{teams:out,del}}
+async function teamsPublish(){if(!isAdmin()||!window.mqtt)return;const p=await offSign({ts:Date.now(),teams:getTeams(),del:teamsMeta().del||{}});if(!p)return;
+  offConnect();OFF.cls.forEach(cl=>{if(cl.connected)try{cl.publish(TEAM_T,p,{retain:true,qos:1})}catch(e){}})}
+function teamsMsg(d){if(!Array.isArray(d.teams))return;TM.got=true;const loc=getTeams(),meta=teamsMeta();
+  if(isAdmin()){const mg=teamsMerge(loc,meta.del,d.teams,d.del);if(JSON.stringify(mg.teams)!==JSON.stringify(loc)){_putTeams(mg.teams);rerenderTeamish()}
+    teamsMetaPut(Object.assign(meta,{del:mg.del}));
+    if(JSON.stringify(mg.teams)!==JSON.stringify(d.teams)||JSON.stringify(mg.del)!==JSON.stringify(d.del||{})){clearTimeout(TM.pubT);TM.pubT=setTimeout(teamsPublish,500)}return}
+  if(JSON.stringify(d.teams)!==JSON.stringify(loc)){_putTeams(d.teams);teamsMetaPut({del:d.del||{}});rerenderTeamish()}}
+function rerenderTeamish(){if(['teams','team','home','tour'].includes(screen)&&!ui.modal)render()}
+function canEditTeams(){return isAdmin()}
+function teamsNote(){return isAdmin()?'Shared with everyone who opens the link. Changes you make here show up on every device.':'Everyone who opens the link sees these teams. Only devices with the team code can change them.'}
+
 /* ---------- watch live (view only) ---------- */
 const WATCH={code:null,cls:[],M:null,ts:0,q:[],seen:0,S:null,raf:0,id:0};
 function watchMenu(){ui.modal={title:'👀 Watch a match live',html:`<p class="mute">Type the match code. The scorer can find it on the ☁️ button on their scoring screen.</p>
@@ -1561,7 +1662,7 @@ function watchApply(d){const old=WATCH.M,nm=d.M;let S;try{S=withMatch(nm,()=>com
   if(old&&old.uid===nm.uid&&n>WATCH.seen){const now=Date.now();let st=Math.max(now,WATCH.q.length?WATCH.q[WATCH.q.length-1].end:0);
     for(let i=WATCH.seen;i<n;i++){const it=S.cards[i],du=(it.dur||10)*1000;if(!it.keep&&st-now>8000)continue;WATCH.q.push(Object.assign({},it,{id:++WATCH.id,start:st,end:st+du}));st+=du}}
   WATCH.seen=n;WATCH.M=nm;WATCH.ts=d.ts;WATCH.S=S;WATCH.tk=null;if(screen==='watch')watchHtml()}
-function renderWatch(){app.innerHTML=`<div class="wrap">${hdr('👀 Watching live')}<div class="wcv"><canvas id="wc" width="1280" height="720"></canvas></div><div id="wbody"><div class="card mute">Connecting to match ${esc(WATCH.code||'')}…</div></div>
+function renderWatch(){document.body.classList.add('watching');app.innerHTML=`<div class="wrap">${hdr('👀 Watching live')}<div class="wcv"><canvas id="wc" width="1280" height="720"></canvas></div><div class="mute wtip">📱 Turn your phone sideways for full screen</div><div id="wbody"><div class="card mute">Connecting to match ${esc(WATCH.code||'')}…</div></div>
   <button class="block" onclick="shareWatch(WATCH.code)">📤 Share this watch link</button></div>`;
   watchStart();if(WATCH.M)watchHtml();if(!WATCH.raf)WATCH.raf=requestAnimationFrame(watchLoop)}
 function watchHtml(){const el=$('#wbody');if(!el||!WATCH.M)return;const m=WATCH.M;let h='';
@@ -1646,7 +1747,7 @@ function goHook(from,to){
   if(from==='cam'&&to!=='cam'&&!camLeave())return false;
   if(to==='score'&&from!=='score'&&M&&M.code&&!matchDone(M)){lockSub();if(otherScoring()&&!LOCKED){waitModal(M.code);return false}}
   if(from==='score'&&to!=='score'&&!LOCKED)lockPub(false);
-  if(from==='watch'&&to!=='watch')watchStop();
+  if(from==='watch'&&to!=='watch'){watchStop();document.body.classList.remove('watching')}
   if(to==='cam'){offStop()}else if(from==='cam'){offConnect()}
   return true}
 function goAfter(to){if(to==='cam')camStart();if(to==='score'&&M&&M.code&&!LOCKED)lockPub(true);if(to==='recs'||to==='home'||to==='cam')recRefresh().then(()=>{if(screen==='home')render()})}
