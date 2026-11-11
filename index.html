@@ -171,6 +171,18 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .seg{display:flex;background:#e8edf5;border-radius:12px;padding:3px;margin:0 0 12px}.seg button{flex:1;border:none;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;margin:0}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.pt.lb td:nth-child(2),.pt.lb th:nth-child(2){text-align:left}.pt.lb{font-size:14px;white-space:nowrap}.pt.lb td,.pt.lb th{padding:6px 5px}.sm2{font-size:12px;margin-top:6px}
 .need2 .sm{font-size:14px;font-weight:600;margin-top:4px}
+.hero{padding:12px 14px;margin:4px 0 12px;border-radius:16px}.hero .logo{width:42px;height:42px;font-size:24px;border-radius:12px}.hero .ht{font-size:21px}
+@media (min-width:900px){
+ .wrap{max-width:1100px}
+ .home{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;grid-auto-flow:row dense;align-items:start}
+ .home>*{grid-column:1 / -1}.home>.htable{grid-column:1}.home:not(:has(.hlast))>.htable{grid-column:1 / -1}.home>.hlast{grid-column:2;margin-top:0}
+ .tiles{grid-template-columns:repeat(4,1fr)}
+ .lbrow{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;align-items:start}.lbrow>.card{margin-top:0}
+ .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}.cgrid>.card{margin:0}
+ .sc{max-width:1100px;display:grid;grid-template-columns:minmax(0,1fr) 460px;align-content:start}
+ .sc>*{grid-column:1}.sc>.top,.sc>.tabs,.sc>.tabbody{grid-column:1 / -1}
+ .sc>.pad{grid-column:2;grid-row:3 / span 30;margin-top:0;min-height:calc(100vh - 110px);justify-content:flex-start;border-radius:0}
+}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -336,16 +348,19 @@ function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home"
 /* ================= HOME ================= */
 function renderHome(){
   const hasCam=typeof renderCam==='function',live=M&&!matchDone(M),v14=typeof OFF!=='undefined';
-  let h=`<div class="wrap"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket Cam</div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
-  if(v14&&ui.recovered)h+=`<div class="card warnc" onclick="ui.recovered=0;go('recs')"><b>🛟 Recovered recording</b><div class="mute">The app closed while recording, but the video was saved. Tap to open Recordings.</div></div>`;
+  let h=`<div class="wrap home"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket Cam</div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
+  let hb='';
+  if(v14&&ui.recovered)hb+=`<div class="card warnc" onclick="ui.recovered=0;go('recs')"><b>🛟 Recovered recording</b><div class="mute">The app closed while recording, but the video was saved. Tap to open Recordings.</div></div>`;
   if(v14&&OFF.live&&!OFF.live.done&&Date.now()-OFF.live.ts<20*60000&&!(M&&M.code===OFF.live.code&&live))
-    h+=`<div class="card livenow"><div class="pill red">● LIVE NOW</div><div class="lc-t">${esc(OFF.live.teams.join(' v '))}</div><button class="pri block" onclick="watchGo('${esc(OFF.live.code)}')">👀 Watch live</button></div>`;
+    hb+=`<div class="card livenow"><div class="pill red">● LIVE NOW</div><div class="lc-t">${esc(OFF.live.teams.join(' v '))}</div><button class="pri block" onclick="watchGo('${esc(OFF.live.code)}')">👀 Watch live</button></div>`;
   if(live){const S=compute(),I=S.cur;
-    h+=`<div class="card livecard"><div class="pill">● Match in progress</div><div class="lc-t">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div>
+    hb+=`<div class="card livecard"><div class="pill">● Match in progress</div><div class="lc-t">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div>
     <div class="lc-s">${I?`${esc(M.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> <span class="mute">${ovs(I.cnt,M.settings.bpo)} ov · ${S.inns.length===1?'1st':'2nd'} innings</span>`:'<span class="mute">Not started yet</span>'}</div>
     <button class="pri block" onclick="go('score')">▶ Continue scoring</button></div>`}
+  if(hb)h+=`<div class="hb">${hb}</div>`;
+  let tiles='',tbl='',last='';
   const rc=v14&&REC_N?`<span class="badge">${REC_N}</span>`:'';
-  h+=`<div class="tiles">
+  tiles=`<div class="tiles">
     ${hasCam?`<button class="tile prim" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
     <button class="tile ${hasCam?'':'prim'}" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
     <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table, runs &amp; wickets</small></button>
@@ -357,19 +372,20 @@ function renderHome(){
   </div>`;
   try{const T=getTours();if(T.length){const t=T.find(x=>M&&x.id===M.tour)||T[0],sd=standings(t);
     const AP=allPlayers(t),oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
-    h+=`<div class="card mini" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View all ›</span></div>
+    tbl=`<div class="card mini htable" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View all ›</span></div>
     <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table>
     ${oc&&(oc.r||pc.w)?`<div class="caps" style="margin:10px 0 0"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets</small></div></div>`:''}</div>`}}catch(e){}
   try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
-    h+=`<div class="card mini"><div class="mh" onclick="go('past')"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px" onclick="go('past')">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div>
+    last=`<div class="card mini hlast"><div class="mh" onclick="go('past')"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px" onclick="go('past')">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div>
     ${M&&m===M&&!M.abandoned?`<button class="block" style="margin:10px 0 0" onclick="rematch()">⚡ Rematch — same teams &amp; rules</button>`:''}</div>`}}catch(e){}
+  h+=tbl+tiles+last;
   h+=`<details class="card help"><summary>How match day works</summary><ol>
     ${hasCam?'<li><b>Camera phone:</b> tap 📷 Camera, allow the camera, turn it <b>sideways</b> and put it somewhere safe. It shows a code.</li>':''}
     <li><b>Scoring device:</b> tap ✏️ New match, pick your teams and who’s playing${hasCam?', then tap <b>Link camera</b> and type the code':''}.</li>
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v14</div>
+  <div class="mute ver">Cricket Cam v15</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -508,9 +524,9 @@ function matchDone(m){if(!m)return false;if(m.abandoned)return true;try{return w
 function pastList(){const L=[];if(M&&matchDone(M))L.push(M);getHist().forEach(h=>{if(!L.some(x=>x.uid===h.uid))L.push(h)});return L}
 function renderPast(){const L=pastList();ui.past=L;
   let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
-  h+=L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
+  h+=(L.length?'<div class="cgrid">':'')+L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
-    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')||'<div class="card mute">No finished matches yet.</div>';
+    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
   h+=`<div class="grid g2"><button onclick="saveScore()">Save current score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
   app.innerHTML=h}
 function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
@@ -797,12 +813,12 @@ function renderTour(){
   h+=`<div class="seg">${[['all','All'],...t.teams.map((tm,i)=>[String(i),tm.short||tm.name])].map(([k,l])=>`<button class="${String(f)===k?'on':''}" onclick="ui.tf='${k}';render()">${esc(l)}</button>`).join('')}</div>`;
   const bpo=(M&&M.settings&&M.settings.bpo)||6,tn=f==='all';
   const BAT=FP.filter(p=>p.r>0||p.inn>0).sort((a,b)=>b.r-a.r||(a.inn-b.inn));
-  h+=`<div class="card"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
+  h+=`<div class="lbrow"><div class="card"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
   ${BAT.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.r}</b></td><td>${p.inn||'–'}</td><td>${p.inn?p.hs+(p.hsNo?'*':''):'–'}</td><td>${p.inn?p.f4:'–'}</td><td>${p.inn?p.f6:'–'}</td><td>${p.b?(p.ar/p.b*100).toFixed(0):'–'}</td><td>${p.out?(p.ar/p.out).toFixed(1):p.inn?'–':'–'}</td></tr>`).join('')||'<tr><td colspan="9" class="mute">No runs yet</td></tr>'}</table></div></div>`;
   const BWL=FP.filter(p=>p.w>0||p.bb>0).sort((a,b)=>b.w-a.w||(a.bb?a.rc/a.bb:9)-(b.bb?b.rc/b.bb:9));
   h+=`<div class="card"><b>🎯 Top Wicket Takers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>W</th><th>O</th><th>R</th><th>Eco</th><th>Best</th></tr>
   ${BWL.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.w}</b></td><td>${p.bb?ovs(p.bb,bpo):'–'}</td><td>${p.bb?p.rc:'–'}</td><td>${p.bb?(p.rc/(p.bb/bpo)).toFixed(1):'–'}</td><td>${p.best?p.best[0]+'-'+p.best[1]:'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="mute">No wickets yet</td></tr>'}</table></div>
-  <div class="mute sm2">Inn, HS, 4s, 6s, SR, Avg, overs, economy and best count games scored in the app. Runs and wickets include the earlier games too.</div></div>`;
+  <div class="mute sm2">Inn, HS, 4s, 6s, SR, Avg, overs, economy and best count games scored in the app. Runs and wickets include the earlier games too.</div></div></div>`;
   const DK=FP.filter(p=>p.duck>0).sort((a,b)=>b.duck-a.duck);
   if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
   h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.slice().reverse().map(m=>{const j=t.matches.indexOf(m);return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}${m.potm?' · ⭐ '+esc(m.potm):''}</div></div>${ed?`<button class="mini" onclick="rmMatch(${j})">Remove</button>`:''}</div>`}).join(''):'<p class="mute">None yet. Games are added automatically when they finish.</p>'}</div>`;
@@ -1397,7 +1413,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=14;
+const APP_VER=15;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"EpenFS4ygDa7nBuaid0VBg==","iv":"PImZAdNoLCbIlm2P","ct":"WmVEQSpV4/CTnuRnTdTZ2sFExsZhhLs2Bxdt4CruyYmHMrHRChPSnwHbJmbOFh0BiZ+eUMMioLmDJ20bxiMgfXmMLWeS4YuIyliEiCGNHFBgbfcE570tfQn6UwSAi/nsV0EGT76rqm9IDONGnwzwP0hDeWodd8f221SkUshKvhqItW7jeA50Y2c4mo+3DIgdnwSN6Nf4ZPifrABa9BrnCv8Kzl9gwn+j8FEkkOdnNT3TqUZ/dvsxAweVUbjegVUEXAVK/lFTNx4lkyZHHPuvr3UbJC/4MrPGrkCSFRSp"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -1427,12 +1443,12 @@ async function recBack(id){const m=(await recAll()).find(x=>x.id===id);if(m&&scr
 async function recDelYes(id){closeModal();await recDel(id);await recRefresh();toast('Recording deleted');if(screen==='recs')render();else camControls()}
 async function recPlay(id){const m=(await recAll()).find(x=>x.id===id);if(!m)return;const b=await recBlob(m);const u=URL.createObjectURL(b);
   ui.modal={title:m.title,html:`<video src="${u}" controls playsinline style="width:100%;border-radius:10px;background:#000"></video><button class="block" onclick="closeModal()">Close</button>`};showModal()}
-async function renderRecs(){let h=`<div class="wrap">${hdr('Recordings')}<p class="mute">Videos recorded with the camera. They stay here until you save or delete them.</p><div id="rl"><div class="card mute">Loading…</div></div></div>`;app.innerHTML=h;
+async function renderRecs(){let h=`<div class="wrap">${hdr('Recordings')}<p class="mute">Videos recorded with the camera. They stay here until you save or delete them.</p><div id="rl" class="cgrid"><div class="card mute">Loading…</div></div></div>`;app.innerHTML=h;
   const L=await recRefresh();if(screen!=='recs')return;const el=$('#rl');if(!el)return;
   el.innerHTML=L.filter(m=>!(CAM.rec&&m.id===CAM.rid)).map(m=>`<div class="card"><b>${esc(m.title)}</b>${m.state==='recovered'?' <span class="pill" style="background:#fef3c7;color:#92400e">🛟 Recovered</span>':''}
     <div class="mute">${new Date(m.start).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${fmt(m.dur||0)} · ${((m.size||0)/1048576).toFixed(0)} MB</div>
     <div class="grid g3" style="margin-top:8px"><button class="pri" onclick="recSave('${m.id}')">💾 Save</button><button onclick="recPlay('${m.id}')">▶ Play</button><button class="dan" onclick="recDelAsk('${m.id}')">🗑 Delete</button></div></div>`).join('')||'<div class="card mute">No recordings. Everything has been saved or deleted.</div>';
-  try{const e=await navigator.storage.estimate();el.insertAdjacentHTML('beforeend',`<p class="mute">This app is using ${((e.usage||0)/1073741824).toFixed(1)} GB of your phone's storage.</p>`)}catch(e){}}
+  try{const e=await navigator.storage.estimate();el.insertAdjacentHTML('afterend',`<p class="mute">This app is using ${((e.usage||0)/1073741824).toFixed(1)} GB of your phone's storage.</p>`)}catch(e){}}
 
 /* ---------- shared official tournament (anyone can view; only PIN devices can change) ---------- */
 const OFF_ID='official-rsss',OFF_T='cricket-cam-official/v1/rsss',OFF_LT=OFF_T+'/live';
