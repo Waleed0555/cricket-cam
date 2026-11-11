@@ -164,6 +164,13 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .stg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
 .stg div{background:var(--card2);border-radius:9px;padding:8px 10px}.stg small{display:block;color:var(--mute);font-size:12px}.stg b{font-size:20px}
 .str{font-size:14px;margin:6px 2px}.str span{color:var(--mute)}.str.chase{color:var(--red);font-weight:700}
+.form{display:flex;gap:3px;margin-top:3px}.form i{font-style:normal;font-size:10px;font-weight:800;width:16px;height:16px;line-height:16px;text-align:center;border-radius:4px;color:#fff}
+.form .fW{background:#16a34a}.form .fL{background:#dc2626}.form .fT{background:#64748b}
+.caps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}.cap{border-radius:12px;padding:10px 12px;color:#fff;display:flex;flex-direction:column;gap:2px}
+.cap span{font-size:12px;font-weight:700;opacity:.9}.cap b{font-size:17px}.cap small{font-size:13px;opacity:.9}.cap.or{background:linear-gradient(135deg,#f97316,#ea580c)}.cap.pu{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+.seg{display:flex;background:#e8edf5;border-radius:12px;padding:3px;margin:0 0 12px}.seg button{flex:1;border:none;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;margin:0}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}.pt.lb td:nth-child(2),.pt.lb th:nth-child(2){text-align:left}.pt.lb{font-size:14px;white-space:nowrap}.pt.lb td,.pt.lb th{padding:6px 5px}.sm2{font-size:12px;margin-top:6px}
+.need2 .sm{font-size:14px;font-weight:600;margin-top:4px}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -183,6 +190,19 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .rtime{font-weight:700;font-size:16px;background:rgba(224,49,63,.9);padding:3px 10px;border-radius:12px}
 .chint{font-size:14px;color:#dfe6f3;text-align:center}
 .ccode{top:40%}
+.cwarn{display:none;position:absolute;top:calc(56px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:#dc2626;color:#fff;font-weight:800;padding:8px 14px;border-radius:10px;font-size:15px;max-width:80vw;text-align:center}
+.crot{display:none;position:absolute;inset:0;background:rgba(0,0,0,.78);align-items:center;justify-content:center;text-align:center;padding:24px;font-size:20px}.crot .sm{font-size:14px;color:#cbd5e1;margin-top:10px;max-width:420px}
+.cask{display:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(11,18,32,.94);border:2px solid #f5c518;padding:16px 20px;border-radius:14px;text-align:center;font-size:18px;max-width:86vw}
+.cask .sm{font-size:14px;color:#cbd5e1;margin:6px 0 10px}.cask .row{display:flex;gap:8px;justify-content:center}.cask button{border:none;padding:12px 14px}
+.cask button:not(.pri){background:rgba(255,255,255,.18);color:#fff}
+.lens{background:rgba(255,255,255,.15);border-radius:20px;padding:3px}.lens button{background:transparent!important;color:#fff;padding:7px 12px;border-radius:16px;font-weight:800}.lens button.on{background:#fff!important;color:#000}
+.cgl{background:rgba(255,255,255,.15)!important;color:#fff}.chint.sm{font-size:12px;opacity:.85}
+.recb.dis{opacity:.35}
+.badge{display:inline-block;background:#e0313f;color:#fff;border-radius:10px;font-size:11px;padding:1px 6px;font-weight:800;vertical-align:middle}
+.offst{display:flex;align-items:center;gap:6px;font-size:13px;color:#55627a;margin:0 0 10px}
+.livenow{border:2px solid #e0313f}.pill.red{background:#e0313f;color:#fff}.warnc{border:2px solid #f59e0b;background:#fffbeb}
+.wcv{border-radius:12px;overflow:hidden;margin:0 0 12px;background:#000}.wcv canvas{display:block;width:100%;height:auto}
+.updbar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));background:#0e2a5c;color:#fff;padding:12px 14px;border-radius:12px;text-align:center;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 @media (orientation:landscape){.cbot{left:auto;top:0;bottom:0;right:0;width:190px;justify-content:center;padding:calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 14px 10px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.6))}.cbot .row{flex-direction:column}.ccode{left:calc(50% - 80px)}}
 </style>
 </head>
@@ -298,44 +318,58 @@ function compute(upto){
 function result(S){const[a,b]=S.inns;if(!b||!b.done)return'';const ta=M.teams[a.bat].name,tb=M.teams[b.bat].name;
   if(b.runs>a.runs){if(!M.settings.stayIn){const l=maxWk(b)-b.wk;return`${tb} won by ${l} wicket${l===1?'':'s'}`}const d=b.runs-a.runs;return`${tb} won by ${d} run${d===1?'':'s'}`}
   if(b.runs<a.runs){const d=a.runs-b.runs;return`${ta} won by ${d} run${d===1?'':'s'}`}return'Match tied'}
+function potm(S){const[a,b]=S.inns;if(!b||!b.done)return null;const win=b.runs>a.runs?b.bat:b.runs<a.runs?a.bat:-1,P={};
+  const g=(n,ti)=>P[n]=P[n]||{n,ti,r:0,bf:0,w:0,rc:0,bat:0,bwl:0};
+  S.inns.forEach(I=>{I.bO.forEach(n=>{const x=g(n,I.bat),B=I.B[n];x.r+=B.r;x.bf+=B.b;x.bat=1;x.no=!B.out});I.wO.forEach(n=>{const x=g(n,1-I.bat),W=I.W[n];x.w+=W.w;x.rc+=W.r;x.bwl=1})});
+  let best=null;Object.values(P).forEach(x=>{x.sc=x.r+x.w*20+(x.ti===win?8:0)-(x.bwl?x.rc*0.15:0);if(!best||x.sc>best.sc)best=x});return best&&(best.r||best.w)?best:null}
+function potmText(S){const p=potm(S);if(!p)return'';const bits=[];if(p.bat&&p.r)bits.push(`${p.r}${p.no?'*':''} (${p.bf})`);if(p.w)bits.push(`${p.w}-${p.rc}`);return p.n+(bits.length?' '+bits.join(' & '):'')}
 function crr(I){return I.cnt?(I.runs/(I.cnt/M.settings.bpo)).toFixed(2):'0.00'}
 function infoLine(S){const I=S.cur,st=M.settings;
   if(I.target!=null&&!I.done){const need=I.target-I.runs,left=st.overs*st.bpo-I.cnt;return`Need <b>${need}</b> off <b>${left}</b> ball${left===1?'':'s'} · Target ${I.target}`}
   return`Run rate ${crr(I)}${I.ext?` · Extras ${I.ext}`:''}`}
 
 /* ================= NAV ================= */
-function go(s){if(screen==='cam'&&s!=='cam'&&!camLeave())return;screen=s;if(s==='score')ui.tab='score';ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(s==='cam')camStart()}
-function render(){if(screen==='cam')return renderCam();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
+function go(s){if(typeof goHook==='function'&&goHook(screen,s)===false)return;screen=s;if(s==='score')ui.tab='score';ui.modal=null;showModal();render();try{renderNav()}catch(e){}window.scrollTo(0,0);if(s==='video')startLoop();if(typeof goAfter==='function')goAfter(s)}
+function render(){if(screen==='cam')return renderCam();if(screen==='watch')return renderWatch();if(screen==='recs')return renderRecs();if(screen==='past')return renderPast();if(screen==='tour')return renderTour();if(screen==='teams')return renderTeams();if(screen==='setup')return renderSetup();if(screen==='score')return renderScore();if(screen==='video')return renderVideo();renderHome()}
 function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home" onclick="go('home')">‹</button><b>${t}</b></div>`}
 
 /* ================= HOME ================= */
 function renderHome(){
-  const hasCam=typeof renderCam==='function',live=M&&!matchDone(M);
+  const hasCam=typeof renderCam==='function',live=M&&!matchDone(M),v14=typeof OFF!=='undefined';
   let h=`<div class="wrap"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket Cam</div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
+  if(v14&&ui.recovered)h+=`<div class="card warnc" onclick="ui.recovered=0;go('recs')"><b>🛟 Recovered recording</b><div class="mute">The app closed while recording, but the video was saved. Tap to open Recordings.</div></div>`;
+  if(v14&&OFF.live&&!OFF.live.done&&Date.now()-OFF.live.ts<20*60000&&!(M&&M.code===OFF.live.code&&live))
+    h+=`<div class="card livenow"><div class="pill red">● LIVE NOW</div><div class="lc-t">${esc(OFF.live.teams.join(' v '))}</div><button class="pri block" onclick="watchGo('${esc(OFF.live.code)}')">👀 Watch live</button></div>`;
   if(live){const S=compute(),I=S.cur;
     h+=`<div class="card livecard"><div class="pill">● Match in progress</div><div class="lc-t">${esc(M.teams[0].name)} v ${esc(M.teams[1].name)}</div>
     <div class="lc-s">${I?`${esc(M.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> <span class="mute">${ovs(I.cnt,M.settings.bpo)} ov · ${S.inns.length===1?'1st':'2nd'} innings</span>`:'<span class="mute">Not started yet</span>'}</div>
     <button class="pri block" onclick="go('score')">▶ Continue scoring</button></div>`}
+  const rc=v14&&REC_N?`<span class="badge">${REC_N}</span>`:'';
   h+=`<div class="tiles">
     ${hasCam?`<button class="tile prim" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
     <button class="tile ${hasCam?'':'prim'}" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
+    <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table, runs &amp; wickets</small></button>
+    ${v14?`<button class="tile" onclick="watchMenu()"><span class="ti">👀</span><b>Watch live</b><small>Follow a match</small></button>`:''}
+    ${v14?`<button class="tile" onclick="go('recs')"><span class="ti">🎞</span><b>Recordings ${rc}</b><small>Save to Camera Roll</small></button>`:''}
     <button class="tile" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
-    <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table and leaders</small></button>
-    ${hasCam?'':`<button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>`}
-    ${typeof contMenu==='function'?`<button class="tile" onclick="contMenu()"><span class="ti">↪️</span><b>Continue a match</b><small>From another device</small></button><button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>`:''}
+    ${typeof contMenu==='function'?`<button class="tile" onclick="contMenu()"><span class="ti">↪️</span><b>Continue a match</b><small>From another device</small></button>`:''}
+    <button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>
   </div>`;
   try{const T=getTours();if(T.length){const t=T.find(x=>M&&x.id===M.tour)||T[0],sd=standings(t);
-    h+=`<div class="card mini" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View ›</span></div>
-    <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b></td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table></div>`}}catch(e){}
-  try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=result(S)||'';sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
-    h+=`<div class="card mini" onclick="go('past')"><div class="mh"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div></div>`}}catch(e){}
+    const AP=allPlayers(t),oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
+    h+=`<div class="card mini" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View all ›</span></div>
+    <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table>
+    ${oc&&(oc.r||pc.w)?`<div class="caps" style="margin:10px 0 0"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets</small></div></div>`:''}</div>`}}catch(e){}
+  try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
+    h+=`<div class="card mini"><div class="mh" onclick="go('past')"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px" onclick="go('past')">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div>
+    ${M&&m===M&&!M.abandoned?`<button class="block" style="margin:10px 0 0" onclick="rematch()">⚡ Rematch — same teams &amp; rules</button>`:''}</div>`}}catch(e){}
   h+=`<details class="card help"><summary>How match day works</summary><ol>
-    ${hasCam?'<li><b>Camera phone:</b> tap 📷 Camera, allow the camera, turn it sideways and put it somewhere safe. It shows a code.</li>':''}
+    ${hasCam?'<li><b>Camera phone:</b> tap 📷 Camera, allow the camera, turn it <b>sideways</b> and put it somewhere safe. It shows a code.</li>':''}
     <li><b>Scoring device:</b> tap ✏️ New match, pick your teams and who’s playing${hasCam?', then tap <b>Link camera</b> and type the code':''}.</li>
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
-    <li>When the match ends, wait for the summary and table to finish${hasCam?', then stop and tap <b>Save video</b>':''}.</li></ol>
-    ${hasCam?'<p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v13</div>
+    <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
+    ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
+  <div class="mute ver">Cricket Cam v14</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -421,7 +455,7 @@ function cardTitle(c,x0,y0,pw,txt,sub){c.save();rrPath(c,x0,y0,pw,56,14);c.clip(
 function drawEndCard(c,W,H,S,cd){
   const s=Math.min(W/1280,H/720);c.save();c.scale(s,s);const BW=W/s,BH=H/s;c.textBaseline='middle';
   if(cd.type==='summary'){
-    const pw=Math.min(1000,BW-40),x0=(BW-pw)/2,hh=44,rh=34,n=4,ph=56+S.inns.length*(hh+n*rh)+50,y0=Math.max(10,(BH-100-ph)/2);
+    const pm=potmText(S),pw=Math.min(1000,BW-40),x0=(BW-pw)/2,hh=44,rh=34,n=4,ph=56+S.inns.length*(hh+n*rh)+50+(pm?40:0),y0=Math.max(10,(BH-100-ph)/2);
     cardPanel(c,x0,y0,pw,ph);cardTitle(c,x0,y0,pw,'MATCH SUMMARY');
     let y=y0+56;const half=pw/2;
     S.inns.forEach((I,k)=>{const tm=M.teams[I.bat];
@@ -440,8 +474,10 @@ function drawEndCard(c,W,H,S,cd){
           c.textAlign='right';c.font=`800 20px ${FONT}`;c.fillText(`${w.w}-${w.r}`,x0+pw-90,y+rh/2);c.fillStyle='#c9d3e6';c.font=`500 18px ${FONT}`;c.fillText(ovs(w.balls,M.settings.bpo),x0+pw-22,y+rh/2)}
         y+=rh}
       c.fillStyle='rgba(255,255,255,.15)';c.fillRect(x0+half,y-n*rh,1.5,n*rh)});
-    c.save();rrPath(c,x0,y0,pw,ph,14);c.clip();c.fillStyle='#f5c518';c.fillRect(x0,y,pw,50);c.restore();
+    c.save();rrPath(c,x0,y0,pw,ph,14);c.clip();c.fillStyle='#f5c518';c.fillRect(x0,y,pw,50);if(pm){c.fillStyle='#1b2740';c.fillRect(x0,y+50,pw,40)}c.restore();
     c.fillStyle='#111';c.font=`900 24px ${FONT}`;c.textAlign='center';c.fillText(fit(c,(result(S)||'').toUpperCase(),pw-40),x0+pw/2,y+26);
+    if(pm){c.fillStyle='#f5c518';c.font=`800 15px ${FONT}`;const lb='⭐ PLAYER OF THE MATCH   ';c.font=`800 15px ${FONT}`;const lw=c.measureText(lb).width;c.font=`900 21px ${FONT}`;const tw=Math.min(c.measureText(pm.toUpperCase()).width,pw-80-lw);
+      const sx=x0+pw/2-(lw+tw)/2;c.textAlign='left';c.font=`800 15px ${FONT}`;c.fillText(lb,sx,y+71);c.fillStyle='#fff';c.font=`900 21px ${FONT}`;c.fillText(fit(c,pm.toUpperCase(),pw-80-lw),sx+lw,y+70)}
   }else if(cd.type==='table'){
     const sn=getSnap();if(!sn){c.restore();return}
     const pw=Math.min(900,BW-40),x0=(BW-pw)/2,rh=62,ph=56+40+sn.rows.length*rh+40,y0=Math.max(10,(BH-110-ph)/2);
@@ -468,11 +504,11 @@ function drawEndCard(c,W,H,S,cd){
 function getHist(){try{return JSON.parse(localStorage.getItem('cc.history')||'[]')}catch(e){return[]}}
 function putHist(h){try{localStorage.setItem('cc.history',JSON.stringify(h.slice(0,20)))}catch(e){}}
 function archiveMatch(m){if(!m||!m.events||!m.events.length)return;m.uid=m.uid||('m'+Date.now().toString(36));const h=getHist().filter(x=>x.uid!==m.uid);h.unshift(JSON.parse(JSON.stringify(m)));putHist(h)}
-function matchDone(m){if(!m)return false;try{return withMatch(m,()=>{const S=compute();return S.inns.length===2&&S.inns[1].done})}catch(e){return false}}
+function matchDone(m){if(!m)return false;if(m.abandoned)return true;try{return withMatch(m,()=>{const S=compute();return S.inns.length===2&&S.inns[1].done})}catch(e){return false}}
 function pastList(){const L=[];if(M&&matchDone(M))L.push(M);getHist().forEach(h=>{if(!L.some(x=>x.uid===h.uid))L.push(h)});return L}
 function renderPast(){const L=pastList();ui.past=L;
   let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
-  h+=L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=result(S)||'Not finished';sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
+  h+=L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
     <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')||'<div class="card mute">No finished matches yet.</div>';
   h+=`<div class="grid g2"><button onclick="saveScore()">Save current score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
@@ -483,11 +519,18 @@ function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some
   <button class="dan block" onclick="doPastDel(${i})">Delete match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
 function doPastDel(i){const m=ui.past[i];if(!m)return;const rmT=$('#deltour')?$('#deltour').checked:false;
   putHist(getHist().filter(x=>x.uid!==m.uid));
-  if(rmT){const T=getTours();T.forEach(t=>{t.matches=t.matches.filter(x=>x.uid!==m.uid)});putTours(T)}
+  if(rmT){const T=getTours();T.forEach(t=>{if(t.matches.some(x=>x.uid===m.uid))tourRemove(t,m.uid)});putTours(T)}
   if(M&&M.uid===m.uid){M=null;try{localStorage.removeItem(KEY)}catch(e){}}
   closeModal();render();toast(rmT?'Match deleted and removed from the table':'Match deleted')}
 function pastCard(i){const m=ui.past[i];if(m)withMatch(m,()=>openCard(true))}
 function pastVideo(i){const m=ui.past[i];if(!m)return;if(M&&M.uid!==m.uid)archiveMatch(M);M=m;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}go('video')}
+function matchGone(m){}
+function endGameMenu(){ui.modal={title:'End this game now?',html:`<p class="mute">It's saved in Past matches as <b>Abandoned</b> and <b>won't count</b> in the points table or player stats.</p><button class="dan block" onclick="doEndGame()">🏁 End game (abandoned)</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+function doEndGame(){if(!M)return;M.abandoned=true;save();archiveMatch(M);const m=M;M=null;try{localStorage.removeItem(KEY)}catch(e){}matchGone(m);closeModal();go('home');toast('Game ended — saved as abandoned')}
+function discardMenu(){ui.modal={title:'Discard this game?',html:`<p class="mute">The whole game is deleted for good — it won't be in Past matches or the table.</p><button class="dan block" onclick="doDiscard()">🗑 Yes, delete it</button><button class="block" onclick="closeModal()">No, go back</button>`};showModal()}
+function doDiscard(){if(!M)return;const m=M;putHist(getHist().filter(x=>x.uid!==m.uid));const T=getTours();T.forEach(t=>{if(t.matches.some(x=>x.uid===m.uid))tourRemove(t,m.uid)});putTours(T);M=null;try{localStorage.removeItem(KEY)}catch(e){}matchGone(m,true);closeModal();go('home');toast('Game discarded')}
+function rematch(){const o=M;if(!o)return;const D=newMatch();D.teams=JSON.parse(JSON.stringify(o.teams));D.settings=Object.assign({},o.settings);D.tour=o.tour||'';if(o.camCode)D.camCode=o.camCode;
+  archiveMatch(o);M=D;save();go('score');toast('Rematch ready — who bats first?')}
 function newMatchMenu(){
   if(!M||matchDone(M)||!M.events.length){openSetup(true);return}
   ui.modal={title:'Start a new match?',html:`<p class="mute">Your current match isn't finished. It'll be moved to Past matches, so nothing is lost.</p><button class="pri block" onclick="closeModal();openSetup(true)">Start new match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
@@ -524,7 +567,7 @@ function syncSetup(){
   ui.st.forEach((s,i)=>{s.name=$('#tn'+i).value;s.short=$('#ts'+i).value;s.color=$('#tc'+i).value;s.save=$('#sv'+i).checked});
   const st=ui.draft.settings,num=(id,d,min)=>{const v=parseInt($(id).value,10);return isNaN(v)?d:Math.max(min,v)};
   st.overs=num('#so',6,1);st.bpo=num('#sb',6,1);st.extrasCount=$('#sx').checked;st.wideRuns=num('#sw',1,0);st.nbRuns=num('#sn',1,0);st.wicketPen=num('#sp',0,0);st.stayIn=$('#ss').checked}
-function autoTour(){const TT=getTours();const nm=ui.st.map(s=>PK(s.name));const t=TT.find(t=>nm.every((n,i)=>n&&t.teams.some(x=>PK(x.name)===n||PK(x.short)===n)));return t?t.id:''}
+function autoTour(){const TT=setupTours();const nm=ui.st.map(s=>PK(s.name));const t=TT.find(t=>nm.every((n,i)=>n&&t.teams.some(x=>PK(x.name)===n||PK(x.short)===n)));return t?t.id:''}
 function reSetup(focus){const y=window.scrollY;renderSetup();window.scrollTo(0,y);if(focus){const e=$(focus);if(e)e.focus()}}
 function togP(i,j){syncSetup();const s=ui.st[i],p=s.squad[j];s.sel=s.sel.includes(p)?s.sel.filter(x=>x!==p):[...s.sel,p];reSetup()}
 function selAll(i,on){syncSetup();const s=ui.st[i];s.sel=on?s.squad.slice():[];reSetup()}
@@ -546,14 +589,15 @@ function renderSetup(){
       ${s.squad.length?`<div style="display:flex;gap:6px;margin-top:8px"><button class="mini" onclick="selAll(${i},1)">Select all</button><button class="mini" onclick="selAll(${i},0)">Clear</button></div>`:''}
       <div class="addrow"><input id="np${i}" placeholder="Add a player" autocapitalize="words" autocomplete="off" onkeydown="if(event.key==='Enter')addP(${i})"><button onclick="addP(${i})">Add</button></div>
       <label class="tog"><input type="checkbox" id="sv${i}" ${s.save?'checked':''}><span>Save this team for next time<div class="sm">${s.sid?'Updates the saved team with any new players':'Adds it to My teams'}</div></span></label></div>`});
-  {const TT=getTours();if(TT.length){const sel=ui.tourSel!==undefined?ui.tourSel:(D.tour||autoTour());
+  {const TT=setupTours();if(TT.length){const sel=ui.tourSel!==undefined?ui.tourSel:(D.tour||autoTour());
     h+=`<div class="card"><b>🏆 Tournament</b><select id="tsel" onchange="ui.tourSel=this.value" style="margin-top:8px"><option value="">Not part of a tournament</option>${TT.map(t=>`<option value="${t.id}" ${t.id===sel?'selected':''}>${esc(t.name)}</option>`).join('')}</select><div class="mute" style="margin-top:6px">When the match ends, the result, runs and wickets are added to the table automatically. Team names must match the tournament (e.g. Rising Stars / Seasoned Stars).</div></div>`}}
   h+=`<div class="card"><b>Rules</b>
     <div class="grid g2"><div><label>Overs per innings</label><input id="so" type="number" inputmode="numeric" min="1" value="${st.overs}"></div><div><label>Balls per over</label><input id="sb" type="number" inputmode="numeric" min="1" value="${st.bpo}"></div></div>
     <label class="tog"><input type="checkbox" id="sx" ${st.extrasCount?'checked':''}><span>Wides &amp; no-balls count as a ball<div class="sm">The over always ends after the set number of balls, even if there were wides</div></span></label>
     <div class="grid g3"><div><label>Runs for a wide</label><input id="sw" type="number" inputmode="numeric" min="0" value="${st.wideRuns}"></div><div><label>Runs for a no-ball</label><input id="sn" type="number" inputmode="numeric" min="0" value="${st.nbRuns}"></div><div><label>Runs lost when out</label><input id="sp" type="number" inputmode="numeric" min="0" value="${st.wicketPen}"></div></div>
     <label class="tog"><input type="checkbox" id="ss" ${st.stayIn?'checked':''}><span>Batters stay in when they're out<div class="sm">For pairs-style indoor cricket. Leave off for normal rules.</div></span></label>
-  </div><button class="pri block big-start" onclick="saveSetup()">${ui.draftFresh?'Start scoring':'Save'}</button></div>`;
+  </div><button class="pri block big-start" onclick="saveSetup()">${ui.draftFresh?'Start scoring':'Save'}</button>
+  ${!ui.draftFresh&&M&&M.events.length&&!matchDone(M)?`<div class="card"><b>This match</b><button class="block" style="margin-top:8px" onclick="endGameMenu()">🏁 End game early</button><button class="block dan" style="margin-bottom:0" onclick="discardMenu()">🗑 Discard game</button></div>`:''}</div>`;
   app.innerHTML=h;
 }
 function saveSetup(){
@@ -615,9 +659,8 @@ window.addEventListener('load',()=>{try{if(location.hash.indexOf('#teams=')===0)
 /* ================= VIDEO SCORECARDS (end of innings) ================= */
 const CARD_DUR={bat:10,bowl:10,result:10,summary:10,table:10,leaders:8},OVER_CARD=3;
 function cardsCheck(S){const I=S.cur;if(I&&I.done&&!I._carded){I._carded=true;const idx=S.inns.indexOf(I),t=S._lastT||0;
-  if(idx===1){enqueue(S,t,{type:'bat',inn:idx,dur:3,keep:1});enqueue(S,t,{type:'bowl',inn:idx,dur:3,keep:1});enqueue(S,t,{type:'summary',inn:idx,dur:10,keep:1});
-    if(M.tour){enqueue(S,t,{type:'table',inn:idx,dur:10,keep:1});enqueue(S,t,{type:'leaders',inn:idx,dur:8,keep:1})}}
-  else{enqueue(S,t,{type:'bat',inn:idx,dur:CARD_DUR.bat,keep:1});enqueue(S,t,{type:'bowl',inn:idx,dur:CARD_DUR.bowl,keep:1})}}}
+  enqueue(S,t,{type:'bat',inn:idx,dur:5,keep:1});enqueue(S,t,{type:'bowl',inn:idx,dur:5,keep:1});
+  if(idx===1&&!M.abandoned){enqueue(S,t,{type:'summary',inn:idx,dur:10,keep:1});if(M.tour)enqueue(S,t,{type:'table',inn:idx,dur:5,keep:1})}}}
 function activeCard(S,tm){let a=null;if(tm==null)return null;for(const c of S.cards){if(tm>=c.t&&tm<c.t+(c.dur||CARD_DUR[c.type]||10))a=c}return a}
 function drawAll(c,W,H,tm){drawTicker(c,W,H,tm);const S=compute(tm),cd=activeCard(S,tm);if(cd)drawItem(c,W,H,S,cd,tm-cd.t)}
 function drawCard(c,W,H,S,cd){
@@ -694,21 +737,25 @@ function summarizeMatch(S,t){
   const st=M.settings,bpo=st.bpo,map=[tourTeamIdx(t,M.teams[0],0),tourTeamIdx(t,M.teams[1],1)];
   if(map[0]===map[1])map[1]=1-map[0];
   const tt=[{rf:0,of:0,ra:0,ob:0},{rf:0,of:0,ra:0,ob:0}],pl=[{},{}];
-  const add=(ti,nm,k,v)=>{const p=pl[ti],key=PK(nm);p[key]=p[key]||{w:0,r:0};p[key][k]+=v};
+  const P=(ti,nm)=>{const p=pl[ti],k=PK(nm);return p[k]=p[k]||{w:0,r:0,b:0,f4:0,f6:0,inn:0,out:0,hs:0,hsNo:0,duck:0,bb:0,rc:0,bw:null}};
   S.inns.forEach(I=>{const a=map[I.bat],d=map[1-I.bat];
     const allOut=!st.stayIn&&I.wk>=maxWk(I);const ov=(allOut?st.overs*bpo:I.cnt)/bpo;
     tt[a].rf+=I.runs;tt[a].of+=ov;tt[d].ra+=I.runs;tt[d].ob+=ov;
-    I.bO.forEach(n=>add(a,n,'r',I.B[n].r));I.wO.forEach(n=>{if(I.W[n].w)add(d,n,'w',I.W[n].w);else add(d,n,'w',0)})});
+    I.bO.forEach(n=>{const b=I.B[n],x=P(a,n),out=!!b.out&&b.out!=='rh';x.r+=b.r;x.b+=b.b;x.f4+=b.f4;x.f6+=b.f6;x.inn++;if(out)x.out++;
+      if(b.r>x.hs||(b.r===x.hs&&!out)){x.hs=b.r;x.hsNo=out?0:1}if(out&&b.r<=0&&!st.stayIn)x.duck++});
+    I.wO.forEach(n=>{const w=I.W[n],x=P(d,n);x.w+=w.w;x.bb+=w.balls;x.rc+=w.r;if(!x.bw||w.w>x.bw[0]||(w.w===x.bw[0]&&w.r<x.bw[1]))x.bw=[w.w,w.r]})});
   const[x,y]=S.inns;let win=-1;if(y.runs>x.runs)win=map[y.bat];else if(y.runs<x.runs)win=map[x.bat];
-  return{uid:M.uid,date:new Date(M.t0||Date.now()).toISOString().slice(0,10),win,t:tt,pl,res:result(S),
+  return{uid:M.uid,date:new Date(M.t0||Date.now()).toISOString().slice(0,10),win,t:tt,pl,res:result(S),potm:potmText(S),at:Date.now(),
     score:`${M.teams[x.bat].name} ${x.runs}-${x.wk} v ${M.teams[y.bat].name} ${y.runs}-${y.wk}`}}
 function syncTour(){
   if(!M||!M.tour||!M.uid)return;const T=getTours(),t=T.find(x=>x.id===M.tour);if(!t)return;
   let S;try{S=compute()}catch(e){return}
-  const done=S.inns.length===2&&S.inns[1].done,i=t.matches.findIndex(m=>m.uid===M.uid);
-  if(!done){if(i>=0){t.matches.splice(i,1);putTours(T)}return}
-  const sm=summarizeMatch(S,t);const was=i>=0;if(was)t.matches[i]=sm;else t.matches.push(sm);putTours(T);
+  const done=!M.abandoned&&S.inns.length===2&&S.inns[1].done,i=t.matches.findIndex(m=>m.uid===M.uid);
+  if(!done){if(i>=0){tourRemove(t,M.uid);putTours(T)}return}
+  const sm=summarizeMatch(S,t);const was=i>=0;if(was){if(JSON.stringify(Object.assign({},t.matches[i],{at:0}))===JSON.stringify(Object.assign({},sm,{at:0})))return;t.matches[i]=sm}else t.matches.push(sm);putTours(T);
   if(!was)setTimeout(()=>toast('Added to the tournament table 🏆'),300)}
+function tourRemove(t,uid){const n=t.matches.length;t.matches=t.matches.filter(x=>x.uid!==uid);(t.removed=t.removed||{})[uid]=Date.now();return n!==t.matches.length}
+function setupTours(){return getTours()}
 function standings(t){
   return t.teams.map((tm,i)=>{const b=t.base.t[i]||{p:0,w:0,l:0,tie:0,nrr:0};
     let p=b.p,w=b.w,l=b.l,tie=b.tie||0,rf=0,of=0,ra=0,ob=0,n=0;
@@ -718,9 +765,17 @@ function standings(t){
     else if(!n)nrr=b.nrr||0;
     else{const app=(of?rf/of:0)-(ob?ra/ob:0);nrr=b.p?((b.nrr||0)*b.p+app*n)/(b.p+n):app;est=b.p>0}
     return{i,name:tm.name,short:tm.short,p,w,l,tie,pts:w*t.ptsWin+tie*t.ptsTie,nrr,est}}).sort((a,b)=>b.pts-a.pts||b.nrr-a.nrr)}
-function playerTotals(t,i){const o={};const addIn=src=>{for(const k in src){o[k]=o[k]||{w:0,r:0};o[k].w+=src[k].w||0;o[k].r+=src[k].r||0}};
-  addIn(t.base.pl[i]||{});t.matches.forEach(m=>addIn(m.pl[i]||{}));
-  return Object.entries(o).map(([n,v])=>({n,...v})).sort((a,b)=>b.r-a.r||b.w-a.w)}
+function playerTotals(t,i){const o={};const g=k=>o[k]=o[k]||{n:k,w:0,r:0,b:0,f4:0,f6:0,inn:0,out:0,hs:-1,hsNo:0,duck:0,bb:0,rc:0,best:null,ar:0};
+  const bp=t.base.pl[i]||{};for(const k in bp){const x=g(k);x.w+=bp[k].w||0;x.r+=bp[k].r||0}
+  t.matches.forEach(m=>{const p=(m.pl&&m.pl[i])||{};for(const k in p){const s=p[k],x=g(k);x.w+=s.w||0;x.r+=s.r||0;x.ar+=s.r||0;x.b+=s.b||0;x.f4+=s.f4||0;x.f6+=s.f6||0;x.inn+=s.inn||0;x.out+=s.out||0;x.duck+=s.duck||0;x.bb+=s.bb||0;x.rc+=s.rc||0;
+    if(s.inn&&((s.hs||0)>x.hs||((s.hs||0)===x.hs&&s.hsNo))){x.hs=s.hs||0;x.hsNo=s.hsNo||0}
+    if(s.bw&&(!x.best||s.bw[0]>x.best[0]||(s.bw[0]===x.best[0]&&s.bw[1]<x.best[1])))x.best=s.bw.slice()}});
+  return Object.values(o).sort((a,b)=>b.r-a.r||b.w-a.w)}
+function allPlayers(t){const L=[];t.teams.forEach((tm,i)=>playerTotals(t,i).forEach(p=>L.push(Object.assign(p,{ti:i,s:tm.short||short(tm)}))));return L}
+function formGuide(t,i){return t.matches.slice(-5).map(m=>m.win===i?'W':m.win===-1?'T':'L')}
+function canEditTour(t){return true}
+function tourStatusHtml(t){return''}
+function tourAdminHtml(t){return''}
 const fmtN=x=>(x>=0?'+':'')+x.toFixed(2);
 function renderTour(){
   const T=getTours();
@@ -728,28 +783,41 @@ function renderTour(){
   if(!T.length){
     h+=`<div class="card"><b>No tournament yet</b><p class="mute">Load your Rising Stars v Seasoned Stars tournament with the numbers from the games you've already played (points, NRR, runs and wickets).</p>
     <button class="pri block" onclick="createSeed()">Load RS v SS (4 games played)</button></div></div>`;app.innerHTML=h;return}
-  const t=T.find(x=>x.id===ui.tourId)||T[0];ui.tourId=t.id;
+  const t=T.find(x=>x.id===ui.tourId)||T[0];ui.tourId=t.id;const ed=canEditTour(t);
   if(T.length>1)h+=`<select onchange="ui.tourId=this.value;render()">${T.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
-  const sd=standings(t);
-  h+=`<div class="card"><b>${esc(t.name)}</b> <span class="mute">· Points table</span>
-  <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>L</th>${sd.some(r=>r.tie)?'<th>T</th>':''}<th>Pts</th><th>NRR</th></tr>
-  ${sd.map(r=>`<tr><td><b>${esc(r.name)}</b> <span class="mute">(${esc(r.short)})</span></td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td>${sd.some(x=>x.tie)?`<td>${r.tie}</td>`:''}<td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}${r.est?'*':''}</td></tr>`).join('')}</table>
-  ${sd.some(r=>r.est)?'<div class="mute">* NRR estimated — add the earlier games’ totals in “Edit starting numbers” to make it exact.</div>':''}</div>`;
-  t.teams.forEach((tm,i)=>{const P=playerTotals(t,i);
-    h+=`<div class="card"><b>${esc(tm.name)} (${esc(tm.short)})</b><table class="pt"><tr><th>Player</th><th>Wickets</th><th>Runs</th></tr>
-    ${P.map(p=>`<tr><td>${esc(p.n)}</td><td>${p.w}</td><td><b>${p.r}</b></td></tr>`).join('')||'<tr><td colspan="3" class="mute">No players yet</td></tr>'}</table></div>`});
-  h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.map((m,j)=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}</div></div><button class="mini" onclick="rmMatch(${j})">Remove</button></div>`).join(''):'<p class="mute">None yet. When you set up a match, pick this tournament — it’s added automatically when the match finishes.</p>'}</div>`;
+  h+=tourStatusHtml(t);
+  const sd=standings(t),hasT=sd.some(r=>r.tie);
+  h+=`<div class="card"><b>${esc(t.name)}</b><div class="mute">Points table</div>
+  <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>L</th>${hasT?'<th>T</th>':''}<th>Pts</th><th>NRR</th></tr>
+  ${sd.map((r,k)=>`<tr><td>${k===0?'🥇 ':''}<b>${esc(r.name)}</b> <span class="mute">(${esc(r.short)})</span>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td>${hasT?`<td>${r.tie}</td>`:''}<td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}${r.est?'*':''}</td></tr>`).join('')}</table>
+  ${sd.some(r=>r.est)?`<div class="mute sm2">* NRR estimated${ed?' — add the earlier games’ totals in “Edit starting numbers” to make it exact':''}.</div>`:''}${t.matches.length?'<div class="mute sm2">Form = last 5 games scored in the app (newest on the right).</div>':''}</div>`;
+  const AP=allPlayers(t),f=ui.tf==null?'all':ui.tf,FP=AP.filter(p=>f==='all'||p.ti===+f);
+  const oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
+  if(oc&&(oc.r||pc.w))h+=`<div class="caps"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs · ${esc(oc.s)}</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets · ${esc(pc.s)}</small></div></div>`;
+  h+=`<div class="seg">${[['all','All'],...t.teams.map((tm,i)=>[String(i),tm.short||tm.name])].map(([k,l])=>`<button class="${String(f)===k?'on':''}" onclick="ui.tf='${k}';render()">${esc(l)}</button>`).join('')}</div>`;
+  const bpo=(M&&M.settings&&M.settings.bpo)||6,tn=f==='all';
+  const BAT=FP.filter(p=>p.r>0||p.inn>0).sort((a,b)=>b.r-a.r||(a.inn-b.inn));
+  h+=`<div class="card"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
+  ${BAT.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.r}</b></td><td>${p.inn||'–'}</td><td>${p.inn?p.hs+(p.hsNo?'*':''):'–'}</td><td>${p.inn?p.f4:'–'}</td><td>${p.inn?p.f6:'–'}</td><td>${p.b?(p.ar/p.b*100).toFixed(0):'–'}</td><td>${p.out?(p.ar/p.out).toFixed(1):p.inn?'–':'–'}</td></tr>`).join('')||'<tr><td colspan="9" class="mute">No runs yet</td></tr>'}</table></div></div>`;
+  const BWL=FP.filter(p=>p.w>0||p.bb>0).sort((a,b)=>b.w-a.w||(a.bb?a.rc/a.bb:9)-(b.bb?b.rc/b.bb:9));
+  h+=`<div class="card"><b>🎯 Top Wicket Takers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>W</th><th>O</th><th>R</th><th>Eco</th><th>Best</th></tr>
+  ${BWL.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.w}</b></td><td>${p.bb?ovs(p.bb,bpo):'–'}</td><td>${p.bb?p.rc:'–'}</td><td>${p.bb?(p.rc/(p.bb/bpo)).toFixed(1):'–'}</td><td>${p.best?p.best[0]+'-'+p.best[1]:'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="mute">No wickets yet</td></tr>'}</table></div>
+  <div class="mute sm2">Inn, HS, 4s, 6s, SR, Avg, overs, economy and best count games scored in the app. Runs and wickets include the earlier games too.</div></div>`;
+  const DK=FP.filter(p=>p.duck>0).sort((a,b)=>b.duck-a.duck);
+  if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
+  h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.slice().reverse().map(m=>{const j=t.matches.indexOf(m);return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}${m.potm?' · ⭐ '+esc(m.potm):''}</div></div>${ed?`<button class="mini" onclick="rmMatch(${j})">Remove</button>`:''}</div>`}).join(''):'<p class="mute">None yet. Games are added automatically when they finish.</p>'}</div>`;
   h+=`<button class="pri block" onclick="shareTour()">Share table (WhatsApp)</button>
-  <button class="block" onclick="editBase()">Edit starting numbers</button>
-  <p class="mute">Player names are matched ignoring capitals, so “Waleed Dustgir” in your team = “WALEED DUSTGIR” here. Spell them the same in My teams.</p></div>`;
+  ${ed?'<button class="block" onclick="editBase()">Edit starting numbers</button>':''}${tourAdminHtml(t)}</div>`;
   app.innerHTML=h}
 function createSeed(){const T=getTours();T.push(seedRSSS());putTours(T);render();toast('Tournament loaded 🏆')}
 function curTour(){const T=getTours();return[T,T.find(x=>x.id===ui.tourId)||T[0]]}
 function rmMatch(j){if(ui.rmArm!==j){ui.rmArm=j;toast('Tap Remove again to take this game out of the table');return}
-  ui.rmArm=null;const[T,t]=curTour();t.matches.splice(j,1);putTours(T);render()}
+  ui.rmArm=null;const[T,t]=curTour();const m=t.matches[j];if(m)tourRemove(t,m.uid);putTours(T);render()}
 function tourText(t){const sd=standings(t);
   let s=`${t.name} Points table (LIVE)\nTeam Played Won Loss Points NRR\n`;
   sd.forEach(r=>{s+=`${r.name} (${r.short}) ${r.p} ${r.w} ${r.l} ${r.pts} ${fmtN(r.nrr)}\n`});
+  const AP=allPlayers(t);s+=`\nTop run scorers\n`;AP.filter(p=>p.r>0).sort((a,b)=>b.r-a.r).slice(0,10).forEach((p,k)=>{s+=`${k+1}. ${p.n} (${p.s}) ${p.r}\n`});
+  s+=`\nTop wicket takers\n`;AP.filter(p=>p.w>0).sort((a,b)=>b.w-a.w).slice(0,10).forEach((p,k)=>{s+=`${k+1}. ${p.n} (${p.s}) ${p.w}\n`});
   t.teams.forEach((tm,i)=>{s+=`\n${tm.name} (${tm.short}) — Wickets Taken / Runs Scored\n`;playerTotals(t,i).forEach(p=>{s+=`${p.n} ${p.w} ${p.r}\n`})});
   return s.trim()}
 function shareTour(){const[,t]=curTour();ui.shareText=tourText(t);
@@ -773,7 +841,7 @@ function saveBase(){const[T,t]=curTour();
     t.base.t[i]=b;const pl={};
     $('#bpl'+i).value.split('\n').forEach(line=>{const p=line.split(',').map(x=>x.trim());if(!p[0])return;pl[PK(p[0])]={w:parseInt(p[1])||0,r:parseInt(p[2])||0}});
     t.base.pl[i]=pl});
-  putTours(T);closeModal();render();toast('Saved')}
+  t.baseTs=Date.now();putTours(T);closeModal();render();toast('Saved')}
 
 /* ================= SCORING SCREEN ================= */
 function nowT(){return M.t0?(Date.now()-M.t0)/1000:0}
@@ -782,7 +850,9 @@ function startClock(){M.t0=Date.now();save();render();toast('Clock started — s
 function addEv(e){if(!M.t0)M.t0=Date.now();e.t=Math.round(nowT()*10)/10;M.events.push(e);save();render();autoPick()}
 function autoPick(){const I=compute().cur;if(!I||I.done)return;
   if(!I.s)pickBatter('s');else if(!I.n)pickBatter('n');else if(!I.bowler)pickBowler(false)}
-function undo(){if(!M.events.length)return;const e=M.events.pop();save();render();toast('Undone: '+({ball:'last ball',bat:'batter choice',bowl:'bowler choice',strike:'strike change',ret:'retirement',end:'end of innings',inn:'innings start'}[e.k]||'last action'))}
+function undo(ok){if(!M.events.length)return;const L=M.events[M.events.length-1];
+  if(!ok&&((L.k==='ball'&&L.w)||(L.k==='ret'&&L.how==='ro'))){ui.modal={title:'Undo this wicket?',html:`<p class="mute">The last ball was a wicket. Undoing it brings the batter back in.</p><button class="dan block" onclick="closeModal();undo(true)">Yes, undo the wicket</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal();return}
+  const e=M.events.pop();save();render();toast('Undone: '+({ball:'last ball',bat:'batter choice',bowl:'bowler choice',strike:'strike change',ret:'retirement',end:'end of innings',inn:'innings start'}[e.k]||'last action'))}
 function chip(L){return`<span class="chip ${L.c}">${esc(L.l)}</span>`}
 function sr(b){return b.b?(b.r/b.b*100).toFixed(1):'0.0'}
 function eco(w){return w.balls?(w.r/(w.balls/M.settings.bpo)).toFixed(1):'0.0'}
@@ -847,7 +917,7 @@ function renderScore(){
     if(S.inns.length===1){const ot=M.teams[1-I.bat];
       h+=`<div class="need2">Innings over — ${esc(ot.name)} need ${I.runs+1} to win</div><button class="bigsel" onclick="addEv({k:'inn',bat:${1-I.bat}})">Start 2nd innings</button>`;
     }else{
-      h+=`<div class="need2">${esc(result(S))}</div><button class="bigsel" onclick="go('home')">🏠 Done — back to Home</button>`;
+      h+=`<div class="need2">${esc(result(S))}${potmText(S)?`<div class="sm">⭐ Player of the match: ${esc(potmText(S))}</div>`:''}</div><div class="grid g2"><button class="bigsel" onclick="rematch()">⚡ Rematch</button><button class="bigsel" style="background:#e8edf5;color:#0f172a" onclick="go('home')">🏠 Home</button></div>`;
     }
     h+=acts+`</div>`;
   }else if(!I.s||!I.n||!I.bowler){
@@ -1098,15 +1168,25 @@ function liveStart(role,code,onMsg){liveStop();Object.assign(LIVE,{role,code,onM
   BROKERS.forEach(url=>{let cl;
     try{cl=mqtt.connect(url,{clientId:'crk_'+Math.random().toString(36).slice(2,10),reconnectPeriod:4000,connectTimeout:10000,clean:true})}catch(e){return}
     LIVE.cls.push(cl);
-    cl.on('connect',()=>{liveStatus();if(role==='cam')cl.subscribe(liveTopic(),{qos:0});else pubOne(cl)});
-    cl.on('message',(t,p)=>{try{const d=JSON.parse(new TextDecoder().decode(p));LIVE.onMsg&&LIVE.onMsg(d)}catch(e){}});
+    cl.on('connect',()=>{liveStatus();if(role==='cam'){cl.subscribe(liveTopic(),{qos:0});cl.subscribe(liveTopic()+'/hb',{qos:0})}else pubOne(cl)});
+    cl.on('message',(t,p)=>{try{const d=JSON.parse(new TextDecoder().decode(p));if(t.slice(-3)==='/hb'){LIVE.hb=Date.now();return}LIVE.onMsg&&LIVE.onMsg(d)}catch(e){}});
     ['close','offline','error','reconnect'].forEach(ev=>cl.on(ev,liveStatus));
   });liveStatus()}
 function liveStop(){(LIVE.cls||[]).forEach(c=>{try{c.end(true)}catch(e){}});LIVE.cls=[];LIVE.code=null;LIVE.role=null;liveStatus()}
 function liveOn(){return(LIVE.cls||[]).some(c=>c.connected)}
 function liveTopic(){return'cricket-cam-live/v1/'+LIVE.code}
-function pubOne(cl){if(M&&cl.connected){try{cl.publish(liveTopic(),JSON.stringify({ts:Date.now(),M:{teams:M.teams,settings:M.settings,events:M.events,t0:M.t0,uid:M.uid,tour:M.tour||'',tourSnap:tourSnapshot()}}),{retain:true,qos:0})}catch(e){}}}
-let pubT=0;function publishLive(){if(LIVE.role!=='score'||!LIVE.code)return;clearTimeout(pubT);pubT=setTimeout(()=>LIVE.cls.forEach(pubOne),120)}
+function fullMsg(){return JSON.stringify({ts:Date.now(),M:{teams:M.teams,settings:M.settings,events:M.events,t0:M.t0,uid:M.uid,tour:M.tour||'',abandoned:!!M.abandoned,tourSnap:tourSnapshot()}})}
+function pubOne(cl,msg){if(M&&cl.connected){try{cl.publish(liveTopic(),msg||fullMsg(),{retain:true,qos:0})}catch(e){}}}
+const SENT={uid:null,ev:[],tj:'',sj:''};
+let pubT=0,pubF=0;
+function publishLive(){if(LIVE.role!=='score'||!LIVE.code||!M||(typeof LOCKED!=='undefined'&&LOCKED))return;clearTimeout(pubT);pubT=setTimeout(pubDelta,30);clearTimeout(pubF);pubF=setTimeout(()=>{const m=fullMsg();LIVE.cls.forEach(c=>pubOne(c,m))},1500)}
+function pubDelta(){if(!M)return;const cur=M.events.map(e=>JSON.stringify(e)),tj=JSON.stringify(M.teams),sj=JSON.stringify(M.settings);
+  if(SENT.uid!==M.uid){SENT.uid=M.uid;SENT.ev=cur;SENT.tj=tj;SENT.sj=sj;const m=fullMsg();LIVE.cls.forEach(c=>pubOne(c,m));return}
+  let k=Math.min(SENT.ev.length,cur.length);for(let i=0;i<k;i++)if(SENT.ev[i]!==cur[i]){k=i;break}
+  const d={ts:Date.now(),d:1,uid:M.uid,from:k,ev:M.events.slice(k),t0:M.t0,ab:!!M.abandoned};if(tj!==SENT.tj)d.teams=M.teams;if(sj!==SENT.sj)d.settings=M.settings;
+  SENT.ev=cur;SENT.tj=tj;SENT.sj=sj;const p=JSON.stringify(d);
+  LIVE.cls.forEach(cl=>{if(cl.connected)try{cl.publish(liveTopic(),p,{retain:false,qos:0})}catch(e){}})}
+setInterval(()=>{if(LIVE.role==='score'&&LIVE.code&&!(typeof LOCKED!=='undefined'&&LOCKED)){const p=JSON.stringify({ts:Date.now()});LIVE.cls.forEach(cl=>{if(cl.connected)try{cl.publish(liveTopic()+'/hb',p,{retain:false,qos:0})}catch(e){}})}},5000);
 function liveText(){if(!LIVE.code)return'Camera not linked';if(!window.mqtt)return'Live link unavailable';
   return liveOn()?(LIVE.role==='cam'?(LM?'Receiving score ✓':'Connected — waiting for scorer'):'Camera linked ✓ '+LIVE.code):'Connecting…'}
 function liveStatus(){const on=liveOn(),t=liveText();
@@ -1123,7 +1203,8 @@ function unLink(){try{localStorage.removeItem('cc.scorerCode')}catch(e){}closeMo
 
 /* ================= CAMERA PHONE ================= */
 let LM=null,LMts=0;
-const CAM={stream:null,vid:null,rec:null,chunks:[],size:0,t0:0,blob:null,ext:'mp4',W:0,H:0,q:720,raf:0,wl:null,err:'',saved:false};
+const CAM={stream:null,vid:null,rec:null,chunks:[],size:0,t0:0,blob:null,ext:'mp4',W:0,H:0,q:1080,raf:0,wl:null,err:'',saved:false,lens:'',lenses:null};
+try{const q=+localStorage.getItem('cc.camQ');if(q===720||q===1080)CAM.q=q;CAM.lens=localStorage.getItem('cc.camLens')||''}catch(e){}
 function camCode(){let c='';try{c=localStorage.getItem('cc.camCode')||''}catch(e){}
   if(!c){const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];try{localStorage.setItem('cc.camCode',c)}catch(e){}}return c}
 function renderCam(){
@@ -1131,37 +1212,61 @@ function renderCam(){
   app.innerHTML=`<div class="cam"><canvas id="cc"></canvas>
   <div class="ctop"><button class="mini" onclick="go('home')">‹ Exit</button><div class="cst"><span class="livedot"></span><span class="livest"></span></div></div>
   <div class="ccode" id="ccode" style="display:${LM||CAM.rec?'none':'block'}">Scoring phone code<b>${code}</b><div class="sm">On the scoring phone: Scoring → <strong>Link camera</strong> → type this code</div></div>
+  <div class="cwarn" id="cwarn"></div><div class="crot" id="crot"></div><div class="cask" id="cask"></div>
   <div class="cbot" id="cbot"></div></div>`;
-  camControls();liveStatus();
+  camControls();liveStatus();camWarn();
 }
 function camStart(){
-  if(LIVE.role!=='cam'||LIVE.code!==camCode())liveStart('cam',camCode(),d=>{if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>=LMts){const first=!LM;camCardsOnMsg(LM,d.M);LM=d.M;LMts=d.ts;const cc=$('#ccode');if(cc&&screen==='cam')cc.style.display='none';liveStatus();if(first&&screen==='cam'&&!CAM.rec)camControls()}});
+  if(LIVE.role!=='cam'||LIVE.code!==camCode())liveStart('cam',camCode(),d=>{
+    if(d&&d.d===1){if(!LM||LM.uid!==d.uid||LM.events.length<d.from||d.ts<=LMts)return;
+      const nm=Object.assign({},LM,{events:LM.events.slice(0,d.from).concat(d.ev),t0:d.t0,abandoned:d.ab});if(d.teams)nm.teams=d.teams;if(d.settings)nm.settings=d.settings;d={ts:d.ts,M:nm}}
+    if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>=LMts){const first=!LM;camCardsOnMsg(LM,d.M);LM=d.M;LMts=d.ts;LIVE.hb=Date.now();const cc=$('#ccode');if(cc&&screen==='cam')cc.style.display='none';liveStatus();if(first&&screen==='cam'&&!CAM.rec)camControls()}});
   if(!CAM.raf){CAM.gen++;const g=CAM.gen;CAM.raf=requestAnimationFrame(()=>camLoop(g))}
 }
+function camLand(){const v=CAM.vid;return !v||!v.videoWidth||v.videoWidth>=v.videoHeight}
 function camControls(){const el=$('#cbot');if(!el)return;let h='';
   if(!CAM.stream){
     h=`<div class="chint">${CAM.err?esc(CAM.err):'Turn this phone sideways, then start the camera.'}</div>
-    <div class="row"><select id="cq" onchange="CAM.q=+this.value"><option value="720" ${CAM.q===720?'selected':''}>720p (recommended)</option><option value="1080" ${CAM.q===1080?'selected':''}>1080p</option></select>
-    <button class="pri" style="padding:14px 22px;font-size:18px" onclick="openCam()">Start camera</button></div>`;
+    <div class="row"><select id="cq" onchange="CAM.q=+this.value;try{localStorage.setItem('cc.camQ',CAM.q)}catch(e){}"><option value="1080" ${CAM.q===1080?'selected':''}>1080p (Full HD)</option><option value="720" ${CAM.q===720?'selected':''}>720p (smaller file)</option></select>
+    <button class="pri" style="padding:14px 22px;font-size:18px" onclick="openCam()">Start camera</button></div>
+    <div class="row"><button class="mini cgl" onclick="go('recs')">🎞 Recordings${recCountTxt()}</button></div>`;
   }else if(CAM.rec){
     h=`<div class="row"><span class="rtime" id="rtime">● 0:00</span></div><div class="row"><button class="recb on" onclick="camStop()"><i></i></button></div>`;
-  }else if(CAM.blob){
-    h=`<div class="chint">Recorded ${(CAM.blob.size/1048576).toFixed(0)} MB. Save it before recording again.</div>
-    <div class="row"><button class="pri" style="padding:14px 22px;font-size:18px" onclick="camSave()">Save video</button><button onclick="camDiscard()" style="padding:14px 18px">Record again</button></div>`;
   }else{
-    h=`<div class="chint">${LM?'Score is live on the picture.':'Waiting for the scoring phone to link — you can still record.'}${(CAM.vid&&CAM.vid.videoHeight>CAM.vid.videoWidth)?'<br><b>Tip:</b> turn the phone sideways for a bigger scorecard.':''}</div>
-    <div class="row"><button class="recb" onclick="camRecord()"><i></i></button></div>`;
+    const land=camLand(),L=CAM.lenses;
+    h=`<div class="chint">${!land?'<b>Turn the phone sideways to record.</b>':LM?'Score is live on the picture.':'Waiting for the scoring phone to link — you can still record.'}</div>
+    ${L&&L.uw?`<div class="row lens">${[['w','1×'],['uw','0.5×']].map(([k,l])=>`<button class="${(CAM.lens||'w')===k?'on':''}" onclick="camLens('${k}')">${l}</button>`).join('')}</div>`:''}
+    <div class="row"><button class="recb ${land?'':'dis'}" onclick="camRecord()"><i></i></button></div>
+    <div class="row"><button class="mini cgl" onclick="go('recs')">🎞 Recordings${recCountTxt()}</button></div><div class="chint sm" id="cspace">${CAM.spaceTxt||''}</div>`;
   }
-  el.innerHTML=h}
+  el.innerHTML=h;camRot()}
+function camRot(){const r=$('#crot');if(!r)return;const land=camLand();
+  r.style.display=CAM.stream&&!land?'flex':'none';
+  r.innerHTML=`<div><div style="font-size:54px">📱↻</div><b>${CAM.rec?'Turn the phone back sideways!':'Turn the phone sideways'}</b><div class="sm">Videos are always landscape (16:9). If the picture doesn't turn, swipe down from the top-right corner and switch off <b>Portrait Orientation Lock</b>.</div></div>`}
+setInterval(()=>{if(screen==='cam'){camRot();camWarn()}},1000);
+function camWarn(){const w=$('#cwarn');if(!w)return;let t='';const now=Date.now();
+  if(LIVE.role==='cam'){const on=liveOn();if(!on){LIVE.offSince=LIVE.offSince||now}else LIVE.offSince=0;
+    if(!on&&now-LIVE.offSince>10000)t='⚠ Score not updating — this phone has lost internet';
+    else if(on&&LM&&LIVE.hb&&now-LIVE.hb>20000)t='⚠ Score not updating — the scoring device isn’t connected';}
+  w.textContent=t;w.style.display=t?'block':'none'}
+async function camLens(k){if(CAM.rec)return;CAM.lens=k;try{localStorage.setItem('cc.camLens',k)}catch(e){}
+  if(CAM.stream){CAM.stream.getTracks().forEach(t=>t.stop());CAM.stream=null;CAM.vid=null}await openCam()}
+async function camLensList(){try{const D=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  const uw=D.find(d=>/ultra ?wide/i.test(d.label)),w=D.find(d=>/back camera$/i.test(d.label.trim()))||D.find(d=>/back/i.test(d.label)&&!/ultra|telephoto|dual|triple/i.test(d.label));
+  CAM.lenses={uw:uw&&uw.deviceId,w:w&&w.deviceId}}catch(e){CAM.lenses=null}}
+async function camSpace(){try{const e=await navigator.storage.estimate();const free=(e.quota||0)-(e.usage||0),gb=free/1073741824,mins=Math.floor(free/((CAM.q>=1080?6:3.5)*1e6/8)/60);
+  CAM.spaceTxt=free>0?(gb<4?`⚠ Only ${gb.toFixed(1)} GB space left (about ${mins} min of video)`:`Space for about ${mins>600?'10+ hours':Math.floor(mins/60)+'h '+(mins%60)+'m'} of video`):'';const el=$('#cspace');if(el)el.textContent=CAM.spaceTxt}catch(e){}}
 async function openCam(){
   CAM.err='';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){CAM.err='This browser can’t use the camera. Open the app in Safari.';camControls();return}
-  const big=CAM.q>=1080,v={facingMode:{ideal:'environment'},width:{ideal:big?1920:1280},height:{ideal:big?1080:720},frameRate:{ideal:30}};
+  const big=CAM.q>=1080,v={width:{ideal:big?1920:1280},height:{ideal:big?1080:720},frameRate:{ideal:30}};
+  const lid=CAM.lenses&&CAM.lens&&CAM.lenses[CAM.lens];if(lid)v.deviceId={exact:lid};else v.facingMode={ideal:'environment'};
   try{CAM.stream=await navigator.mediaDevices.getUserMedia({video:v,audio:true})}
   catch(e){try{CAM.stream=await navigator.mediaDevices.getUserMedia({video:v,audio:false})}catch(e2){CAM.err='Camera blocked. Allow camera access for this site (Settings → Safari → Camera), then try again.';camControls();return}}
   const vd=document.createElement('video');vd.muted=true;vd.playsInline=true;vd.setAttribute('playsinline','');vd.autoplay=true;vd.srcObject=CAM.stream;CAM.vid=vd;
   try{await vd.play()}catch(e){}
-  vd.addEventListener('resize',()=>{if(!CAM.rec)camControls()});
+  vd.addEventListener('resize',()=>{if(!CAM.rec)camControls();else camRot()});
+  if(!CAM.lenses){await camLensList()}camSpace();
   camControls();
 }
 const TK={c:null,key:''};
@@ -1170,11 +1275,12 @@ const CQ=[];let CQid=0;
 function camCardsOnMsg(oldM,newM){
   let nS;try{nS=withMatch(newM,()=>compute())}catch(e){return}
   CAM.S=nS;const n=nS.cards.length;
-  if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;return}
+  if(!oldM||oldM.uid!==newM.uid){CAM.seenN=n;CAM.finUid=(nS.inns.length===2&&nS.inns[1].done)?newM.uid:null;return}
   if(n<(CAM.seenN||0)){CQ.length=0;CAM.seenN=n;return}
   const now=Date.now();let start=Math.max(now,CQ.length?CQ[CQ.length-1].end:0);
   for(let i=CAM.seenN||0;i<n;i++){const it=nS.cards[i],d=(it.dur||10)*1000,big=it.keep||(it.dur||0)>=10||it.type==='result'||it.type==='duck'||it.type==='bm';if(!big&&start-now>8000)continue;CQ.push(Object.assign({},it,{id:++CQid,start,end:start+d}));start+=d}
-  CAM.seenN=n}
+  CAM.seenN=n;
+  try{const fin=nS.inns.length===2&&nS.inns[1].done&&!newM.abandoned;if(fin&&!CAM.finUid){CAM.finUid=newM.uid;const w=Math.max(0,(CQ.length?CQ[CQ.length-1].end:now)-now)+1500;clearTimeout(CAM.askT);CAM.askT=setTimeout(camAskStop,w)}if(!fin&&CAM.finUid===newM.uid)CAM.finUid=null}catch(e){}}
 function camActiveCard(){const now=Date.now();while(CQ.length&&CQ[0].end<=now)CQ.shift();return CQ.length&&CQ[0].start<=now?CQ[0]:null}
 function tickerLayer(W,H){
   const key=LMts+'|'+W+'|'+H;
@@ -1186,7 +1292,7 @@ function camFrame(){
   const v=CAM.vid,c=$('#cc');
   if(v&&v.videoWidth&&c){
     let W,H;
-    if(CAM.rec){W=CAM.W;H=CAM.H}else{const vw=v.videoWidth,vh=v.videoHeight,sc=Math.min(1,CAM.q/Math.min(vw,vh));W=Math.round(vw*sc/2)*2;H=Math.round(vh*sc/2)*2}
+    if(CAM.rec){W=CAM.W;H=CAM.H}else{H=Math.min(CAM.q,Math.max(v.videoWidth,v.videoHeight)*9/16|0)&~1;W=Math.round(H*16/9/2)*2}
     if(c.width!==W||c.height!==H){c.width=W;c.height=H}
     const x=c.getContext('2d',{alpha:false});
     if(v.videoWidth===W&&v.videoHeight===H)x.drawImage(v,0,0);
@@ -1210,33 +1316,47 @@ setInterval(()=>{if((screen==='cam'||CAM.rec)&&Date.now()-CAM.last>800){CAM.gen+
 setInterval(()=>{if(CAM.rec){const t=$('#rtime');if(t)t.textContent=`● ${fmt((Date.now()-CAM.t0)/1000)} · ${(CAM.size/1048576).toFixed(0)} MB`}},500);
 async function camRecord(){
   const c=$('#cc');if(!c||!c.width){toast('Camera not ready yet');return}
+  if(!camLand()){toast('Turn the phone sideways first');return}
   if(!window.MediaRecorder||!c.captureStream){toast("This browser can't record — use Safari");return}
   CAM.W=c.width;CAM.H=c.height;
   const st=c.captureStream(30);const a=CAM.stream.getAudioTracks()[0];if(a)st.addTrack(a);
   const mime=pickMime();let rec;
   try{rec=new MediaRecorder(st,mime?{mimeType:mime,videoBitsPerSecond:CAM.q>=1080?6000000:3500000}:{})}catch(e){try{rec=new MediaRecorder(st)}catch(e2){toast("Recording isn't supported here");return}}
-  CAM.chunks=[];CAM.size=0;CAM.blob=null;CAM.saved=false;
-  rec.ondataavailable=e=>{if(e.data&&e.data.size){CAM.chunks.push(e.data);CAM.size+=e.data.size}};
-  rec.onstop=()=>{CAM.ext=(rec.mimeType||mime||'').includes('webm')?'webm':'mp4';CAM.blob=new Blob(CAM.chunks,{type:CAM.ext==='webm'?'video/webm':'video/mp4'});CAM.chunks=[];CAM.rec=null;
-    try{CAM.wl&&CAM.wl.release()}catch(e){}CAM.wl=null;camControls()};
-  rec.start(1000);CAM.rec=rec;CAM.t0=Date.now();
+  CAM.ext=(rec.mimeType||mime||'').includes('webm')?'webm':'mp4';
+  const rid='r'+Date.now().toString(36),title=LM?withMatch(LM,()=>M.teams[0].name+' v '+M.teams[1].name):'Cricket';
+  CAM.chunks=[];CAM.size=0;CAM.rid=rid;CAM.ci=0;CAM.mem=false;CAM.wq=Promise.resolve();
+  const meta={id:rid,title,start:Date.now(),ext:CAM.ext,type:CAM.ext==='webm'?'video/webm':'video/mp4',size:0,dur:0,state:'rec'};CAM.meta=meta;
+  try{await recPutMeta(meta);try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}catch(e){CAM.mem=true}
+  rec.ondataavailable=e=>{if(!e.data||!e.data.size)return;const b=e.data,i=CAM.ci++;CAM.size+=b.size;
+    if(CAM.mem){CAM.chunks.push(b);return}
+    CAM.wq=CAM.wq.then(()=>recPutChunk(rid,i,b)).catch(()=>{if(!CAM.mem){CAM.mem=true;toast('Phone storage full — keeping the rest in memory. Stop and save soon.')}CAM.chunks.push(b)});
+    if(i%15===0){meta.size=CAM.size;meta.dur=(Date.now()-CAM.t0)/1000;CAM.wq=CAM.wq.then(()=>recPutMeta(meta)).catch(()=>{})}};
+  rec.onstop=async()=>{CAM.rec=null;try{CAM.wl&&CAM.wl.release()}catch(e){}CAM.wl=null;
+    const el=$('#cbot');if(el)el.innerHTML='<div class="chint">Finishing the video…</div>';
+    try{await CAM.wq}catch(e){}
+    meta.size=CAM.size;meta.dur=(Date.now()-CAM.t0)/1000;meta.state='done';
+    if(CAM.mem&&CAM.chunks.length){CAM.memBlob=new Blob(CAM.chunks,{type:meta.type});meta.mem=1}
+    CAM.chunks=[];try{await recPutMeta(meta)}catch(e){}
+    CAM.last=meta;camControls();camChoice(meta)};
+  rec.start(2000);CAM.rec=rec;CAM.t0=Date.now();
   try{CAM.wl=await navigator.wakeLock?.request('screen')}catch(e){}
   const cc=$('#ccode');if(cc)cc.style.display='none';
   camControls()}
-function camStop(){if(CAM.rec&&CAM.rec.state!=='inactive')CAM.rec.stop()}
-async function camSave(){if(!CAM.blob)return;const n=(LM?withMatch(LM,fileBase):'cricket')+'-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.'+CAM.ext;
-  const ok=await saveBlob(CAM.blob,n);if(ok){CAM.saved=true;toast('Choose “Save Video” to put it in Photos')}}
-function camDiscard(){
-  if(!CAM.saved){ui.modal={title:'Delete this recording?',html:`<p class="mute">You haven't saved it yet.</p><button class="dan block" onclick="CAM.saved=true;closeModal();camDiscard()">Delete it</button><button class="block" onclick="closeModal()">Keep it</button>`};showModal();return}
-  CAM.blob=null;CAM.saved=false;camControls()}
+function camStop(){const k=$('#cask');if(k)k.style.display='none';if(CAM.rec&&CAM.rec.state!=='inactive')CAM.rec.stop()}
+function camAskStop(){if(!CAM.rec||screen!=='cam')return;const k=$('#cask');if(!k)return;
+  k.innerHTML=`<b>🏁 Match finished</b><div class="sm">Stop recording and save the video now?</div><div class="row"><button class="pri" onclick="camStop()">⏹ Stop &amp; save</button><button onclick="this.parentNode.parentNode.style.display='none'">Keep recording</button></div>`;
+  k.style.display='block';clearTimeout(CAM.askH);CAM.askH=setTimeout(()=>{k.style.display='none'},45000)}
+function camChoice(meta){
+  ui.modal={title:'Recording stopped',html:`<p class="mute">${esc(meta.title)} · ${fmt(meta.dur)} · ${(meta.size/1048576).toFixed(0)} MB</p>
+  <button class="pri block" onclick="closeModal();recSave('${meta.id}')">💾 Save to Camera Roll</button>
+  <button class="block" onclick="closeModal();toast('Kept — find it in 🎞 Recordings')">⏳ Keep for later</button>
+  <button class="block dan" onclick="recDelAsk('${meta.id}')">🗑 Don't save</button>`};showModal()}
 function camLeave(){
   if(CAM.rec){toast('Stop recording first');return false}
-  if(CAM.blob&&!CAM.saved){ui.modal={title:'Leave without saving?',html:`<p class="mute">Your recording hasn't been saved.</p><button class="pri block" onclick="closeModal();camSave()">Save video</button><button class="dan block" onclick="CAM.saved=true;closeModal();go('home')">Leave without saving</button>`};showModal();return false}
   if(CAM.stream){CAM.stream.getTracks().forEach(t=>t.stop());CAM.stream=null;CAM.vid=null}
-  CAM.blob=null;CAM.saved=false;
   if(LIVE.role==='cam')liveStop();
   return true}
-window.addEventListener('beforeunload',e=>{if(CAM.rec||(CAM.blob&&!CAM.saved)){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{if(CAM.rec){e.preventDefault();e.returnValue=''}});
 
 
 /* ================= MATCH CODE: continue scoring on another device ================= */
@@ -1275,8 +1395,233 @@ function contDone(m,c){
   go('score');toast('Match loaded — carry on scoring')}
 
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
-render();try{renderNav()}catch(e){}
 
+/* ================= v14 ================= */
+const APP_VER=14;
+const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"EpenFS4ygDa7nBuaid0VBg==","iv":"PImZAdNoLCbIlm2P","ct":"WmVEQSpV4/CTnuRnTdTZ2sFExsZhhLs2Bxdt4CruyYmHMrHRChPSnwHbJmbOFh0BiZ+eUMMioLmDJ20bxiMgfXmMLWeS4YuIyliEiCGNHFBgbfcE570tfQn6UwSAi/nsV0EGT76rqm9IDONGnwzwP0hDeWodd8f221SkUshKvhqItW7jeA50Y2c4mo+3DIgdnwSN6Nf4ZPifrABa9BrnCv8Kzl9gwn+j8FEkkOdnNT3TqUZ/dvsxAweVUbjegVUEXAVK/lFTNx4lkyZHHPuvr3UbJC/4MrPGrkCSFRSp"}};
+/* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
+const RDB={p:null};
+function rdb(){return RDB.p||(RDB.p=new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('no idb'));return}const r=indexedDB.open('cc-rec',1);
+  r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('recs'))d.createObjectStore('recs',{keyPath:'id'});if(!d.objectStoreNames.contains('chunks'))d.createObjectStore('chunks',{keyPath:['rid','i']})};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+function rtx(store,mode,fn){return rdb().then(d=>new Promise((res,rej)=>{const tx=d.transaction(store,mode),st=tx.objectStore(store);let out;const q=fn(st);if(q)q.onsuccess=()=>{out=q.result};tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)}))}
+function recPutMeta(m){return rtx('recs','readwrite',st=>st.put(Object.assign({},m)))}
+function recPutChunk(rid,i,b){return rtx('chunks','readwrite',st=>st.put({rid,i,b}))}
+function recAll(){return rtx('recs','readonly',st=>st.getAll()).then(L=>(L||[]).sort((a,b)=>b.start-a.start)).catch(()=>[])}
+function recChunks(rid){return rtx('chunks','readonly',st=>st.getAll(IDBKeyRange.bound([rid,0],[rid,Infinity])))}
+async function recDel(rid){await rtx('chunks','readwrite',st=>st.delete(IDBKeyRange.bound([rid,0],[rid,Infinity])));await rtx('recs','readwrite',st=>st.delete(rid));if(CAM.memBlob&&CAM.last&&CAM.last.id===rid)CAM.memBlob=null}
+async function recBlob(m){if(m.mem&&CAM.memBlob&&CAM.last&&CAM.last.id===m.id)return CAM.memBlob;const C=await recChunks(m.id);C.sort((a,b)=>a.i-b.i);return new Blob(C.map(c=>c.b),{type:m.type||'video/mp4'})}
+let REC_N=0;function recCountTxt(){return REC_N?` <span class="badge">${REC_N}</span>`:''}
+async function recRefresh(){const L=await recAll();REC_N=L.filter(m=>!(CAM.rec&&m.id===CAM.rid)).length;return L}
+async function recRecover(){try{const L=await recAll();let n=0;for(const m of L){if(m.state==='rec'&&!(CAM.rec&&m.id===CAM.rid)){const C=await recChunks(m.id);if(!C.length){await recDel(m.id);continue}
+    m.size=C.reduce((a,c)=>a+c.b.size,0);m.dur=Math.max(m.dur||0,C.length*2);m.state='recovered';await recPutMeta(m);n++}}
+  await recRefresh();if(n){ui.recovered=n;if(screen==='home')render();toast(`🛟 Recovered ${n} recording${n>1?'s':''} — see 🎞 Recordings`)}}catch(e){}}
+function recName(m){return(m.title||'cricket').replace(/[^A-Za-z0-9]+/g,'-').slice(0,50)+'-'+new Date(m.start).toISOString().slice(0,16).replace(/[:T]/g,'-')+'.'+(m.ext||'mp4')}
+async function recSave(id){const m=(await recAll()).find(x=>x.id===id);if(!m){toast('Recording not found');return}
+  toast('Getting the video ready…');let b;try{b=await recBlob(m)}catch(e){toast("Couldn't read the video — try again");return}
+  const ok=await saveBlob(b,recName(m));
+  if(ok){ui.modal={title:'Did it save to Photos?',html:`<p class="mute">If you tapped <b>Save Video</b>, it's in your Camera Roll now.</p><button class="pri block" onclick="recDone('${id}')">✅ Yes — remove it from the app</button><button class="block" onclick="closeModal();toast('Kept in 🎞 Recordings')">Not yet — keep it here</button>`};showModal()}}
+async function recDone(id){closeModal();await recDel(id);await recRefresh();toast('Saved and removed from the app ✓');if(screen==='recs'||screen==='cam')render()}
+function recDelAsk(id){ui.modal={title:'Are you sure?',html:`<p class="mute">The video will be deleted for good.</p><button class="dan block" onclick="recDelYes('${id}')">🗑 Yes, delete it</button><button class="block" onclick="closeModal();recBack('${id}')">No, go back</button>`};showModal()}
+async function recBack(id){const m=(await recAll()).find(x=>x.id===id);if(m&&screen==='cam'&&CAM.last&&CAM.last.id===id)camChoice(m)}
+async function recDelYes(id){closeModal();await recDel(id);await recRefresh();toast('Recording deleted');if(screen==='recs')render();else camControls()}
+async function recPlay(id){const m=(await recAll()).find(x=>x.id===id);if(!m)return;const b=await recBlob(m);const u=URL.createObjectURL(b);
+  ui.modal={title:m.title,html:`<video src="${u}" controls playsinline style="width:100%;border-radius:10px;background:#000"></video><button class="block" onclick="closeModal()">Close</button>`};showModal()}
+async function renderRecs(){let h=`<div class="wrap">${hdr('Recordings')}<p class="mute">Videos recorded with the camera. They stay here until you save or delete them.</p><div id="rl"><div class="card mute">Loading…</div></div></div>`;app.innerHTML=h;
+  const L=await recRefresh();if(screen!=='recs')return;const el=$('#rl');if(!el)return;
+  el.innerHTML=L.filter(m=>!(CAM.rec&&m.id===CAM.rid)).map(m=>`<div class="card"><b>${esc(m.title)}</b>${m.state==='recovered'?' <span class="pill" style="background:#fef3c7;color:#92400e">🛟 Recovered</span>':''}
+    <div class="mute">${new Date(m.start).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${fmt(m.dur||0)} · ${((m.size||0)/1048576).toFixed(0)} MB</div>
+    <div class="grid g3" style="margin-top:8px"><button class="pri" onclick="recSave('${m.id}')">💾 Save</button><button onclick="recPlay('${m.id}')">▶ Play</button><button class="dan" onclick="recDelAsk('${m.id}')">🗑 Delete</button></div></div>`).join('')||'<div class="card mute">No recordings. Everything has been saved or deleted.</div>';
+  try{const e=await navigator.storage.estimate();el.insertAdjacentHTML('beforeend',`<p class="mute">This app is using ${((e.usage||0)/1073741824).toFixed(1)} GB of your phone's storage.</p>`)}catch(e){}}
+
+/* ---------- shared official tournament (anyone can view; only PIN devices can change) ---------- */
+const OFF_ID='official-rsss',OFF_T='cricket-cam-official/v1/rsss',OFF_LT=OFF_T+'/live';
+const OFF={cls:[],got:false,live:null,pubT:0,on:false,lastSeen:0};
+const b64u8=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),u8b64=u=>{let s='';new Uint8Array(u).forEach(c=>s+=String.fromCharCode(c));return btoa(s)};
+let OFF_PUBK=null,OFF_PRIVK=null;
+async function offPub(){if(!OFF_PUBK)OFF_PUBK=await crypto.subtle.importKey('jwk',Object.assign({ext:true},OFF_KEYS.pub),{name:'ECDSA',namedCurve:'P-256'},false,['verify']);return OFF_PUBK}
+async function offPriv(){if(OFF_PRIVK)return OFF_PRIVK;let j=null;try{j=JSON.parse(localStorage.getItem('cc.adminKey')||'null')}catch(e){}if(!j)return null;
+  OFF_PRIVK=await crypto.subtle.importKey('jwk',j,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);return OFF_PRIVK}
+function isAdmin(){try{return !!localStorage.getItem('cc.adminKey')}catch(e){return false}}
+async function offSign(obj){const k=await offPriv();if(!k)return null;const d=JSON.stringify(obj);const sg=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},k,new TextEncoder().encode(d));return JSON.stringify({d,sig:u8b64(sg)})}
+async function offVerify(raw){try{const o=JSON.parse(raw);if(!o||!o.d||!o.sig)return null;const ok=await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},await offPub(),b64u8(o.sig),new TextEncoder().encode(o.d));return ok?JSON.parse(o.d):null}catch(e){return null}}
+function offLocal(){return getTours().find(x=>x.id===OFF_ID)||null}
+function offSeed(){const t=seedRSSS();t.id=OFF_ID;t.ts=0;t.removed={};return t}
+function offStore(t){const T=getTours().filter(x=>x.id!==OFF_ID);T.unshift(t);try{localStorage.setItem('cc.tours',JSON.stringify(T))}catch(e){}}
+function offMerge(a,b){if(!a)return b;if(!b)return a;const rm=Object.assign({},a.removed||{});for(const k in(b.removed||{}))rm[k]=Math.max(rm[k]||0,b.removed[k]);
+  const mp=new Map();[...a.matches,...b.matches].forEach(m=>{const ex=mp.get(m.uid);if(!ex||(m.at||0)>(ex.at||0))mp.set(m.uid,m)});
+  const ms=[...mp.values()].filter(m=>!(rm[m.uid]>=(m.at||0))).sort((x,y)=>(x.at||0)-(y.at||0));
+  const nb=(a.baseTs||0)>=(b.baseTs||0)?a:b,nw=(a.ts||0)>=(b.ts||0)?a:b;
+  return Object.assign({},nw,{base:nb.base,baseTs:nb.baseTs||0,matches:ms,removed:rm,ts:Math.max(a.ts||0,b.ts||0)})}
+const _putTours=putTours;
+putTours=function(T){const o=T.find(x=>x.id===OFF_ID),prev=offLocal();
+  if(o&&prev){const strip=x=>JSON.stringify(Object.assign({},x,{ts:0}));
+    if(strip(o)!==strip(prev)){if(isAdmin()){o.ts=Date.now();clearTimeout(OFF.pubT);OFF.pubT=setTimeout(offPublish,200)}else{const i=T.indexOf(o);T[i]=prev}}}
+  _putTours(T)};
+async function offPublish(){if(!isAdmin()||!window.mqtt)return;const t=offLocal();if(!t)return;const p=await offSign({ts:t.ts||Date.now(),tour:t});if(!p)return;
+  offConnect();OFF.cls.forEach(cl=>{if(cl.connected)try{cl.publish(OFF_T,p,{retain:true,qos:1})}catch(e){}})}
+function offConnect(){if(OFF.cls.length||!window.mqtt)return;OFF.on=true;
+  BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'cro_'+Math.random().toString(36).slice(2,10),reconnectPeriod:6000,connectTimeout:10000,clean:true});OFF.cls.push(cl);
+    cl.on('connect',()=>{cl.subscribe([OFF_T,OFF_LT]);if(isAdmin())setTimeout(()=>{const t=offLocal();if(!OFF.got&&t&&t.ts>0)offPublish()},7000)});
+    cl.on('message',(tp,p)=>offMsg(tp,new TextDecoder().decode(p)))}catch(e){}})}
+function offStop(){OFF.cls.forEach(c=>{try{c.end(true)}catch(e){}});OFF.cls=[];OFF.on=false}
+async function offMsg(tp,raw){if(!raw)return;const d=await offVerify(raw);if(!d)return;
+  if(tp===OFF_LT){if(!OFF.live||d.ts>=OFF.live.ts){OFF.live=d;if(screen==='home')render()}return}
+  if(!d.tour||d.tour.id!==OFF_ID)return;OFF.got=true;OFF.lastSeen=Date.now();const loc=offLocal();
+  if(isAdmin()){const mg=offMerge(loc,d.tour);const same=loc&&JSON.stringify(mg)===JSON.stringify(loc);if(!same){offStore(mg);rerenderTourish()}
+    if(JSON.stringify(mg)!==JSON.stringify(d.tour)){if(mg.ts<=d.tour.ts){mg.ts=Date.now();offStore(mg)}clearTimeout(OFF.pubT);OFF.pubT=setTimeout(offPublish,500)}return}
+  if(!loc||((d.tour.ts||0)>=(loc.ts||0)&&JSON.stringify(loc)!==JSON.stringify(d.tour))){offStore(d.tour);rerenderTourish()}}
+function rerenderTourish(){if(screen==='tour'||screen==='home')render()}
+function offEnsure(){if(!offLocal())offStore(offSeed())}
+async function offLivePub(m,done){if(!isAdmin()||!m||m.tour!==OFF_ID||!m.code)return;const p=await offSign({ts:Date.now(),code:m.code,uid:m.uid,teams:m.teams.map(t=>t.name),done:!!done});if(!p)return;
+  offConnect();OFF.cls.forEach(cl=>{if(cl.connected)try{cl.publish(OFF_LT,p,{retain:true,qos:0})}catch(e){}})}
+let offLiveLast={};
+function canEditTour(t){return t.id!==OFF_ID||isAdmin()}
+function setupTours(){const T=getTours();return isAdmin()?T:T.filter(x=>x.id!==OFF_ID)}
+function tourStatusHtml(t){if(t.id!==OFF_ID)return'';const ago=t.ts?timeAgo(t.ts):'';
+  return`<div class="offst"><span class="livedot ${OFF.got?'on':''}"></span>${OFF.got?'Live table — always up to date':'Showing the last copy on this device'}${ago?` · updated ${ago}`:''}${isAdmin()?' · <b>🔑 Admin</b>':''}</div>`}
+function timeAgo(ts){const s=(Date.now()-ts)/1000;if(s<90)return'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return new Date(ts).toLocaleDateString()}
+function tourAdminHtml(t){if(t.id!==OFF_ID)return'';
+  return isAdmin()?`<div class="card"><b>🔑 Admin on this device</b><p class="mute">Matches you score in this tournament update the table for everyone.</p><button class="block" onclick="offPublish().then(()=>toast('Table sent to everyone ✓'))">Re-send table to everyone</button><button class="block" onclick="adminOff()">Turn off admin on this device</button></div>`
+  :`<button class="block mini" style="margin-top:6px" onclick="adminMenu()">🔑 Admin (needs PIN)</button>`}
+function adminMenu(){ui.modal={title:'Admin PIN',html:`<p class="mute">Only devices with the PIN can change the official table. Everyone else can view it.</p>
+  <input id="apin" inputmode="numeric" type="password" autocomplete="off" placeholder="PIN" style="font-size:26px;letter-spacing:6px;text-align:center">
+  <button class="pri block" onclick="adminOn()">Unlock</button><div id="ast" class="mute" style="text-align:center;min-height:20px"></div>`};showModal();setTimeout(()=>{const e=$('#apin');if(e)e.focus()},50)}
+async function adminOn(){const pin=($('#apin').value||'').trim(),st=$('#ast');if(!pin)return;if(st)st.textContent='Checking…';
+  try{const E=OFF_KEYS.enc,base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+    const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64u8(E.s),iterations:300000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(E.iv)},key,b64u8(E.ct));localStorage.setItem('cc.adminKey',new TextDecoder().decode(pt));OFF_PRIVK=null}
+  catch(e){if(st)st.textContent='Wrong PIN';return}
+  adoptLegacy();closeModal();offConnect();render();toast('🔑 Admin unlocked on this device');
+  setTimeout(()=>{const t=offLocal();if(!t)return;if(!OFF.got&&!t.ts){t.ts=Date.now();offStore(t)}if(OFF.got||t.ts)offPublish()},OFF.got?100:6000)}
+function adminOff(){try{localStorage.removeItem('cc.adminKey')}catch(e){}OFF_PRIVK=null;render();toast('Admin turned off on this device')}
+function adoptLegacy(){const T=getTours();let off=T.find(x=>x.id===OFF_ID);const leg=T.filter(x=>x.id!==OFF_ID&&/rising stars/i.test(x.name)&&/seasoned stars/i.test(x.name));
+  if(!leg.length)return;leg.forEach(l=>{const c=Object.assign({},l,{id:OFF_ID,ts:off?off.ts:0,removed:l.removed||{},baseTs:l.baseTs||0});c.matches=(c.matches||[]).map((m,k)=>Object.assign({at:m.at||k+1},m));
+    if(!off||!off.ts){off=Object.assign({},c,{matches:offMerge(off||c,c).matches})}else off=offMerge(off,c);
+    if(M&&M.tour===l.id){M.tour=OFF_ID;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}}});
+  off.ts=Date.now();const R=T.filter(x=>x.id!==OFF_ID&&!leg.includes(x));R.unshift(off);_putTours(R)}
+function createSeed(){offEnsure();render()}
+
+/* ---------- watch live (view only) ---------- */
+const WATCH={code:null,cls:[],M:null,ts:0,q:[],seen:0,S:null,raf:0,id:0};
+function watchMenu(){ui.modal={title:'👀 Watch a match live',html:`<p class="mute">Type the match code. The scorer can find it on the ☁️ button on their scoring screen.</p>
+  <input id="wcode" placeholder="e.g. K7P2QX" autocapitalize="characters" autocomplete="off" style="font-size:26px;letter-spacing:5px;text-transform:uppercase;text-align:center">
+  <button class="pri block" onclick="watchGo(($('#wcode').value||'').toUpperCase().replace(/[^A-Z0-9]/g,''))">Watch</button>`};showModal();setTimeout(()=>{const e=$('#wcode');if(e)e.focus()},50)}
+function watchGo(c){if(!c||c.length<4){toast('Type the match code');return}closeModal();watchStop();WATCH.code=c;go('watch')}
+function watchStart(){if(WATCH.cls.length||!WATCH.code||!window.mqtt)return;
+  BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'crw_'+Math.random().toString(36).slice(2,10),reconnectPeriod:5000,connectTimeout:10000,clean:true});WATCH.cls.push(cl);
+    cl.on('connect',()=>cl.subscribe(matchTopic(WATCH.code)));
+    cl.on('message',(t,p)=>{try{const d=JSON.parse(new TextDecoder().decode(p));if(d&&d.M&&Array.isArray(d.M.events)&&d.ts>WATCH.ts)watchApply(d)}catch(e){}})}catch(e){}})}
+function watchStop(){WATCH.cls.forEach(c=>{try{c.end(true)}catch(e){}});WATCH.cls=[];WATCH.M=null;WATCH.ts=0;WATCH.q=[];WATCH.seen=0}
+function watchApply(d){const old=WATCH.M,nm=d.M;let S;try{S=withMatch(nm,()=>compute())}catch(e){return}
+  const n=S.cards.length;
+  if(old&&old.uid===nm.uid&&n>WATCH.seen){const now=Date.now();let st=Math.max(now,WATCH.q.length?WATCH.q[WATCH.q.length-1].end:0);
+    for(let i=WATCH.seen;i<n;i++){const it=S.cards[i],du=(it.dur||10)*1000;if(!it.keep&&st-now>8000)continue;WATCH.q.push(Object.assign({},it,{id:++WATCH.id,start:st,end:st+du}));st+=du}}
+  WATCH.seen=n;WATCH.M=nm;WATCH.ts=d.ts;WATCH.S=S;WATCH.tk=null;if(screen==='watch')watchHtml()}
+function renderWatch(){app.innerHTML=`<div class="wrap">${hdr('👀 Watching live')}<div class="wcv"><canvas id="wc" width="1280" height="720"></canvas></div><div id="wbody"><div class="card mute">Connecting to match ${esc(WATCH.code||'')}…</div></div>
+  <button class="block" onclick="shareWatch(WATCH.code)">📤 Share this watch link</button></div>`;
+  watchStart();if(WATCH.M)watchHtml();if(!WATCH.raf)WATCH.raf=requestAnimationFrame(watchLoop)}
+function watchHtml(){const el=$('#wbody');if(!el||!WATCH.M)return;const m=WATCH.M;let h='';
+  withMatch(m,()=>{const S=WATCH.S||compute(),I=S.cur;
+    h=`<div class="card"><div class="pill">${m.abandoned?'Abandoned':matchDone(m)?'Finished':'● LIVE'}</div><div class="lc-t">${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</div>
+    ${I?`<div class="lc-s">${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> <span class="mute">${ovs(I.cnt,m.settings.bpo)} ov</span></div><div class="mute">${S.inns.length===2&&S.inns[1].done?esc(result(S))+(potmText(S)?' · ⭐ '+esc(potmText(S)):''):infoLine(S)}</div>`:'<div class="mute">Not started yet</div>'}
+    <div class="mute sm2">Updated ${timeAgo(WATCH.ts)}</div></div><div class="card">${cardHtml(true)||'<p class="mute">Nothing scored yet.</p>'}</div>`});
+  el.innerHTML=h}
+function watchLoop(){if(screen!=='watch'){WATCH.raf=0;return}
+  const c=$('#wc');if(c&&WATCH.M){const x=c.getContext('2d'),W=c.width,H=c.height;
+    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1d5e2c');g.addColorStop(1,'#0e3a1a');x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle='rgba(255,255,255,.08)';x.fillRect(W/2-60,H*0.12,120,H*0.62);
+    try{withMatch(WATCH.M,()=>drawTicker(x,W,H,null))}catch(e){}
+    const now=Date.now();while(WATCH.q.length&&WATCH.q[0].end<=now)WATCH.q.shift();const it=WATCH.q.length&&WATCH.q[0].start<=now?WATCH.q[0]:null;
+    if(it&&WATCH.S)try{withMatch(WATCH.M,()=>drawItem(x,W,H,WATCH.S,it,(now-it.start)/1000))}catch(e){}}
+  WATCH.raf=requestAnimationFrame(watchLoop)}
+function watchLink(c){return location.origin+location.pathname+'#watch-'+c}
+function shareWatch(c){if(!c)return;const u=watchLink(c);ui.shareText='Watch our cricket match live 🏏 '+u;
+  if(navigator.share)navigator.share({text:ui.shareText}).catch(()=>{});else copyShare()}
+setInterval(()=>{if(screen==='watch'&&WATCH.M){const e=document.querySelector('#wbody .sm2');if(e)e.textContent='Updated '+timeAgo(WATCH.ts)}},5000);
+
+/* ---------- one scorer at a time ---------- */
+let LOCKED=false;
+const DEV=(()=>{let d='';try{d=localStorage.getItem('cc.dev')||''}catch(e){}if(!d){d='d'+Math.random().toString(36).slice(2,10);try{localStorage.setItem('cc.dev',d)}catch(e){}}return d})();
+const LOCK={code:null,other:null};
+function lockTopic(c){return matchTopic(c)+'/lock'}
+function lockSub(){if(!M||!M.code)return;if(LOCK.code===M.code)return;const old=LOCK.code;LOCK.code=M.code;LOCK.other=null;
+  SYNC.cls.forEach(cl=>{try{if(old){cl.unsubscribe(lockTopic(old));cl.unsubscribe(matchTopic(old))}if(cl.connected){cl.subscribe(lockTopic(M.code));cl.subscribe(matchTopic(M.code))}}catch(e){}})}
+function lockMsg(t,raw,pk){let d;try{d=JSON.parse(raw)}catch(e){return}
+  if(t.slice(-5)==='/lock'){if(!d||!LOCK.code||t!==lockTopic(LOCK.code))return;
+    if(d.dev===DEV){if(d.on===false&&!pk.retain){}LOCK.other=null;return}
+    LOCK.other=d.on?{ts:d.ts,recv:Date.now(),ret:!!pk.retain}:null;
+    if(d.on&&!pk.retain&&screen==='score'&&!LOCKED&&M&&M.code===LOCK.code){LOCKED=true;lockedOut()}return}
+  if((LOCKED||screen!=='score')&&d&&d.M&&M&&d.M.uid===M.uid&&d.M.events&&(d.ts||0)>(LOCK.mts||0)&&(LOCKED||(d.M.events.length>M.events.length&&JSON.stringify(d.M.events.slice(0,M.events.length))===JSON.stringify(M.events)))&&JSON.stringify(d.M.events)!==JSON.stringify(M.events)){LOCK.mts=d.ts;const c=M.code,cc=M.camCode;M=d.M;M.code=c;if(cc&&!M.camCode)M.camCode=cc;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}if(screen==='score')render()}}
+function otherScoring(){const o=LOCK.other;if(!o)return false;return o.ret?Date.now()-o.ts<45000:Date.now()-o.recv<35000}
+function lockPub(on){if(!M||!M.code||!window.mqtt)return;syncConnect();const p=JSON.stringify({dev:DEV,on,ts:Date.now()});SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(lockTopic(M.code),p,{retain:true,qos:0})}catch(e){}})}
+setInterval(()=>{if(screen==='score'&&M&&M.code&&!LOCKED&&!matchDone(M))lockPub(true)},10000);
+window.addEventListener('pagehide',()=>{if(screen==='score'&&!LOCKED)lockPub(false)});
+function waitModal(c){ui.modal={title:'🔒 Someone is scoring',html:`<p>Someone is scoring this match right now on another device. <b>Please wait until they leave.</b></p>
+  <button class="pri block" onclick="closeModal();watchGo('${c}')">👀 Watch it live instead</button>
+  <button class="block" onclick="takeOverAsk('${c}')">Take over scoring</button><button class="block" onclick="closeModal()">OK</button>`};showModal()}
+function takeOverAsk(c){ui.modal={title:'Take over scoring?',html:`<p class="mute">The other device will stop scoring and switch to view-only. Only do this if they've finished or their phone died.</p><button class="dan block" onclick="takeOver()">Yes, take over</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
+function takeOver(){closeModal();if(ui.pendCont){const p=ui.pendCont;ui.pendCont=null;contDone(p.m,p.c,true);return}LOCKED=false;LOCK.other=null;lockPub(true);go('score');toast('You are scoring now')}
+function lockedOut(){ui.modal={title:'Scoring moved to another device',html:`<p>Someone else is now scoring this match on another device, so this device has <b>stopped scoring</b>. The score here keeps updating.</p>
+  <button class="pri block" onclick="closeModal();go('home')">🏠 Home</button><button class="block" onclick="takeOverAsk('${M&&M.code}')">Take back scoring</button>`};showModal()}
+const _addEv=addEv;addEv=function(e){if(LOCKED){lockedOut();return}return _addEv(e)};
+
+/* continue-a-match: check the lock first */
+function doCont(){
+  const c=($('#mcode').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length<4){toast('Type the match code');return}
+  if(!window.mqtt){toast('No connection to the internet');return}
+  const st=$('#cst');if(st)st.textContent='Looking for the match…';
+  const tmp=[];let done=false,found=null,lk=null;
+  const end=()=>tmp.forEach(cl=>{try{cl.end(true)}catch(e){}});
+  const finish=()=>{if(done)return;done=true;end();const fresh=lk&&lk.on&&lk.dev!==DEV&&Date.now()-lk.ts<45000;
+    if(fresh){ui.pendCont={m:found,c};waitModal(c);return}contDone(found,c)};
+  BROKERS.forEach(url=>{try{const cl=mqtt.connect(url,{clientId:'crc_'+Math.random().toString(36).slice(2,10),connectTimeout:10000,reconnectPeriod:0,clean:true});tmp.push(cl);
+    cl.on('connect',()=>cl.subscribe([matchTopic(c),lockTopic(c)]));
+    cl.on('message',(t,p)=>{try{const d=JSON.parse(new TextDecoder().decode(p));if(t===lockTopic(c)){if(!lk||d.ts>lk.ts)lk=d;return}
+      if(d&&d.M&&Array.isArray(d.M.events)&&!found){found=d.M;setTimeout(finish,1500)}}catch(e){}})}catch(e){}});
+  setTimeout(()=>{if(!done&&!found){done=true;end();const s2=$('#cst');if(s2)s2.textContent="Couldn't find that match. Check the code, and that both devices have internet."}},12000)}
+const _contDone=contDone;
+contDone=function(m,c,force){LOCKED=false;LOCK.other=null;_contDone(m,c);lockSub();lockPub(true)};
+function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:var(--navy)">${esc(M&&M.code||'…')}</div>
+  <p class="mute">This match saves online after every ball.</p><p class="mute"><b>Carry on scoring on another device:</b> open Cricket Cam there → <b>↪️ Continue a match</b> → type this code.</p>
+  <p class="mute"><b>Let mates watch live:</b> send them the watch link.</p>
+  <button class="pri block" onclick="shareWatch(M&&M.code)">📤 Share watch link</button><button class="block" onclick="closeModal()">OK</button>`};showModal()}
+function matchGone(m,discard){try{lockPub(false)}catch(e){}if(m.tour===OFF_ID)offLivePub(m,true);
+  if(discard&&m.code&&window.mqtt){SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(matchTopic(m.code),'',{retain:true,qos:0})}catch(e){}})}}
+
+/* hook sync clients: subscribe to the lock + receive updates when locked out */
+const _syncConnect=syncConnect;
+syncConnect=function(){const had=SYNC.cls.length;_syncConnect();if(had)return;
+  SYNC.cls.forEach(cl=>{cl.on('connect',()=>{if(LOCK.code){cl.subscribe(lockTopic(LOCK.code));cl.subscribe(matchTopic(LOCK.code))}});cl.on('message',(t,p,pk)=>lockMsg(t,new TextDecoder().decode(p),pk||{}))})};
+const _pubMatch=pubMatch;
+pubMatch=function(now){if(LOCKED)return;_pubMatch(now);lockSub();
+  if(M&&M.tour===OFF_ID&&M.code&&isAdmin()){const fin=matchDone(M);if(fin!==offLiveLast.fin||Date.now()-(offLiveLast.t||0)>120000){offLiveLast={fin,t:Date.now()};offLivePub(M,fin)}}};
+
+/* ---------- navigation hooks ---------- */
+function goHook(from,to){
+  if(from==='cam'&&to!=='cam'&&!camLeave())return false;
+  if(to==='score'&&from!=='score'&&M&&M.code&&!matchDone(M)){lockSub();if(otherScoring()&&!LOCKED){waitModal(M.code);return false}}
+  if(from==='score'&&to!=='score'&&!LOCKED)lockPub(false);
+  if(from==='watch'&&to!=='watch')watchStop();
+  if(to==='cam'){offStop()}else if(from==='cam'){offConnect()}
+  return true}
+function goAfter(to){if(to==='cam')camStart();if(to==='score'&&M&&M.code&&!LOCKED)lockPub(true);if(to==='recs'||to==='home'||to==='cam')recRefresh().then(()=>{if(screen==='home')render()})}
+
+/* ---------- offline + update banner ---------- */
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!window.claude){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+async function verCheck(){if(screen==='cam'||CAM.rec||!navigator.onLine||!/^https?:/.test(location.protocol))return;
+  try{const r=await fetch(location.pathname+'?vc='+Date.now(),{cache:'no-store'});const t=await r.text();const m=t.match(/const APP_VER=(\d+);/);
+    if(m&&+m[1]>APP_VER&&!$('#upd')){const b=document.createElement('div');b.id='upd';b.className='updbar';b.innerHTML='🆕 New version available — <b>tap to update</b>';b.onclick=()=>location.reload();document.body.appendChild(b)}}catch(e){}}
+setTimeout(verCheck,8000);setInterval(verCheck,10*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
+
+/* ---------- start-up ---------- */
+offEnsure();if(isAdmin())adoptLegacy();
+recRecover();
+if(location.hash.indexOf('#watch-')===0){const c=location.hash.slice(7).toUpperCase().replace(/[^A-Z0-9]/g,'');history.replaceState(null,'',location.pathname+location.search);if(c){WATCH.code=c;screen='watch'}}
+if(screen!=='cam')offConnect();
+if(M&&M.code){syncConnect();lockSub()}
+
+render();try{renderNav()}catch(e){}
 </script>
 </body>
 </html>
