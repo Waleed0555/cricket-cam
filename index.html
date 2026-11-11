@@ -214,6 +214,27 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .offst{display:flex;align-items:center;gap:6px;font-size:13px;color:#55627a;margin:0 0 10px}
 .livenow{border:2px solid #e0313f}.pill.red{background:#e0313f;color:#fff}.warnc{border:2px solid #f59e0b;background:#fffbeb}
 .wcv{border-radius:12px;overflow:hidden;margin:0 0 12px;background:#000}.wcv canvas{display:block;width:100%;height:auto}
+/* ---- v16 colours ---- */
+:root{--bg:#e9eef7;--line:#dbe2ee}
+body{background:linear-gradient(180deg,#dfe7f5 0,#eef2f9 320px,#f2f5fa 100%) fixed}
+.hero{background:linear-gradient(115deg,#0a1a44 0%,#1340a8 60%,#2b5ce0 100%);position:relative;overflow:hidden;box-shadow:0 10px 24px -14px rgba(10,26,68,.8)}
+.hero:before{content:'';position:absolute;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8505b,#a3111e);opacity:.9}
+.hero:after{content:'';position:absolute;right:-46px;top:-46px;width:150px;height:150px;border-radius:50%;border:3px dashed rgba(255,255,255,.55);box-sizing:border-box;transform:scale(.62) rotate(25deg)}
+.hero>*{position:relative;z-index:1}
+.appbar{background:linear-gradient(90deg,#0a1a44,#1340a8);color:#fff;border-bottom:none}.appbar .abk{color:#fff}
+#nav{background:#0a1a44;border-top:none}#nav button{color:#93a5cc}#nav button span{filter:none;opacity:.7}#nav button.on{color:#ffd23f}#nav button.on span{opacity:1}
+.tiles .tile{border:none;color:#fff;box-shadow:0 8px 18px -10px rgba(10,26,68,.55)}.tiles .tile small{color:rgba(255,255,255,.88)!important}
+.t-cam{background:linear-gradient(135deg,#e0313f,#9f1222)!important}.t-new{background:linear-gradient(135deg,#2563eb,#1e3a8a)!important}
+.t-tour{background:linear-gradient(135deg,#f59e0b,#c2410c)!important}.t-watch{background:linear-gradient(135deg,#8b5cf6,#5b21b6)!important}
+.t-rec{background:linear-gradient(135deg,#14b8a6,#0f766e)!important}.t-team{background:linear-gradient(135deg,#22c55e,#15803d)!important}
+.t-cont{background:linear-gradient(135deg,#6366f1,#3730a3)!important}.t-past{background:linear-gradient(135deg,#64748b,#334155)!important}
+.card{border-color:#dbe2ee;box-shadow:0 2px 8px -4px rgba(15,23,42,.12)}
+.trow td{background:color-mix(in srgb,var(--tc) 11%,#fff)}.trow td:first-child{box-shadow:inset 5px 0 0 var(--tc)}
+.htable{border-top:4px solid #f5c518}
+.lbr{border-top:4px solid #f97316}.lbw{border-top:4px solid #8b5cf6}
+.tchip{display:inline-block;color:#fff;font-size:10px;font-weight:800;border-radius:5px;padding:1px 5px;vertical-align:middle;margin-left:3px}
+.seg{background:#dbe2ee}.seg button.on{background:#0a1a44;color:#fff}
+.sc>.top{background:linear-gradient(90deg,#0a1a44,#1340a8);color:#fff;border-bottom:none}.sc>.top .ib{color:#fff}
 .updbar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));background:#0e2a5c;color:#fff;padding:12px 14px;border-radius:12px;text-align:center;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 @media (orientation:landscape){.cbot{left:auto;top:0;bottom:0;right:0;width:190px;justify-content:center;padding:calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 14px 10px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.6))}.cbot .row{flex-direction:column}.ccode{left:calc(50% - 80px)}}
 </style>
@@ -361,20 +382,20 @@ function renderHome(){
   let tiles='',tbl='',last='';
   const rc=v14&&REC_N?`<span class="badge">${REC_N}</span>`:'';
   tiles=`<div class="tiles">
-    ${hasCam?`<button class="tile prim" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
-    <button class="tile ${hasCam?'':'prim'}" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
-    <button class="tile" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table, runs &amp; wickets</small></button>
-    ${v14?`<button class="tile" onclick="watchMenu()"><span class="ti">👀</span><b>Watch live</b><small>Follow a match</small></button>`:''}
-    ${v14?`<button class="tile" onclick="go('recs')"><span class="ti">🎞</span><b>Recordings ${rc}</b><small>Save to Camera Roll</small></button>`:''}
-    <button class="tile" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
-    ${typeof contMenu==='function'?`<button class="tile" onclick="contMenu()"><span class="ti">↪️</span><b>Continue a match</b><small>From another device</small></button>`:''}
-    <button class="tile" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>
+    ${hasCam?`<button class="tile prim t-cam" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
+    <button class="tile t-new" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
+    <button class="tile t-tour" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table, runs &amp; wickets</small></button>
+    ${v14?`<button class="tile t-watch" onclick="watchMenu()"><span class="ti">👀</span><b>Watch live</b><small>Follow a match</small></button>`:''}
+    ${v14?`<button class="tile t-rec" onclick="go('recs')"><span class="ti">🎞</span><b>Recordings ${rc}</b><small>Save to Camera Roll</small></button>`:''}
+    <button class="tile t-team" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
+    ${typeof contMenu==='function'?`<button class="tile t-cont" onclick="contMenu()"><span class="ti">↪️</span><b>Continue a match</b><small>From another device</small></button>`:''}
+    <button class="tile t-past" onclick="go('past')"><span class="ti">📋</span><b>Past matches</b><small>Scorecards</small></button>
   </div>`;
   try{const T=getTours();if(T.length){const t=T.find(x=>M&&x.id===M.tour)||T[0],sd=standings(t);
     const AP=allPlayers(t),oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
     tbl=`<div class="card mini htable" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View all ›</span></div>
-    <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table>
-    ${oc&&(oc.r||pc.w)?`<div class="caps" style="margin:10px 0 0"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets</small></div></div>`:''}</div>`}}catch(e){}
+    <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr class="trow" style="--tc:${teamCol(r.name,r.i)}"><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table>
+    ${oc&&(oc.r||pc.w)?`<div class="caps" style="margin:10px 0 0"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs · ${esc(oc.s)}</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets · ${esc(pc.s)}</small></div></div>`:''}</div>`}}catch(e){}
   try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
     last=`<div class="card mini hlast"><div class="mh" onclick="go('past')"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px" onclick="go('past')">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div>
     ${M&&m===M&&!M.abandoned?`<button class="block" style="margin:10px 0 0" onclick="rematch()">⚡ Rematch — same teams &amp; rules</button>`:''}</div>`}}catch(e){}
@@ -385,7 +406,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v15</div>
+  <div class="mute ver">Cricket Cam v16</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -790,6 +811,7 @@ function playerTotals(t,i){const o={};const g=k=>o[k]=o[k]||{n:k,w:0,r:0,b:0,f4:
 function allPlayers(t){const L=[];t.teams.forEach((tm,i)=>playerTotals(t,i).forEach(p=>L.push(Object.assign(p,{ti:i,s:tm.short||short(tm)}))));return L}
 function formGuide(t,i){return t.matches.slice(-5).map(m=>m.win===i?'W':m.win===-1?'T':'L')}
 function canEditTour(t){return true}
+function teamCol(name,i){const T=getTeams().find(t=>PK(t.name)===PK(name));if(T&&T.color)return T.color;if(/seasoned/i.test(name))return'#0e7a3e';if(/rising/i.test(name))return'#d62839';return['#0e7a3e','#d62839','#2563eb','#9333ea'][(i||0)%4]}
 function tourStatusHtml(t){return''}
 function tourAdminHtml(t){return''}
 const fmtN=x=>(x>=0?'+':'')+x.toFixed(2);
@@ -805,19 +827,19 @@ function renderTour(){
   const sd=standings(t),hasT=sd.some(r=>r.tie);
   h+=`<div class="card"><b>${esc(t.name)}</b><div class="mute">Points table</div>
   <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>L</th>${hasT?'<th>T</th>':''}<th>Pts</th><th>NRR</th></tr>
-  ${sd.map((r,k)=>`<tr><td>${k===0?'🥇 ':''}<b>${esc(r.name)}</b> <span class="mute">(${esc(r.short)})</span>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td>${hasT?`<td>${r.tie}</td>`:''}<td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}${r.est?'*':''}</td></tr>`).join('')}</table>
+  ${sd.map((r,k)=>`<tr class="trow" style="--tc:${teamCol(r.name,r.i)}"><td>${k===0?'🥇 ':''}<b>${esc(r.name)}</b> <span class="mute">(${esc(r.short)})</span>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td>${hasT?`<td>${r.tie}</td>`:''}<td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}${r.est?'*':''}</td></tr>`).join('')}</table>
   ${sd.some(r=>r.est)?`<div class="mute sm2">* NRR estimated${ed?' — add the earlier games’ totals in “Edit starting numbers” to make it exact':''}.</div>`:''}${t.matches.length?'<div class="mute sm2">Form = last 5 games scored in the app (newest on the right).</div>':''}</div>`;
   const AP=allPlayers(t),f=ui.tf==null?'all':ui.tf,FP=AP.filter(p=>f==='all'||p.ti===+f);
   const oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
   if(oc&&(oc.r||pc.w))h+=`<div class="caps"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs · ${esc(oc.s)}</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets · ${esc(pc.s)}</small></div></div>`;
-  h+=`<div class="seg">${[['all','All'],...t.teams.map((tm,i)=>[String(i),tm.short||tm.name])].map(([k,l])=>`<button class="${String(f)===k?'on':''}" onclick="ui.tf='${k}';render()">${esc(l)}</button>`).join('')}</div>`;
+  h+=`<div class="seg">${[['all','All'],...t.teams.map((tm,i)=>[String(i),tm.short||tm.name])].map(([k,l])=>`<button class="${String(f)===k?'on':''}" style="${String(f)===k&&k!=='all'?`background:${teamCol(t.teams[+k].name,+k)};color:#fff`:''}" onclick="ui.tf='${k}';render()">${esc(l)}</button>`).join('')}</div>`;
   const bpo=(M&&M.settings&&M.settings.bpo)||6,tn=f==='all';
   const BAT=FP.filter(p=>p.r>0||p.inn>0).sort((a,b)=>b.r-a.r||(a.inn-b.inn));
-  h+=`<div class="lbrow"><div class="card"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
-  ${BAT.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.r}</b></td><td>${p.inn||'–'}</td><td>${p.inn?p.hs+(p.hsNo?'*':''):'–'}</td><td>${p.inn?p.f4:'–'}</td><td>${p.inn?p.f6:'–'}</td><td>${p.b?(p.ar/p.b*100).toFixed(0):'–'}</td><td>${p.out?(p.ar/p.out).toFixed(1):p.inn?'–':'–'}</td></tr>`).join('')||'<tr><td colspan="9" class="mute">No runs yet</td></tr>'}</table></div></div>`;
+  h+=`<div class="lbrow"><div class="card lbr"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
+  ${BAT.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="tchip" style="background:${teamCol(t.teams[p.ti].name,p.ti)}">${esc(p.s)}</span>`:''}</td><td><b>${p.r}</b></td><td>${p.inn||'–'}</td><td>${p.inn?p.hs+(p.hsNo?'*':''):'–'}</td><td>${p.inn?p.f4:'–'}</td><td>${p.inn?p.f6:'–'}</td><td>${p.b?(p.ar/p.b*100).toFixed(0):'–'}</td><td>${p.out?(p.ar/p.out).toFixed(1):p.inn?'–':'–'}</td></tr>`).join('')||'<tr><td colspan="9" class="mute">No runs yet</td></tr>'}</table></div></div>`;
   const BWL=FP.filter(p=>p.w>0||p.bb>0).sort((a,b)=>b.w-a.w||(a.bb?a.rc/a.bb:9)-(b.bb?b.rc/b.bb:9));
-  h+=`<div class="card"><b>🎯 Top Wicket Takers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>W</th><th>O</th><th>R</th><th>Eco</th><th>Best</th></tr>
-  ${BWL.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td><b>${p.w}</b></td><td>${p.bb?ovs(p.bb,bpo):'–'}</td><td>${p.bb?p.rc:'–'}</td><td>${p.bb?(p.rc/(p.bb/bpo)).toFixed(1):'–'}</td><td>${p.best?p.best[0]+'-'+p.best[1]:'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="mute">No wickets yet</td></tr>'}</table></div>
+  h+=`<div class="card lbw"><b>🎯 Top Wicket Takers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>W</th><th>O</th><th>R</th><th>Eco</th><th>Best</th></tr>
+  ${BWL.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="tchip" style="background:${teamCol(t.teams[p.ti].name,p.ti)}">${esc(p.s)}</span>`:''}</td><td><b>${p.w}</b></td><td>${p.bb?ovs(p.bb,bpo):'–'}</td><td>${p.bb?p.rc:'–'}</td><td>${p.bb?(p.rc/(p.bb/bpo)).toFixed(1):'–'}</td><td>${p.best?p.best[0]+'-'+p.best[1]:'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="mute">No wickets yet</td></tr>'}</table></div>
   <div class="mute sm2">Inn, HS, 4s, 6s, SR, Avg, overs, economy and best count games scored in the app. Runs and wickets include the earlier games too.</div></div></div>`;
   const DK=FP.filter(p=>p.duck>0).sort((a,b)=>b.duck-a.duck);
   if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
@@ -1413,8 +1435,8 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=15;
-const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"EpenFS4ygDa7nBuaid0VBg==","iv":"PImZAdNoLCbIlm2P","ct":"WmVEQSpV4/CTnuRnTdTZ2sFExsZhhLs2Bxdt4CruyYmHMrHRChPSnwHbJmbOFh0BiZ+eUMMioLmDJ20bxiMgfXmMLWeS4YuIyliEiCGNHFBgbfcE570tfQn6UwSAi/nsV0EGT76rqm9IDONGnwzwP0hDeWodd8f221SkUshKvhqItW7jeA50Y2c4mo+3DIgdnwSN6Nf4ZPifrABa9BrnCv8Kzl9gwn+j8FEkkOdnNT3TqUZ/dvsxAweVUbjegVUEXAVK/lFTNx4lkyZHHPuvr3UbJC/4MrPGrkCSFRSp"}};
+const APP_VER=16;
+const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
 function rdb(){return RDB.p||(RDB.p=new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('no idb'));return}const r=indexedDB.open('cc-rec',1);
@@ -1498,19 +1520,24 @@ function tourStatusHtml(t){if(t.id!==OFF_ID)return'';const ago=t.ts?timeAgo(t.ts
   return`<div class="offst"><span class="livedot ${OFF.got?'on':''}"></span>${OFF.got?'Live table — always up to date':'Showing the last copy on this device'}${ago?` · updated ${ago}`:''}${isAdmin()?' · <b>🔑 Admin</b>':''}</div>`}
 function timeAgo(ts){const s=(Date.now()-ts)/1000;if(s<90)return'just now';if(s<3600)return Math.round(s/60)+' min ago';if(s<86400)return Math.round(s/3600)+' h ago';return new Date(ts).toLocaleDateString()}
 function tourAdminHtml(t){if(t.id!==OFF_ID)return'';
-  return isAdmin()?`<div class="card"><b>🔑 Admin on this device</b><p class="mute">Matches you score in this tournament update the table for everyone.</p><button class="block" onclick="offPublish().then(()=>toast('Table sent to everyone ✓'))">Re-send table to everyone</button><button class="block" onclick="adminOff()">Turn off admin on this device</button></div>`
-  :`<button class="block mini" style="margin-top:6px" onclick="adminMenu()">🔑 Admin (needs PIN)</button>`}
-function adminMenu(){ui.modal={title:'Admin PIN',html:`<p class="mute">Only devices with the PIN can change the official table. Everyone else can view it.</p>
-  <input id="apin" inputmode="numeric" type="password" autocomplete="off" placeholder="PIN" style="font-size:26px;letter-spacing:6px;text-align:center">
+  return isAdmin()?`<div class="card"><b>🔑 Team code entered on this device</b><p class="mute">This device can film, score and update the table for everyone.</p><button class="block" onclick="offPublish().then(()=>toast('Table sent to everyone ✓'))">Re-send table to everyone</button><button class="block" onclick="adminOff()">Lock this device again</button></div>`
+  :`<button class="block mini" style="margin-top:6px" onclick="adminMenu()">🔑 Enter team code</button>`}
+function adminMenu(why){if(!why)GATE.next=null;ui.modal={title:'🔑 Team code',html:`<p class="mute">${why?esc(why):'Only devices with the team code can film, start matches and update the table. Everyone can watch and see the table.'}</p>
+  <input id="apin" inputmode="numeric" type="password" autocomplete="off" placeholder="Code" onkeydown="if(event.key==='Enter')adminOn()" style="font-size:26px;letter-spacing:6px;text-align:center">
   <button class="pri block" onclick="adminOn()">Unlock</button><div id="ast" class="mute" style="text-align:center;min-height:20px"></div>`};showModal();setTimeout(()=>{const e=$('#apin');if(e)e.focus()},50)}
 async function adminOn(){const pin=($('#apin').value||'').trim(),st=$('#ast');if(!pin)return;if(st)st.textContent='Checking…';
   try{const E=OFF_KEYS.enc,base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
     const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64u8(E.s),iterations:300000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['decrypt']);
     const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64u8(E.iv)},key,b64u8(E.ct));localStorage.setItem('cc.adminKey',new TextDecoder().decode(pt));OFF_PRIVK=null}
-  catch(e){if(st)st.textContent='Wrong PIN';return}
-  adoptLegacy();closeModal();offConnect();render();toast('🔑 Admin unlocked on this device');
+  catch(e){if(st)st.textContent='Wrong code';return}
+  adoptLegacy();closeModal();offConnect();const nx=GATE.next;GATE.next=null;if(nx)nx();else render();toast('🔓 Unlocked on this device');
   setTimeout(()=>{const t=offLocal();if(!t)return;if(!OFF.got&&!t.ts){t.ts=Date.now();offStore(t)}if(OFF.got||t.ts)offPublish()},OFF.got?100:6000)}
-function adminOff(){try{localStorage.removeItem('cc.adminKey')}catch(e){}OFF_PRIVK=null;render();toast('Admin turned off on this device')}
+function adminOff(){try{localStorage.removeItem('cc.adminKey')}catch(e){}OFF_PRIVK=null;render();toast('Device locked')}
+/* team code gate: Camera, New match, Rematch */
+const GATE={next:null};
+function gate(fn,why){if(isAdmin()){fn();return}GATE.next=fn;adminMenu(why||'Enter the team code to film or start a match. (Watching, the table and past matches are free for everyone.)');setTimeout(()=>{const e=$('#apin');if(e)e.focus()},50)}
+const _newMatchMenu=newMatchMenu;newMatchMenu=function(){gate(()=>_newMatchMenu())};
+const _rematch=rematch;rematch=function(){gate(()=>_rematch())};
 function adoptLegacy(){const T=getTours();let off=T.find(x=>x.id===OFF_ID);const leg=T.filter(x=>x.id!==OFF_ID&&/rising stars/i.test(x.name)&&/seasoned stars/i.test(x.name));
   if(!leg.length)return;leg.forEach(l=>{const c=Object.assign({},l,{id:OFF_ID,ts:off?off.ts:0,removed:l.removed||{},baseTs:l.baseTs||0});c.matches=(c.matches||[]).map((m,k)=>Object.assign({at:m.at||k+1},m));
     if(!off||!off.ts){off=Object.assign({},c,{matches:offMerge(off||c,c).matches})}else off=offMerge(off,c);
@@ -1567,10 +1594,10 @@ function lockMsg(t,raw,pk){let d;try{d=JSON.parse(raw)}catch(e){return}
   if(t.slice(-5)==='/lock'){if(!d||!LOCK.code||t!==lockTopic(LOCK.code))return;
     if(d.dev===DEV){if(d.on===false&&!pk.retain){}LOCK.other=null;return}
     LOCK.other=d.on?{ts:d.ts,recv:Date.now(),ret:!!pk.retain}:null;
-    if(d.on&&!pk.retain&&screen==='score'&&!LOCKED&&M&&M.code===LOCK.code){LOCKED=true;lockedOut()}return}
+    if(d.on&&screen==='score'&&!LOCKED&&M&&M.code===LOCK.code&&(!pk.retain||(Date.now()-d.ts<45000&&d.ts>(LOCK.myTs||0)))){LOCKED=true;lockedOut()}return}
   if((LOCKED||screen!=='score')&&d&&d.M&&M&&d.M.uid===M.uid&&d.M.events&&(d.ts||0)>(LOCK.mts||0)&&(LOCKED||(d.M.events.length>M.events.length&&JSON.stringify(d.M.events.slice(0,M.events.length))===JSON.stringify(M.events)))&&JSON.stringify(d.M.events)!==JSON.stringify(M.events)){LOCK.mts=d.ts;const c=M.code,cc=M.camCode;M=d.M;M.code=c;if(cc&&!M.camCode)M.camCode=cc;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}if(screen==='score')render()}}
 function otherScoring(){const o=LOCK.other;if(!o)return false;return o.ret?Date.now()-o.ts<45000:Date.now()-o.recv<35000}
-function lockPub(on){if(!M||!M.code||!window.mqtt)return;syncConnect();const p=JSON.stringify({dev:DEV,on,ts:Date.now()});SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(lockTopic(M.code),p,{retain:true,qos:0})}catch(e){}})}
+function lockPub(on){if(!M||!M.code||!window.mqtt)return;syncConnect();LOCK.myTs=Date.now();const p=JSON.stringify({dev:DEV,on,ts:LOCK.myTs});SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(lockTopic(M.code),p,{retain:true,qos:0})}catch(e){}})}
 setInterval(()=>{if(screen==='score'&&M&&M.code&&!LOCKED&&!matchDone(M))lockPub(true)},10000);
 window.addEventListener('pagehide',()=>{if(screen==='score'&&!LOCKED)lockPub(false)});
 function waitModal(c){ui.modal={title:'🔒 Someone is scoring',html:`<p>Someone is scoring this match right now on another device. <b>Please wait until they leave.</b></p>
@@ -1608,13 +1635,14 @@ function matchGone(m,discard){try{lockPub(false)}catch(e){}if(m.tour===OFF_ID)of
 /* hook sync clients: subscribe to the lock + receive updates when locked out */
 const _syncConnect=syncConnect;
 syncConnect=function(){const had=SYNC.cls.length;_syncConnect();if(had)return;
-  SYNC.cls.forEach(cl=>{cl.on('connect',()=>{if(LOCK.code){cl.subscribe(lockTopic(LOCK.code));cl.subscribe(matchTopic(LOCK.code))}});cl.on('message',(t,p,pk)=>lockMsg(t,new TextDecoder().decode(p),pk||{}))})};
+  SYNC.cls.forEach(cl=>{cl.on('connect',()=>{if(LOCK.code){cl.subscribe(lockTopic(LOCK.code));cl.subscribe(matchTopic(LOCK.code))}if(screen==='score'&&M&&M.code&&!LOCKED&&!matchDone(M)){LOCK.myTs=Date.now();const p=JSON.stringify({dev:DEV,on:true,ts:LOCK.myTs});try{cl.publish(lockTopic(M.code),p,{retain:true,qos:0})}catch(e){}}});cl.on('message',(t,p,pk)=>lockMsg(t,new TextDecoder().decode(p),pk||{}))})};
 const _pubMatch=pubMatch;
 pubMatch=function(now){if(LOCKED)return;_pubMatch(now);lockSub();
   if(M&&M.tour===OFF_ID&&M.code&&isAdmin()){const fin=matchDone(M);if(fin!==offLiveLast.fin||Date.now()-(offLiveLast.t||0)>120000){offLiveLast={fin,t:Date.now()};offLivePub(M,fin)}}};
 
 /* ---------- navigation hooks ---------- */
 function goHook(from,to){
+  if(to==='cam'&&from!=='cam'&&!isAdmin()){gate(()=>go('cam'));return false}
   if(from==='cam'&&to!=='cam'&&!camLeave())return false;
   if(to==='score'&&from!=='score'&&M&&M.code&&!matchDone(M)){lockSub();if(otherScoring()&&!LOCKED){waitModal(M.code);return false}}
   if(from==='score'&&to!=='score'&&!LOCKED)lockPub(false);
