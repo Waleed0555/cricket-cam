@@ -229,6 +229,7 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .wcv{border-radius:12px;overflow:hidden;margin:0 0 12px;background:#000}.wcv canvas{display:block;width:100%;height:auto}
 body.camon{background:#000!important}body.camon:before{display:none}
 .expdl{display:block;text-align:center;padding:13px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);font-weight:800;text-decoration:none;margin:8px 0}
+.nxcard{border:2px solid #16a34a}.nxst{margin:8px 0;font-size:15px}.nxst.good{color:#166534}.nxst.bad{color:#b91c1c}.nxdl{display:block;text-align:center;padding:14px;border-radius:12px;background:var(--acc);color:#fff!important;text-decoration:none;font-weight:800;margin:8px 0}
 #vsp{display:none;position:fixed;top:0;left:0;right:0;z-index:45;background:#000;padding-top:env(safe-area-inset-top)}
 #vsp .vsv{position:relative;margin:0 auto;max-width:100%}#vsp .vsv video{display:block;width:100%;height:100%;object-fit:contain;background:#000}#vsp #vsov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #vsp .vsc{display:flex;gap:6px;align-items:center;justify-content:center;padding:6px;flex-wrap:wrap}#vsp .vsc button{background:rgba(255,255,255,.16);color:#fff;border:none;padding:8px 12px;margin:0;font-weight:700}
@@ -434,7 +435,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v22</div>
+  <div class="mute ver">Cricket Cam v23</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -576,7 +577,7 @@ function renderPast(){const L=pastList();ui.past=L;
   h+=(L.length?'<div class="cgrid">':'')+L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
     <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
-  h+=`<div class="grid g2"><button onclick="saveScore()">Save current score file</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
+  h+=`<div class="grid g2"><button onclick="saveScore()">⬇ Save score file (to move to another browser)</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
   app.innerHTML=h}
 function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
   ui.modal={title:'Delete this match?',html:`<p class="mute">${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}. This can't be undone.</p>
@@ -1119,7 +1120,7 @@ async function saveBlob(blob,name){
   try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return true}}catch(e){if(e&&e.name==='AbortError')return false}
   const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},120000);return true}
 function fileBase(){return('cricket-'+M.teams[0].name+'-v-'+M.teams[1].name).replace(/[^A-Za-z0-9-]+/g,'-').slice(0,60)}
-async function saveScore(){if(!M)return;await saveBlob(new Blob([JSON.stringify(M)],{type:'application/json'}),fileBase()+'.json')}
+async function saveScore(){if(!M)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(M)],{type:'application/json'}));a.download=fileBase()+'-score.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},60000);toast('Score file saved to Downloads')}
 function loadScore(inp){const f=inp.files&&inp.files[0];if(!f)return;
   f.text().then(t=>{const d=JSON.parse(t);if(!d||!Array.isArray(d.events)||!Array.isArray(d.teams)||!d.settings)throw 0;M=d;save();go('home');toast('Score file loaded')}).catch(()=>toast("That doesn't look like a score file"));inp.value=''}
 
@@ -1514,7 +1515,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=22;
+const APP_VER=23;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -1677,7 +1678,7 @@ function teamsNote(){return isAdmin()?'Shared with everyone who opens the link. 
 /* ---------- score a video you already recorded (side feature) ---------- */
 function vsMenu(){gate(()=>{ui.modal={title:'🎬 Score a recorded video',html:`<p class="mute">Recorded the game with the normal iPhone camera? Pick the video, set up the teams, then score while it plays (2× speed). Every ball is tied to the right moment in the video, so the finished video plays at normal speed with the scorecard on it.</p>
   <label class="filebtn"><button class="block pri" style="pointer-events:none">Choose the video</button><input type="file" accept="video/*" onchange="vsPick(this)"></label>`};showModal()})}
-function vsPick(inp){const f=inp.files&&inp.files[0];if(!f)return;if(vURL)URL.revokeObjectURL(vURL);vURL=URL.createObjectURL(f);
+function vsPick(inp){const f=inp.files&&inp.files[0];if(!f)return;VFILE=f;if(vURL)URL.revokeObjectURL(vURL);vURL=URL.createObjectURL(f);
   VV.onloadedmetadata=null;VV.onerror=()=>toast("This video can't be played here");VV.src=vURL;VV.load();closeModal();ui.vsMode=true;
   if(M&&M.events.length&&!matchDone(M))archiveMatch(M);openSetup(true);toast('Now set up the teams, then tap Start scoring')}
 const _saveSetup=saveSetup;saveSetup=function(){const vs=ui.vsMode;_saveSetup();if(vs&&M){ui.vsMode=false;M.vmode=1;M.offset=0;try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}VV.playbackRate=2;render()}};
@@ -1703,18 +1704,18 @@ function vsLoop(){if(!document.body.classList.contains('vsmode')||!M||!M.vmode){
   VS.raf=requestAnimationFrame(vsLoop)}
 VV.addEventListener('loadedmetadata',()=>{if(document.body.classList.contains('vsmode'))vsSize()});window.addEventListener('resize',()=>{if(document.body.classList.contains('vsmode'))vsSize()});
 /* exported videos: keep them safe in Recordings + clear save buttons */
-const _doExport=doExport;doExport=async function(){await _doExport();if(lastBlob)expKeep()};
+const _doExport=doExport;doExport=async function(){const s2=$('#saveb2');if(s2)s2.remove();const sb=$('#saveb');if(sb)sb.style.display='none';await _doExport();if(lastBlob)expKeep()};
 async function expKeep(){const id='x'+Date.now().toString(36),title=(M?M.teams[0].name+' v '+M.teams[1].name:'Cricket')+' (with scorecard)',type=lastBlob.type||'video/mp4';
   const meta={id,title,start:Date.now(),ext:lastExt,type,size:lastBlob.size,dur:0,state:'done'};
   try{await recPutMeta(meta);await recPutChunk(id,0,lastBlob);await recRefresh()}catch(e){}
   PREP[id]=new File([lastBlob],recName(meta),{type});EXPID=id;
-  const sb=$('#saveb');if(sb){sb.outerHTML=`<div id="saveb2"><button class="pri block" onclick="recSaveNow('${id}')">📤 Share / AirDrop to iPhone</button>
+  const sb=$('#saveb');if(sb){sb.style.display='none';sb.insertAdjacentHTML('afterend',`<div id="saveb2"><button class="pri block" onclick="recSaveNow('${id}')">📤 Share / AirDrop to iPhone</button>
     <a class="block expdl" href="${URL.createObjectURL(PREP[id])}" download="${esc(PREP[id].name)}" target="_blank">⬇ Download to this computer</a>
-    <p class="mute">Also kept safe in 🎞 Recordings, so it isn't lost if you leave this page.</p></div>`}
+    <p class="mute">Also kept safe in 🎞 Recordings, so it isn't lost if you leave this page.</p></div>`)}
   toast('Video ready — also kept in 🎞 Recordings')}
 let EXPID=null;
 saveVideo=function(){if(EXPID&&PREP[EXPID])recSaveNow(EXPID);else if(lastBlob){const f=new File([lastBlob],fileBase()+'.'+lastExt,{type:lastBlob.type});try{if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}}catch(e){}const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.target='_blank';document.body.appendChild(a);a.click()}};
-function vsRepick(inp){const f=inp.files&&inp.files[0];if(!f)return;vURL=URL.createObjectURL(f);VV.src=vURL;VV.load();VV.playbackRate=2;render()}
+function vsRepick(inp){const f=inp.files&&inp.files[0];if(!f)return;VFILE=f;vURL=URL.createObjectURL(f);VV.src=vURL;VV.load();VV.playbackRate=2;render()}
 function vsPlay(){if(VV.paused){VV.playbackRate=VV.playbackRate||2;VV.play().catch(()=>{})}else VV.pause()}
 function vsSeek(d){VV.currentTime=Math.max(0,Math.min((VV.duration||1e9)-0.1,(VV.currentTime||0)+d))}
 function vsRate(){const R=[1,2,3,5],i=R.indexOf(VV.playbackRate);VV.playbackRate=R[(i+1)%R.length];$('#vsr').textContent=VV.playbackRate+'×';toast('Speed '+VV.playbackRate+'× (only while scoring — the saved video plays at normal speed)')}
@@ -1834,7 +1835,7 @@ function goAfter(to){document.body.classList.toggle('camon',to==='cam');if(to===
 
 /* ---------- offline + update banner ---------- */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&!window.claude){navigator.serviceWorker.register('sw.js').catch(()=>{})}
-async function verCheck(){if(screen==='cam'||CAM.rec||!navigator.onLine||!/^https?:/.test(location.protocol))return;
+async function verCheck(){if(['cam','score','video','watch','setup'].includes(screen)||CAM.rec||(typeof NX!=='undefined'&&NX.run)||(typeof EXP!=='undefined'&&EXP)||!navigator.onLine||!/^https?:/.test(location.protocol))return;
   try{const r=await fetch(location.pathname+'?vc='+Date.now(),{cache:'no-store'});const t=await r.text();const m=t.match(/const APP_VER=(\d+);/);
     if(m&&+m[1]>APP_VER&&!$('#upd')){const b=document.createElement('div');b.id='upd';b.className='updbar';b.innerHTML='🆕 New version available — <b>tap to update</b>';b.onclick=()=>location.reload();document.body.appendChild(b)}}catch(e){}}
 setTimeout(verCheck,8000);setInterval(verCheck,10*60*1000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});
@@ -1845,6 +1846,147 @@ recRecover();
 if(location.hash.indexOf('#watch-')===0){const c=location.hash.slice(7).toUpperCase().replace(/[^A-Z0-9]/g,'');history.replaceState(null,'',location.pathname+location.search);if(c){WATCH.code=c;screen='watch'}}
 if(screen!=='cam')offConnect();
 if(M&&M.code){syncConnect();lockSub()}
+
+/* ================= v23: frame-by-frame exporter (no lag, original sound) ================= */
+const NX={run:false,stop:false};
+let VFILE=null;
+function nxLoad(src){return new Promise((res,rej)=>{if(document.querySelector('script[data-nx="'+src+'"]')){res();return}const s=document.createElement('script');s.src=src;s.dataset.nx=src;s.onload=res;s.onerror=()=>rej(new Error('Could not load '+src+' (check internet)'));document.head.appendChild(s)})}
+const nxYield=(()=>{const ch=new MessageChannel(),q=[];ch.port1.onmessage=()=>{const f=q.shift();f&&f()};return()=>new Promise(r=>{q.push(r);ch.port2.postMessage(0)})})();
+function nxMsg(t,cls){const e=$('#nxst');if(e){e.innerHTML=t;e.className='nxst '+(cls||'')}}
+function nxErr(h){const e=new Error(h);e.html=1;return e}
+function nxProg(p){const b=$('#nxbar');if(b)b.style.width=Math.max(1,Math.min(100,p))+'%'}
+
+/* --- read just the index (moov) of an MP4/MOV, wherever it is in the file --- */
+async function nxBoxes(file){const out=[];let pos=0;
+  while(pos<file.size&&out.length<5000){const h=new DataView(await file.slice(pos,pos+16).arrayBuffer());if(h.byteLength<8)break;
+    let size=h.getUint32(0);const type=String.fromCharCode(h.getUint8(4),h.getUint8(5),h.getUint8(6),h.getUint8(7));
+    if(size===1)size=Number(h.getBigUint64(8));else if(size===0)size=file.size-pos;if(size<8)break;out.push({type,pos,size});pos+=size}
+  return out}
+function nxEsdsASC(u8){ // find AudioSpecificConfig (DecoderSpecificInfo tag 5) in an esds box anywhere in the index
+  for(let i=0;i<u8.length-12;i++){if(u8[i]===0x65&&u8[i+1]===0x73&&u8[i+2]===0x64&&u8[i+3]===0x73){let p=i+8;
+    const rd=()=>{let n=0,k=0,b;do{b=u8[p++];n=(n<<7)|(b&0x7f)}while(b&0x80&&++k<4);return n};
+    for(let guard=0;guard<6&&p<u8.length;guard++){const tag=u8[p++],len=rd();
+      if(tag===3){p+=2;const fl=u8[p++];if(fl&0x80)p+=2;if(fl&0x40)p+=1+u8[p];if(fl&0x20)p+=2}
+      else if(tag===4){p+=13}
+      else if(tag===5){return u8.slice(p,p+len)}else p+=len}}}
+  return null}
+function nxASC(rate,ch){const R=[96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350];const fi=Math.max(0,R.indexOf(rate));return new Uint8Array([(2<<3)|(fi>>1),((fi&1)<<7)|(ch<<3)])}
+function nxDesc(trak){const e=trak.mdia.minf.stbl.stsd.entries[0];const box=e.avcC||e.hvcC||e.vpcC||e.av1C;if(!box)return undefined;
+  const DS=window.DataStream||MP4Box.DataStream;const s=new DS(undefined,0,DS.BIG_ENDIAN);box.write(s);return new Uint8Array(s.buffer,8)}
+function nxEdit(trak,movieTS){let empty=0,start=0;const E=trak.edts&&trak.edts.elst&&trak.edts.elst.entries||[];
+  for(const e of E){if(e.media_time===-1||e.media_time===0xffffffff){empty+=e.segment_duration/movieTS}else{start=e.media_time;break}}return{empty,start}}
+function nxRot(m){if(!m)return 0;const a=m[0]|0,b=m[1]|0;if(a===0&&b>0)return 90;if(a<0&&b===0)return 180;if(a===0&&b<0)return 270;return 0}
+
+/* --- output: straight to a file the user picks (Chrome/Edge), or the browser's own storage (Safari) --- */
+async function nxPickOut(name){
+  if(window.showSaveFilePicker){const h=await window.showSaveFilePicker({suggestedName:name,types:[{description:'MP4 video',accept:{'video/mp4':['.mp4']}}]});return{kind:'fsa',h}}
+  return{kind:'opfs',name}}
+function nxOpfsWorker(){const src=`let h=null;onmessage=async e=>{const d=e.data;try{if(d.t==='open'){const dir=await navigator.storage.getDirectory();try{await dir.removeEntry(d.name)}catch(x){}const fh=await dir.getFileHandle(d.name,{create:true});h=await fh.createSyncAccessHandle();postMessage({t:'ok'})}
+ else if(d.t==='w'){h.write(d.data,{at:d.pos});postMessage({t:'wok',n:d.data.byteLength})}else if(d.t==='close'){h.flush();h.close();postMessage({t:'closed'})}}catch(x){postMessage({t:'err',m:String(x&&x.message||x)})}}`;
+  return new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})))}
+
+async function nxStart(){
+  if(NX.run)return;const file=VFILE;if(!file){toast('Choose the video first (step 1)');return}
+  const outName=(fileBase()+'-with-scorecard.mp4').replace(/--+/g,'-');
+  let out;try{out=await nxPickOut(outName)}catch(e){if(e&&e.name==='AbortError')return;out={kind:'opfs',name:outName}}
+  NX.run=true;NX.stop=false;const btn=$('#nxb'),stopb=$('#nxstop');if(btn)btn.disabled=true;if(stopb)stopb.style.display='block';$('#nxprog').style.display='block';$('#nxdone').innerHTML='';nxProg(1);
+  let wl=null;try{wl=await navigator.wakeLock?.request('screen')}catch(e){}
+  try{await nxRun(file,out)}catch(e){console.error(e);nxMsg('⚠ '+(e&&e.html?e.message:esc(e&&e.message||String(e))),'bad')}
+  NX.run=false;if(btn)btn.disabled=false;if(stopb)stopb.style.display='none';try{wl&&wl.release()}catch(e){}}
+
+async function nxRun(file,out){
+  if(!window.VideoDecoder||!window.VideoEncoder)throw nxErr('This browser can’t do the new export. Open the app in Google Chrome on the computer and try there.');
+  nxMsg('Loading tools…');await nxLoad('mp4box.js');await nxLoad('mp4-muxer.js');
+  /* 1. index */
+  nxMsg('Reading the video…');const boxes=await nxBoxes(file);const moovB=boxes.find(b=>b.type==='moov'),ftyp=boxes.find(b=>b.type==='ftyp');
+  if(!moovB)throw nxErr('This file doesn’t look like an MP4/MOV video.');
+  if(moovB.size>400*1048576)throw nxErr('Video index is unusually large.');
+  const parts=[];if(ftyp)parts.push(new Uint8Array(await file.slice(ftyp.pos,ftyp.pos+ftyp.size).arrayBuffer()));const moovU=new Uint8Array(await file.slice(moovB.pos,moovB.pos+moovB.size).arrayBuffer());parts.push(moovU);
+  const idx=new Uint8Array(parts.reduce((a,b)=>a+b.length,0));let o=0;parts.forEach(p=>{idx.set(p,o);o+=p.length});
+  const mp=MP4Box.createFile();let info=null;mp.onReady=i=>{info=i};mp.onError=e=>{};const ab=idx.buffer;ab.fileStart=0;mp.appendBuffer(ab);mp.flush();
+  if(!info||!info.videoTracks.length)throw nxErr('Couldn’t find the video track in this file.');
+  const vt=info.videoTracks[0],vtrak=mp.getTrackById(vt.id),vS=vtrak.samples;const movieTS=info.timescale||1000;
+  const at=info.audioTracks[0],atrak=at&&mp.getTrackById(at.id),aS=atrak?atrak.samples:[];
+  /* 2. decoder */
+  const desc=nxDesc(vtrak);let vcodec=vt.codec;if(/^avc1$|^avc3$/.test(vcodec)&&desc)vcodec='avc1.'+[...desc.slice(1,4)].map(x=>x.toString(16).padStart(2,'0')).join('');
+  const dcfg={codec:vcodec,codedWidth:vt.track_width|0||vt.video.width,codedHeight:vt.track_height|0||vt.video.height,description:desc};
+  dcfg.codedWidth=vt.video&&vt.video.width||dcfg.codedWidth;dcfg.codedHeight=vt.video&&vt.video.height||dcfg.codedHeight;
+  let sup=false;try{sup=(await VideoDecoder.isConfigSupported(dcfg)).supported}catch(e){}
+  if(!sup)throw nxErr(`This browser can’t read this video’s format (${esc(vt.codec)}). Fix: open the video in <b>QuickTime Player</b> → File → Export As → <b>1080p</b> → choose <b>“Greater Compatibility (H.264)”</b>, then pick that new file here.${/^hvc|^hev/.test(vt.codec)?' (Or try this export in Google Chrome.)':''}`);
+  /* 3. sizes */
+  const rot=nxRot(vt.matrix);const sw=dcfg.codedWidth,sh=dcfg.codedHeight;const dw=(rot%180?sh:sw),dh=(rot%180?sw:sh);
+  const q=+(($('#nxq')||{}).value||1080),box=dw>=dh?[q*16/9,q]:[q,q*16/9];const sc=Math.min(1,box[0]/dw,box[1]/dh);
+  const W=Math.round(dw*sc/2)*2,H=Math.round(dh*sc/2)*2;const fps=vt.nb_samples&&vt.duration?Math.round(vt.nb_samples/(vt.duration/vt.timescale)):30;
+  const bitrate=Math.round((H>=1000?6e6:H>=700?4e6:2.5e6)*(fps>40?1.4:1));
+  const durS=vt.duration/vt.timescale,estMB=Math.round((bitrate+140000)*durS/8/1048576);
+  let ecodec=null;for(const c of(H>=1000?['avc1.640028','avc1.4d0028','avc1.420028']:['avc1.64001f','avc1.4d001f','avc1.42001f','avc1.640028'])){try{if((await VideoEncoder.isConfigSupported({codec:c,width:W,height:H,bitrate,framerate:fps})).supported){ecodec=c;break}}catch(e){}}
+  if(!ecodec)throw nxErr('This browser can’t create MP4 video. Try Google Chrome.');
+  /* 4. audio */
+  let audio=null;if(atrak){const A=at.audio||{},asc=nxEsdsASC(moovU)||nxASC(A.sample_rate||48000,A.channel_count||2);
+    if(/^mp4a/.test(at.codec)||!at.codec)audio={sr:A.sample_rate||48000,ch:A.channel_count||2,asc,ts:atrak.mdia.mdhd.timescale,ed:nxEdit(atrak,movieTS)}}
+  /* 5. output */
+  let target,writer=null,closeOut,wr=0;
+  nxMsg(`Getting ready… (finished video will be about ${(estMB/1024).toFixed(1)} GB)`);
+  if(out.kind==='fsa'){writer=await out.h.createWritable();target=new Mp4Muxer.FileSystemWritableFileStreamTarget(writer,{chunkSize:8*1048576});closeOut=async()=>{await writer.close()}}
+  else{try{const e=await navigator.storage.estimate();const freeMB=((e.quota||0)-(e.usage||0))/1048576;if(freeMB&&freeMB<estMB*1.15)throw nxErr(`Not enough space for this browser to build the video (needs about ${(estMB/1024).toFixed(1)} GB, has ${(freeMB/1024).toFixed(1)} GB). Use <b>Google Chrome</b> (it saves straight into a folder), choose <b>720p</b>, or free up space on the computer.`)}catch(e){if(e&&e.html)throw e}
+    const wk=nxOpfsWorker();let pend=0,err=null;const waiters=[];wk.onmessage=e=>{const d=e.data;if(d.t==='wok'){pend--;wr+=d.n}else if(d.t==='err')err=d.m;const w=waiters.splice(0);w.forEach(f=>f(d))};
+    const ask=m=>new Promise(r=>{waiters.push(r);wk.postMessage(m)});const r0=await ask({t:'open',name:out.name});if(r0.t==='err')throw nxErr('Couldn’t make the output file: '+r0.m);
+    target=new Mp4Muxer.StreamTarget({chunked:true,chunkSize:8*1048576,onData:(data,pos)=>{pend++;const c=data.slice();wk.postMessage({t:'w',data:c,pos},[c.buffer])}});
+    closeOut=async()=>{while(pend>0){if(err)throw nxErr(err);await new Promise(r=>setTimeout(r,20))}await ask({t:'close'});wk.terminate()};out.wait=()=>pend}
+  const muxer=new Mp4Muxer.Muxer({target,video:{codec:'avc',width:W,height:H,frameRate:fps},audio:audio?{codec:'aac',numberOfChannels:audio.ch,sampleRate:audio.sr}:undefined,fastStart:false,firstTimestampBehavior:'cross-track-offset'});
+  /* 6. pipeline */
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const cx=cv.getContext('2d',{alpha:false});
+  const ved=nxEdit(vtrak,movieTS),vts=vtrak.mdia.mdhd.timescale,off=(M&&M.offset)||0;let fatal=null,nOut=0,nEnc=0,lastKey=-1e9;
+  const enc=new VideoEncoder({output:(c,m)=>{muxer.addVideoChunk(c,m);nEnc++},error:e=>{fatal=e}});
+  enc.configure({codec:ecodec,width:W,height:H,bitrate,framerate:fps,latencyMode:'quality',avc:{format:'avc'}});
+  const dec=new VideoDecoder({output:fr=>{try{if(fatal){fr.close();return}const t=fr.timestamp/1e6;
+      cx.save();if(rot){cx.translate(W/2,H/2);cx.rotate(rot*Math.PI/180);const rw=rot%180?H:W,rh=rot%180?W:H;cx.drawImage(fr,-rw/2,-rh/2,rw,rh)}else cx.drawImage(fr,0,0,W,H);cx.restore();
+      try{drawAll(cx,W,H,t+off)}catch(e){}
+      const vf=new VideoFrame(cv,{timestamp:fr.timestamp,duration:fr.duration||Math.round(1e6/fps)});fr.close();
+      const key=t-lastKey>=2;if(key)lastKey=t;enc.encode(vf,{keyFrame:key});vf.close();nOut++}catch(e){fatal=e;try{fr.close()}catch(x){}}},error:e=>{fatal=e}});
+  dec.configure(dcfg);
+  /* samples in file order, read in windows */
+  const vTime=s=>(s.cts-ved.start)/vts+ved.empty;
+  const all=[];vS.forEach(s=>all.push({s,v:1}));aS.forEach(s=>all.push({s,v:0}));all.sort((a,b)=>a.s.offset-b.s.offset);
+  const total=vS.length,t0=Date.now();let i=0,aFirst=true,sentA=0,kept=0;
+  const WIN=16*1048576;
+  while(i<all.length){
+    if(NX.stop)throw nxErr('Stopped. Nothing was saved — press Export to start again.');
+    if(fatal)throw nxErr('Video error: '+(fatal.message||fatal));
+    const ws=all[i].s.offset;let j=i,we=ws;while(j<all.length&&all[j].s.offset+all[j].s.size-ws<=WIN){we=Math.max(we,all[j].s.offset+all[j].s.size);j++}if(j===i){we=all[i].s.offset+all[i].s.size;j=i+1}
+    const buf=new Uint8Array(await file.slice(ws,we).arrayBuffer());
+    for(let k=i;k<j;k++){const {s,v}=all[k],data=buf.subarray(s.offset-ws,s.offset-ws+s.size);
+      if(v){const ts=Math.round(vTime(s)*1e6);dec.decode(new EncodedVideoChunk({type:s.is_sync?'key':'delta',timestamp:ts,duration:Math.round(s.duration/vts*1e6),data}));
+        while(dec.decodeQueueSize>6||enc.encodeQueueSize>6){if(fatal)break;await nxYield()}}
+      else if(audio){const ta=(s.cts-audio.ed.start)/audio.ts+audio.ed.empty;if(ta<0)continue;
+        muxer.addAudioChunkRaw(data.slice(),'key',Math.round(ta*1e6),Math.round(s.duration/audio.ts*1e6),aFirst?{decoderConfig:{codec:'mp4a.40.2',numberOfChannels:audio.ch,sampleRate:audio.sr,description:audio.asc}}:undefined);aFirst=false;sentA++}}
+    i=j;
+    const done=nOut/total,el=(Date.now()-t0)/1000,eta=done>0.01?el/done-el:0;
+    nxProg(done*100);nxMsg(`Adding the scorecard… <b>${Math.floor(done*100)}%</b> · ${fmt(nOut/fps)} of ${fmt(total/fps)}${eta?` · about ${Math.ceil(eta/60)} min left`:''}`);
+    await nxYield()}
+  nxMsg('Finishing…');await dec.flush();await enc.flush();if(fatal)throw nxErr('Video error: '+(fatal.message||fatal));
+  muxer.finalize();await closeOut();dec.close();enc.close();
+  nxProg(100);const mins=((Date.now()-t0)/60000).toFixed(1);
+  NX.last={frames:nOut,encoded:nEnc,total,audio:sentA,W,H,fps,codec:vt.codec,mins};
+  if(out.kind==='fsa'){nxMsg(`✅ <b>Done!</b> Saved as <b>${esc(out.h.name)}</b> in the folder you picked (${mins} min).`,'good');
+    $('#nxdone').innerHTML=`<p class="mute">Next: open that folder in Finder → right-click the video → <b>Share → AirDrop</b> → your iPhone. Play it in Photos to check.</p>`}
+  else{const dir=await navigator.storage.getDirectory(),f=await(await dir.getFileHandle(out.name)).getFile();NX.file=f;
+    nxMsg(`✅ <b>Done!</b> ${(f.size/1048576).toFixed(0)} MB (${mins} min).`,'good');
+    $('#nxdone').innerHTML=`<a class="pri block nxdl" href="${URL.createObjectURL(f)}" download="${esc(out.name)}">⬇ Download the video</a><button class="block" onclick="nxShare()">📤 Share / AirDrop</button><p class="mute">After downloading, check the file in Downloads is about ${(f.size/1048576).toFixed(0)} MB. If it's tiny, use Google Chrome for the export instead.</p>`}
+}
+function nxShare(){const f=NX.file;if(!f)return;try{if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}}catch(e){}toast('Sharing isn’t available here — use Download')}
+
+/* --- hook into the "Add score to video" screen --- */
+const _loadVid=loadVid;loadVid=function(inp){VFILE=inp.files&&inp.files[0]||null;_loadVid(inp);setTimeout(nxShow,50)};
+const _renderVideo=renderVideo;renderVideo=function(){_renderVideo();
+  const exp=$('#exp');if(!exp)return;exp.insertAdjacentHTML('beforebegin',`<div class="card nxcard" id="nx" style="display:none"><b>✨ Export video with scorecard</b> <span class="pill" style="background:#dcfce7;color:#166534">New · no lag</span>
+    <p class="mute">Adds the scorecard to <b>every frame</b> and keeps your <b>original sound</b> perfectly in sync. Much faster than real time. Best in <b>Google Chrome</b> on a computer: it saves straight into a file you choose.</p>
+    <label>Quality</label><select id="nxq"><option value="1080">1080p — sharp (recommended)</option><option value="720">720p — smaller file</option></select>
+    <button class="pri block" id="nxb" onclick="nxStart()">✨ Export video with scorecard</button>
+    <div class="prog" id="nxprog" style="display:none"><div id="nxbar"></div></div><div class="nxst" id="nxst"></div>
+    <button class="block" id="nxstop" style="display:none" onclick="NX.stop=true">Stop</button><div id="nxdone"></div></div>`);
+  const h=exp.querySelector('b');if(h)h.textContent='Old export (plays in real time — not recommended)';nxShow()};
+function nxShow(){const n=$('#nx');if(n&&(VFILE||vURL))n.style.display='block'}
 
 render();try{renderNav()}catch(e){}
 </script>
