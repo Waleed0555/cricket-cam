@@ -197,7 +197,7 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .dots{background:none;border:none;font-size:22px;padding:0 8px;color:var(--mute);margin:0}
 .err{color:#dc2626;font-size:13px;min-height:16px;margin:2px 0 6px}
 .lastov{background:#fef3c7;color:#92400e;font-weight:800;border-radius:10px;padding:8px 10px;text-align:center;font-size:14px}
-.runs.many button{min-height:0!important;height:auto!important;padding-top:9px!important;padding-bottom:9px!important}
+.runs.many button{font-size:16px!important;min-height:0!important;height:auto!important;padding-top:9px!important;padding-bottom:9px!important}
 .livedot{width:9px;height:9px;border-radius:50%;background:#9aa3b2;display:inline-block}
 .livedot.on{background:#22c55e}.livedot.wait{background:#f59e0b;animation:bl 1.2s infinite}
 .cam{position:fixed;inset:0;background:#000;color:#fff;overflow:hidden}
@@ -438,7 +438,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v26</div>
+  <div class="mute ver">Cricket Cam v27</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -1042,7 +1042,7 @@ function renderScore(){
     h+=`<div class="pad">${lastOvNow?'<div class="lastov">⚠ Last over: normal rules · wides &amp; no-balls are 1 run and re-bowled</div>':''}<div class="m6"><div>Max ${st.bpo} balls per over<div class="sm">${S.ec?'On — wides & no-balls count as a ball':'Off — wides & no-balls are re-bowled'}</div></div><button class="sw ${S.ec?'on':''}" aria-label="Max balls per over" onclick="addEv({k:'max6',on:${!S.ec}});toast('Max ${st.bpo} balls ${S.ec?'off':'on'} — from this ball on')"></button></div>`;
     h+=`<div class="grid g4 xs">${xs.map(([k,l])=>`<button class="${ui.x===k?'sel':''}" onclick="tx('${k}')">${l}</button>`).join('')}</div>
     <div class="hint">${ui.x?({wd:st.wideRuns?'Wide — tap 0, or the runs they ran':'Wide — tap the runs for this wide (e.g. 3)',nb:'No ball — tap the runs off the bat',b:'Bye — tap the runs',lb:'Leg bye — tap the runs'})[ui.x]:'Tap a batter to change strike'}</div>
-    <div class="grid g4 runs ${ui.x==='wd'||ui.x==='nb'?'many':''}">${(ui.x==='wd'||ui.x==='nb'?[0,1,2,3,4,5,6,7,8]:[0,1,2,3,4,5,6]).map(r=>`<button onclick="ball(${r})">${r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>${acts}</div>`;
+    <div class="grid g4 runs ${ui.x==='wd'||ui.x==='nb'?'many':''}">${(ui.x==='wd'||ui.x==='nb'?[0,1,2,3,4,5,6,7,8]:[0,1,2,3,4,5,6]).map(r=>`<button onclick="ball(${r})">${ui.x==='wd'?(st.wideRuns?'Wide +'+r:'Wide '+r):ui.x==='nb'?'NB +'+r:r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>${acts}</div>`;
   }
   h+=`</div>`;
   app.innerHTML=h;if(hasLink)liveStatus();
@@ -1520,7 +1520,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=26;
+const APP_VER=27;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
