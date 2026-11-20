@@ -322,7 +322,7 @@ function gW(I,n){if(!I.W[n]){I.W[n]={balls:0,r:0,w:0,m:0};I.wO.push(n)}return I.
 function swp(I){const t=I.s;I.s=I.n;I.n=t}
 function lab(e,st){const x=e.x||'',r=e.r||0;
   if(e.w)return{l:'W',c:'w',s:r?r+'+W':'W'};
-  if(x==='wd')return{l:(r?r+st.wideRuns:'')+'wd',c:'ext',s:r?r+'+Wd':'Wd'};
+  if(x==='wd')return e.exact?{l:(r>1?r:'')+'wd',c:'ext',s:(r>1?r+' ':'')+'Wd'}:{l:(r?r+st.wideRuns:'')+'wd',c:'ext',s:r?r+'+Wd':'Wd'};
   if(x==='nb')return{l:(r?r:'')+'nb',c:'ext',s:r?r+'+Nb':'Nb'};
   if(x==='b'||x==='lb')return{l:r+x,c:'ext',s:r+(x==='b'?'B':'Lb')};
   return{l:String(r),c:r===4?'four':r===6?'six':r===0?'dot0':''}}
@@ -345,7 +345,7 @@ function compute(upto){
     if(e.k==='ball'){
       const x=e.x||'',r=e.r||0,wd=x==='wd',nb=x==='nb';
       const lastOv=!!st.lastNormal&&Math.floor(I.cnt/bpo)===st.overs-1,st2=lastOv?Object.assign({},st,{wideRuns:Math.min(st.wideRuns,1),nbRuns:1}):st;
-      const pen=wd?st2.wideRuns:nb?st2.nbRuns:0,tr=r+pen;
+      const pen=wd?(e.exact?0:st2.wideRuns):nb?st2.nbRuns:0,tr=r+pen;
       const no=Math.floor(I.cnt/bpo)+'.'+(I.cnt%bpo+1);
       const sn=I.s,bn=I.bowler,pr0=I.runs,sr0=sn&&I.B[sn]?I.B[sn].r:0;let W0=null;
       I.runs+=tr;
@@ -363,7 +363,7 @@ function compute(upto){
         if(nm){const b=gB(I,nm);if(st.wicketPen)b.r-=st.wicketPen;if(!st.stayIn){b.out=e.w.how;b.bw=bn;b.f=e.w.f||null;I[who]=null}W0={nm,b,how:e.w.how}}
         if(w&&e.w.how!=='runout'&&e.w.how!=='other')w.w++;
       }
-      if(r%2===1&&!(wd&&!st.wideRuns))swp(I);
+      if(r%2===1&&!(wd&&(e.exact||!st.wideRuns)))swp(I);
       S.balls.push({t:e.t,label:`${S.inns.length===1?'1st':'2nd'} inns ${no} · ${bn||'?'} to ${sn||'?'}: ${L.l}  [${fmt(e.t)}]`});
       const ovEnd=counts&&I.cnt%bpo===0;if(ovEnd){if(I.ovR===0&&I.ovBs.length===1&&w)w.m++;swp(I);I.last=I.bowler;I.bowler=null;I.prev=I.over;I.over=[];I.ovR=0;I.ovBs=[]}
       chk(I,st);
@@ -438,7 +438,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v27</div>
+  <div class="mute ver">Cricket Cam v28</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -663,7 +663,7 @@ function renderSetup(){
   h+=`<div class="card"><b>Rules</b>
     <div class="grid g2"><div><label>Overs per innings</label><input id="so" type="number" inputmode="numeric" min="1" value="${st.overs}"></div><div><label>Balls per over</label><input id="sb" type="number" inputmode="numeric" min="1" value="${st.bpo}"></div></div>
     <label class="tog"><input type="checkbox" id="sx" ${st.extrasCount?'checked':''}><span>Wides &amp; no-balls count as a ball<div class="sm">The over always ends after the set number of balls, even if there were wides</div></span></label>
-    <div class="grid g3"><div><label>Runs for a wide <span class="sm">(0 = you pick)</span></label><input id="sw" type="number" inputmode="numeric" min="0" value="${st.wideRuns}"></div><div><label>Runs for a no-ball</label><input id="sn" type="number" inputmode="numeric" min="0" value="${st.nbRuns}"></div><div><label>Runs lost when out</label><input id="sp" type="number" inputmode="numeric" min="0" value="${st.wicketPen}"></div></div>
+    <div class="grid g3"><input type="hidden" id="sw" value="${st.wideRuns}"><div><label>Runs for a no-ball</label><input id="sn" type="number" inputmode="numeric" min="0" value="${st.nbRuns}"></div><div><label>Runs lost when out</label><input id="sp" type="number" inputmode="numeric" min="0" value="${st.wicketPen}"></div></div>
     <label class="tog"><input type="checkbox" id="ss" ${st.stayIn?'checked':''}><span>Batters stay in when they're out<div class="sm">For pairs-style indoor cricket. Leave off for normal rules.</div></span></label>
     <label class="tog"><input type="checkbox" id="sln" ${st.lastNormal?'checked':''}><span>Last over uses normal rules<div class="sm">In the final over of each innings, wides &amp; no-balls are re-bowled (don't count as a ball) and a no-ball is 1 run. Runs off the bat on a no-ball still go to the batter.</div></span></label>
   </div><button class="pri block big-start" onclick="saveSetup()">${ui.draftFresh?'Start scoring':'Save'}</button>
@@ -1041,8 +1041,8 @@ function renderScore(){
     const lastOvNow=st.lastNormal&&Math.floor(I.cnt/st.bpo)===st.overs-1;
     h+=`<div class="pad">${lastOvNow?'<div class="lastov">⚠ Last over: normal rules · wides &amp; no-balls are 1 run and re-bowled</div>':''}<div class="m6"><div>Max ${st.bpo} balls per over<div class="sm">${S.ec?'On — wides & no-balls count as a ball':'Off — wides & no-balls are re-bowled'}</div></div><button class="sw ${S.ec?'on':''}" aria-label="Max balls per over" onclick="addEv({k:'max6',on:${!S.ec}});toast('Max ${st.bpo} balls ${S.ec?'off':'on'} — from this ball on')"></button></div>`;
     h+=`<div class="grid g4 xs">${xs.map(([k,l])=>`<button class="${ui.x===k?'sel':''}" onclick="tx('${k}')">${l}</button>`).join('')}</div>
-    <div class="hint">${ui.x?({wd:st.wideRuns?'Wide — tap 0, or the runs they ran':'Wide — tap the runs for this wide (e.g. 3)',nb:'No ball — tap the runs off the bat',b:'Bye — tap the runs',lb:'Leg bye — tap the runs'})[ui.x]:'Tap a batter to change strike'}</div>
-    <div class="grid g4 runs ${ui.x==='wd'||ui.x==='nb'?'many':''}">${(ui.x==='wd'||ui.x==='nb'?[0,1,2,3,4,5,6,7,8]:[0,1,2,3,4,5,6]).map(r=>`<button onclick="ball(${r})">${ui.x==='wd'?(st.wideRuns?'Wide +'+r:'Wide '+r):ui.x==='nb'?'NB +'+r:r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>${acts}</div>`;
+    <div class="hint">${ui.x?({wd:'Wide — tap Wide (1 run) or Wide 3–8 for exactly that many runs',nb:'No ball — tap the runs off the bat',b:'Bye — tap the runs',lb:'Leg bye — tap the runs'})[ui.x]:'Tap a batter to change strike'}</div>
+    <div class="grid g4 runs ${ui.x==='wd'||ui.x==='nb'?'many':''}">${(ui.x==='wd'?[1,3,4,5,6,7,8]:ui.x==='nb'?[0,1,2,3,4,5,6,7,8]:[0,1,2,3,4,5,6]).map(r=>`<button onclick="ball(${r})">${ui.x==='wd'?(r===1?'Wide':'Wide '+r):ui.x==='nb'?'NB +'+r:r}</button>`).join('')}<button class="wk" onclick="wicketMenu()">W</button></div>${acts}</div>`;
   }
   h+=`</div>`;
   app.innerHTML=h;if(hasLink)liveStatus();
@@ -1059,7 +1059,7 @@ function canBowl(){
   if(!I.s||!I.n){pickBatter(!I.s?'s':'n');return false}
   if(!I.bowler){pickBowler(false);return false}
   return true}
-function ball(r){if(!canBowl())return;const x=ui.x;ui.x='';addEv({k:'ball',r,x})}
+function ball(r){if(!canBowl())return;const x=ui.x;ui.x='';const e={k:'ball',r,x};if(x==='wd')e.exact=1;addEv(e)}
 function pickBatter(slot){
   const I=compute().cur,st=M.settings,team=M.teams[I.bat];
   const items=team.players.filter(p=>p!==I.s&&p!==I.n&&(st.stayIn||!I.B[p]||!I.B[p].out||I.B[p].out==='rh'))
@@ -1520,7 +1520,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=27;
+const APP_VER=28;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
