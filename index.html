@@ -228,6 +228,7 @@ body.hasnav .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .livenow{border:2px solid #e0313f}.pill.red{background:#e0313f;color:#fff}.warnc{border:2px solid #f59e0b;background:#fffbeb}
 .wcv{border-radius:12px;overflow:hidden;margin:0 0 12px;background:#000}.wcv canvas{display:block;width:100%;height:auto}
 body.camon{background:#000!important}body.camon:before{display:none}
+.expdl{display:block;text-align:center;padding:13px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--navy);font-weight:800;text-decoration:none;margin:8px 0}
 #vsp{display:none;position:fixed;top:0;left:0;right:0;z-index:45;background:#000;padding-top:env(safe-area-inset-top)}
 #vsp .vsv{position:relative;margin:0 auto;max-width:100%}#vsp .vsv video{display:block;width:100%;height:100%;object-fit:contain;background:#000}#vsp #vsov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #vsp .vsc{display:flex;gap:6px;align-items:center;justify-content:center;padding:6px;flex-wrap:wrap}#vsp .vsc button{background:rgba(255,255,255,.16);color:#fff;border:none;padding:8px 12px;margin:0;font-weight:700}
@@ -433,7 +434,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v21</div>
+  <div class="mute ver">Cricket Cam v22</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -1513,7 +1514,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=21;
+const APP_VER=22;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -1701,6 +1702,18 @@ function vsLoop(){if(!document.body.classList.contains('vsmode')||!M||!M.vmode){
     if(W&&H){if(c.width!==W||c.height!==H){c.width=W;c.height=H}const x=c.getContext('2d');x.clearRect(0,0,W,H);try{drawAll(x,W,H,VV.currentTime+(M.offset||0))}catch(e){}}}
   VS.raf=requestAnimationFrame(vsLoop)}
 VV.addEventListener('loadedmetadata',()=>{if(document.body.classList.contains('vsmode'))vsSize()});window.addEventListener('resize',()=>{if(document.body.classList.contains('vsmode'))vsSize()});
+/* exported videos: keep them safe in Recordings + clear save buttons */
+const _doExport=doExport;doExport=async function(){await _doExport();if(lastBlob)expKeep()};
+async function expKeep(){const id='x'+Date.now().toString(36),title=(M?M.teams[0].name+' v '+M.teams[1].name:'Cricket')+' (with scorecard)',type=lastBlob.type||'video/mp4';
+  const meta={id,title,start:Date.now(),ext:lastExt,type,size:lastBlob.size,dur:0,state:'done'};
+  try{await recPutMeta(meta);await recPutChunk(id,0,lastBlob);await recRefresh()}catch(e){}
+  PREP[id]=new File([lastBlob],recName(meta),{type});EXPID=id;
+  const sb=$('#saveb');if(sb){sb.outerHTML=`<div id="saveb2"><button class="pri block" onclick="recSaveNow('${id}')">📤 Share / AirDrop to iPhone</button>
+    <a class="block expdl" href="${URL.createObjectURL(PREP[id])}" download="${esc(PREP[id].name)}" target="_blank">⬇ Download to this computer</a>
+    <p class="mute">Also kept safe in 🎞 Recordings, so it isn't lost if you leave this page.</p></div>`}
+  toast('Video ready — also kept in 🎞 Recordings')}
+let EXPID=null;
+saveVideo=function(){if(EXPID&&PREP[EXPID])recSaveNow(EXPID);else if(lastBlob){const f=new File([lastBlob],fileBase()+'.'+lastExt,{type:lastBlob.type});try{if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).catch(()=>{});return}}catch(e){}const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;a.target='_blank';document.body.appendChild(a);a.click()}};
 function vsRepick(inp){const f=inp.files&&inp.files[0];if(!f)return;vURL=URL.createObjectURL(f);VV.src=vURL;VV.load();VV.playbackRate=2;render()}
 function vsPlay(){if(VV.paused){VV.playbackRate=VV.playbackRate||2;VV.play().catch(()=>{})}else VV.pause()}
 function vsSeek(d){VV.currentTime=Math.max(0,Math.min((VV.duration||1e9)-0.1,(VV.currentTime||0)+d))}
