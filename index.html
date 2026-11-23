@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Cricket Cam">
-<meta name="theme-color" content="#0e2a5c">
+<meta name="theme-color" content="#0B1220">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <link rel="manifest" href="manifest.json">
@@ -267,6 +267,71 @@ body:before{content:'';position:fixed;left:0;right:0;bottom:0;height:38vh;z-inde
 .sc>.top{background:linear-gradient(90deg,#0a1a44,#1340a8);color:#fff;border-bottom:none}.sc>.top .ib{color:#fff}
 .updbar{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));background:#0e2a5c;color:#fff;padding:12px 14px;border-radius:12px;text-align:center;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 @media (orientation:landscape){.cbot{left:auto;top:0;bottom:0;right:0;width:190px;justify-content:center;padding:calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 14px 10px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.6))}.cbot .row{flex-direction:column}.ccode{left:calc(50% - 80px)}}
+
+/* ---- v29 app theme (matches iOS app) ---- */
+:root{--bg:#0B1220;--card:#111A2E;--card2:#1E293B;--line:#1E293B;--text:#F1F5F9;--mute:#94A3B8;--acc:#22C55E;--red:#EF4444;--hl:#FDE68A}
+body{background:#0B1220!important;color:#F1F5F9;font-family:Inter,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+body:before{display:none!important}
+h1,h2,h3,.bigscore,.hero .ht,.tile b,.appbar b,.top .ttl,.stg b,.cap b,.lc-s{font-family:"Space Grotesk",Inter,-apple-system,sans-serif}
+.card,.stcard{background:#111A2E!important;border-color:#1E293B!important;box-shadow:none!important}
+button{background:#1E293B;border-color:#334155;color:#F1F5F9}
+button.pri,button.sel,.plist button.sel,.pchip.on{background:#22C55E!important;border-color:#22C55E!important;color:#052E16!important}
+.tile.prim small{color:#052E16!important;opacity:.8}
+button.dan{background:transparent;border-color:#7F1D1D;color:#F87171}
+input,select,textarea{background:#0B1220;border-color:#334155;color:#F1F5F9}
+.need{background:#052E16;border-color:#14532D;color:#86EFAC}
+.back{background:rgba(0,0,0,.6)}.sheet{background:#111A2E!important}
+.plist button,.pchip{background:#1E293B}
+.ib,.appbar .abk,.bigscore{color:#F1F5F9}
+.tbl td{color:#CBD5E1}.tbl th{color:#F1F5F9}
+.pad{background:#0F1729;border-top:1px solid #1E293B}
+.pad button{background:#1E293B;color:#F1F5F9;border-radius:14px}
+.pad .runs:not(.many) button[onclick="ball(4)"]{background:#F97316;color:#431407}
+.pad .runs:not(.many) button[onclick="ball(6)"]{background:#22C55E;color:#052E16}
+.pad .runs .wk{background:#EF4444;color:#fff}
+.pad .xs button{background:#334155;color:#F1F5F9}
+.pad .xs button.sel{background:#FDE68A;color:#422006}
+.pad .acts button{border-color:#334155;color:#CBD5E1;background:transparent}
+.pad .hint,.m6 .sm{color:#94A3B8}
+.selpad{background:#FDE68A}.selpad .acts button,.selpad button{color:#111}
+.sw{background:#334155}.pad .sw{background:#334155}
+.appbar{background:rgba(11,18,32,.92)!important;color:#F1F5F9;border-bottom:1px solid #1E293B!important}
+.sc>.top{background:#111A2E!important;border-bottom:1px solid #1E293B!important}
+.hero{background:#111A2E!important;border:1px solid #1E293B;box-shadow:none!important}
+.hero:before,.hero:after{display:none}.hero .logo{background:#052E16}.hero .ht span{color:#22C55E}.hero .hs{color:#94A3B8;opacity:1}
+.livecard{border-color:#22C55E}.livecard .pill{background:#450A0A;color:#FCA5A5}
+.tile{background:#111A2E;border:1px solid #1E293B!important;border-radius:20px}
+.tiles .tile{box-shadow:none!important}.tiles .tile small{opacity:.85}
+.t-new{background:#22C55E!important;color:#052E16!important}.tiles .t-new small{color:#052E16!important}
+.t-watch{background:#3B82F6!important;color:#fff!important}
+.t-cam{background:#F97316!important;color:#431407!important}.tiles .t-cam small{color:#431407!important}
+.t-rec{background:#A78BFA!important;color:#1E1B4B!important}.tiles .t-rec small{color:#1E1B4B!important}
+.t-tour{background:#FDE68A!important;color:#422006!important}.tiles .t-tour small{color:#422006!important}
+.t-team{background:#14B8A6!important;color:#042F2E!important}.tiles .t-team small{color:#042F2E!important}
+.t-cont{background:#6366F1!important;color:#fff!important}
+.t-past{background:#1E293B!important;color:#F1F5F9!important}
+#nav{background:rgba(11,18,32,.96)!important;border-top:1px solid #1E293B!important}#nav button{color:#94A3B8}#nav button.on{color:#22C55E}
+.tabs button.on{color:#F1F5F9;border-bottom-color:#22C55E}
+.hic{background:#1E293B}
+.chip,.ochip{background:#334155;color:#F1F5F9}
+.chip.four,.ochip.four{background:#F97316;color:#431407}.chip.six,.ochip.six{background:#22C55E;color:#052E16}
+.chip.w,.ochip.w{background:#EF4444;color:#fff}.chip.ext,.ochip.ext{background:#FDE68A;color:#422006}
+.chip.dot0,.ochip.dot0{background:#1E293B;color:#94A3B8}
+.stg div{background:#1E293B}
+.seg{background:#0B1220!important;border:1px solid #1E293B}.seg button{color:#94A3B8}.seg button.on{background:#1E293B!important;color:#F1F5F9!important;box-shadow:none}
+.plist2{background:#111A2E}.prow{background:#111A2E}.prow.on{background:#052E16}.prow .ck{border-color:#475569}
+.capb,.lastov{background:#422006;color:#FDE68A}
+.trow td{background:color-mix(in srgb,var(--tc) 14%,#111A2E)!important}
+.htable{border-top:4px solid #22C55E!important}
+.cap.or{background:#F97316;color:#431407}.cap.pu{background:#A78BFA;color:#1E1B4B}
+.warnc{background:#2A1A05}.offst{color:#94A3B8}
+.expdl{background:#1E293B;color:#F1F5F9;border-color:#334155}
+.nxcard{border-color:#22C55E!important}.nxst.good{color:#86EFAC}.nxst.bad{color:#FCA5A5}.nxdl{background:#22C55E;color:#052E16!important}
+.vsl{background:rgba(255,255,255,.08)}
+.updbar{background:#1E293B;border:1px solid #22C55E}
+#toast{background:#F1F5F9;color:#0B1220}
+.prog{background:#1E293B}.err{color:#F87171}
+.tbadge{color:#fff}
 </style>
 </head>
 <body>
@@ -400,7 +465,7 @@ function hdr(t){return`<div class="appbar"><button class="abk" aria-label="Home"
 /* ================= HOME ================= */
 function renderHome(){
   const hasCam=typeof renderCam==='function',live=M&&!matchDone(M),v14=typeof OFF!=='undefined';
-  let h=`<div class="wrap home"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket Cam</div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
+  let h=`<div class="wrap home"><div class="hero"><div class="logo">🏏</div><div><div class="ht">Cricket <span>Cam</span></div><div class="hs">Live TV-style scorecards on your match videos</div></div></div>`;
   let hb='';
   if(v14&&ui.recovered)hb+=`<div class="card warnc" onclick="ui.recovered=0;go('recs')"><b>🛟 Recovered recording</b><div class="mute">The app closed while recording, but the video was saved. Tap to open Recordings.</div></div>`;
   if(v14&&OFF.live&&!OFF.live.done&&Date.now()-OFF.live.ts<20*60000&&!(M&&M.code===OFF.live.code&&live))
@@ -438,7 +503,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v28</div>
+  <div class="mute ver">Cricket Cam v29</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -646,7 +711,7 @@ function pickSaved(i,id){syncSetup();const t=getTeams().find(a=>a.id===id);if(!t
 function renderSetup(){
   const D=ui.draft,st=D.settings,T=getTeams();
   let h=`<div class="wrap"><div class="hdr"><button class="mini" onclick="go(ui.back||'home')">‹ Back</button><b>${ui.draftFresh?'New match':'Teams, players &amp; rules'}</b></div>`;
-  if(!ui.draftFresh&&D.events.length)h+=`<div class="need" style="background:#f3f5f9;border-color:#e4e8ef;color:#0f172a">Game in progress — you can change anything here. Rule changes (like runs for a wide) apply to the whole match, including balls already scored.</div>`;
+  if(!ui.draftFresh&&D.events.length)h+=`<div class="need" style="background:#1E293B;border-color:#334155;color:#F1F5F9">Game in progress — you can change anything here. Rule changes (like runs for a wide) apply to the whole match, including balls already scored.</div>`;
   ui.st.forEach((s,i)=>{
     const n=s.sel.length;
     h+=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Team ${i+1}</b>
@@ -1028,7 +1093,7 @@ function renderScore(){
     if(S.inns.length===1){const ot=M.teams[1-I.bat];
       h+=`<div class="need2">Innings over — ${esc(ot.name)} need ${I.runs+1} to win</div><button class="bigsel" onclick="addEv({k:'inn',bat:${1-I.bat}})">Start 2nd innings</button>`;
     }else{
-      h+=`<div class="need2">${esc(result(S))}${potmText(S)?`<div class="sm">⭐ Player of the match: ${esc(potmText(S))}</div>`:''}</div><div class="grid g2"><button class="bigsel" onclick="rematch()">⚡ Rematch</button><button class="bigsel" style="background:#e8edf5;color:#0f172a" onclick="go('home')">🏠 Home</button></div>`;
+      h+=`<div class="need2">${esc(result(S))}${potmText(S)?`<div class="sm">⭐ Player of the match: ${esc(potmText(S))}</div>`:''}</div><div class="grid g2"><button class="bigsel" onclick="rematch()">⚡ Rematch</button><button class="bigsel" style="background:#1E293B;color:#F1F5F9" onclick="go('home')">🏠 Home</button></div>`;
     }
     h+=acts+`</div>`;
   }else if(!I.s||!I.n||!I.bowler){
@@ -1495,7 +1560,7 @@ function pubMatch(now){
   syncConnect();clearTimeout(syncT);
   syncT=setTimeout(()=>{const p=JSON.stringify({ts:Date.now(),M});SYNC.cls.forEach(cl=>{if(cl.connected)try{cl.publish(matchTopic(M.code),p,{retain:true,qos:0})}catch(e){}})},now?0:300)}
 function syncPill(){if(!window.mqtt||!M)return'';const c=M.code;return`<button class="hic" onclick="codeInfo()" aria-label="Match code">☁️ ${c?esc(c):'…'}</button>`}
-function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:var(--navy)">${esc(M&&M.code||'…')}</div>
+function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:#22C55E">${esc(M&&M.code||'…')}</div>
   <p class="mute">This match saves online after every ball. To carry on scoring on another device, open Cricket Cam there, tap <b>↪️ Continue a match</b> on Home, and type this code.</p>
   <p class="mute">Only score on one device at a time.</p><button class="block" onclick="closeModal()">OK</button>`};showModal()}
 function contMenu(){ui.modal={title:'Continue a match',html:`<p class="mute">Type the match code from the other device's scoring screen (the ☁️ button next to ⚙︎).</p>
@@ -1520,7 +1585,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=28;
+const APP_VER=29;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -1811,7 +1876,7 @@ function doCont(){
   setTimeout(()=>{if(!done&&!found){done=true;end();const s2=$('#cst');if(s2)s2.textContent="Couldn't find that match. Check the code, and that both devices have internet."}},12000)}
 const _contDone=contDone;
 contDone=function(m,c,force){LOCKED=false;LOCK.other=null;_contDone(m,c);lockSub();lockPub(true)};
-function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:var(--navy)">${esc(M&&M.code||'…')}</div>
+function codeInfo(){ui.modal={title:'Match code',html:`<div style="text-align:center;font-size:40px;font-weight:900;letter-spacing:6px;margin:6px 0 10px;color:#22C55E">${esc(M&&M.code||'…')}</div>
   <p class="mute">This match saves online after every ball.</p><p class="mute"><b>Carry on scoring on another device:</b> open Cricket Cam there → <b>↪️ Continue a match</b> → type this code.</p>
   <p class="mute"><b>Let mates watch live:</b> send them the watch link.</p>
   <button class="pri block" onclick="shareWatch(M&&M.code)">📤 Share watch link</button><button class="block" onclick="closeModal()">OK</button>`};showModal()}
