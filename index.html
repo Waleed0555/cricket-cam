@@ -480,7 +480,7 @@ function renderHome(){
   tiles=`<div class="tiles">
     ${hasCam?`<button class="tile prim t-cam" onclick="go('cam')"><span class="ti">📷</span><b>Camera</b><small>Film with live score</small></button>`:''}
     <button class="tile t-new" onclick="newMatchMenu()"><span class="ti">✏️</span><b>New match</b><small>Set up and score</small></button>
-    <button class="tile t-tour" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Table, runs &amp; wickets</small></button>
+    <button class="tile t-tour" onclick="go('tour')"><span class="ti">🏆</span><b>Tournament</b><small>Points table</small></button>
     ${v14?`<button class="tile t-watch" onclick="watchMenu()"><span class="ti">👀</span><b>Watch live</b><small>Follow a match</small></button>`:''}
     ${v14?`<button class="tile t-rec" onclick="go('recs')"><span class="ti">🎞</span><b>Recordings ${rc}</b><small>Save to Camera Roll</small></button>`:''}
     <button class="tile t-team" onclick="go('teams')"><span class="ti">👥</span><b>My teams</b><small>Squads and players</small></button>
@@ -491,7 +491,7 @@ function renderHome(){
     const AP=allPlayers(t),oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
     tbl=`<div class="card mini htable" onclick="go('tour')"><div class="mh"><b>🏆 Points table</b><span class="mute">View all ›</span></div>
     <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>Pts</th><th>NRR</th></tr>${sd.map((r,i)=>`<tr class="trow" style="--tc:${teamCol(r.name,r.i)}"><td>${i===0?'🥇 ':''}<b>${esc(r.name)}</b>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}</td></tr>`).join('')}</table>
-    ${oc&&(oc.r||pc.w)?`<div class="caps" style="margin:10px 0 0"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs · ${esc(oc.s)}</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets · ${esc(pc.s)}</small></div></div>`:''}</div>`}}catch(e){}
+    </div>`}}catch(e){}
   try{const L=pastList();if(L.length){const m=L[0];let res='',sc='';withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b>`).join(' &nbsp;v&nbsp; ')});
     last=`<div class="card mini hlast"><div class="mh" onclick="go('past')"><b>📋 Last match</b><span class="mute">All ›</span></div><div style="margin-top:6px" onclick="go('past')">${sc}</div><div class="need" style="margin:8px 0 0">${esc(res)}</div>
     ${M&&m===M&&!M.abandoned?`<button class="block" style="margin:10px 0 0" onclick="rematch()">⚡ Rematch — same teams &amp; rules</button>`:''}</div>`}}catch(e){}
@@ -503,7 +503,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v29</div>
+  <div class="mute ver">Cricket Cam v30</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -649,7 +649,7 @@ function renderPast(){const L=pastList();ui.past=L;
   app.innerHTML=h}
 function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
   ui.modal={title:'Delete this match?',html:`<p class="mute">${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}. This can't be undone.</p>
-  ${inTour?'<label class="tog"><input type="checkbox" id="deltour" checked><span>Also remove it from the tournament table<div class="sm">Takes its points, NRR, runs and wickets back out</div></span></label>':''}
+  ${inTour?'<label class="tog"><input type="checkbox" id="deltour" checked><span>Also remove it from the tournament table<div class="sm">Takes its points and NRR back out</div></span></label>':''}
   <button class="dan block" onclick="doPastDel(${i})">Delete match</button><button class="block" onclick="closeModal()">Cancel</button>`};showModal()}
 function doPastDel(i){const m=ui.past[i];if(!m)return;const rmT=$('#deltour')?$('#deltour').checked:false;
   putHist(getHist().filter(x=>x.uid!==m.uid));
@@ -936,8 +936,7 @@ function standings(t){
     else{const app=(of?rf/of:0)-(ob?ra/ob:0);nrr=b.p?((b.nrr||0)*b.p+app*n)/(b.p+n):app;est=b.p>0}
     return{i,name:tm.name,short:tm.short,p,w,l,tie,pts:w*t.ptsWin+tie*t.ptsTie,nrr,est}}).sort((a,b)=>b.pts-a.pts||b.nrr-a.nrr)}
 function playerTotals(t,i){const o={};const g=k=>o[k]=o[k]||{n:k,w:0,r:0,b:0,f4:0,f6:0,inn:0,out:0,hs:-1,hsNo:0,duck:0,bb:0,rc:0,best:null,ar:0};
-  const bp=t.base.pl[i]||{};for(const k in bp){const x=g(k);x.w+=bp[k].w||0;x.r+=bp[k].r||0}
-  t.matches.forEach(m=>{const p=(m.pl&&m.pl[i])||{};for(const k in p){const s=p[k],x=g(k);x.w+=s.w||0;x.r+=s.r||0;x.ar+=s.r||0;x.b+=s.b||0;x.f4+=s.f4||0;x.f6+=s.f6||0;x.inn+=s.inn||0;x.out+=s.out||0;x.duck+=s.duck||0;x.bb+=s.bb||0;x.rc+=s.rc||0;
+    t.matches.forEach(m=>{const p=(m.pl&&m.pl[i])||{};for(const k in p){const s=p[k],x=g(k);x.w+=s.w||0;x.r+=s.r||0;x.ar+=s.r||0;x.b+=s.b||0;x.f4+=s.f4||0;x.f6+=s.f6||0;x.inn+=s.inn||0;x.out+=s.out||0;x.duck+=s.duck||0;x.bb+=s.bb||0;x.rc+=s.rc||0;
     if(s.inn&&((s.hs||0)>x.hs||((s.hs||0)===x.hs&&s.hsNo))){x.hs=s.hs||0;x.hsNo=s.hsNo||0}
     if(s.bw&&(!x.best||s.bw[0]>x.best[0]||(s.bw[0]===x.best[0]&&s.bw[1]<x.best[1])))x.best=s.bw.slice()}});
   return Object.values(o).sort((a,b)=>b.r-a.r||b.w-a.w)}
@@ -952,7 +951,7 @@ function renderTour(){
   const T=getTours();
   let h=`<div class="wrap">${hdr('Tournament')}`;
   if(!T.length){
-    h+=`<div class="card"><b>No tournament yet</b><p class="mute">Load your Rising Stars v Seasoned Stars tournament with the numbers from the games you've already played (points, NRR, runs and wickets).</p>
+    h+=`<div class="card"><b>No tournament yet</b><p class="mute">Load your Rising Stars v Seasoned Stars tournament with the numbers from the games you've already played (points and NRR).</p>
     <button class="pri block" onclick="createSeed()">Load RS v SS (4 games played)</button></div></div>`;app.innerHTML=h;return}
   const t=T.find(x=>x.id===ui.tourId)||T[0];ui.tourId=t.id;const ed=canEditTour(t);
   if(T.length>1)h+=`<select onchange="ui.tourId=this.value;render()">${T.map(x=>`<option value="${x.id}" ${x.id===t.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
@@ -962,18 +961,8 @@ function renderTour(){
   <table class="pt"><tr><th>Team</th><th>P</th><th>W</th><th>L</th>${hasT?'<th>T</th>':''}<th>Pts</th><th>NRR</th></tr>
   ${sd.map((r,k)=>`<tr class="trow" style="--tc:${teamCol(r.name,r.i)}"><td>${k===0?'🥇 ':''}<b>${esc(r.name)}</b> <span class="mute">(${esc(r.short)})</span>${formGuide(t,r.i).length?`<div class="form">${formGuide(t,r.i).map(f=>`<i class="f${f}">${f}</i>`).join('')}</div>`:''}</td><td>${r.p}</td><td>${r.w}</td><td>${r.l}</td>${hasT?`<td>${r.tie}</td>`:''}<td><b>${r.pts}</b></td><td>${fmtN(r.nrr)}${r.est?'*':''}</td></tr>`).join('')}</table>
   ${sd.some(r=>r.est)?`<div class="mute sm2">* NRR estimated${ed?' — add the earlier games’ totals in “Edit starting numbers” to make it exact':''}.</div>`:''}${t.matches.length?'<div class="mute sm2">Form = last 5 games scored in the app (newest on the right).</div>':''}</div>`;
-  const AP=allPlayers(t),f=ui.tf==null?'all':ui.tf,FP=AP.filter(p=>f==='all'||p.ti===+f);
-  const oc=AP.slice().sort((a,b)=>b.r-a.r)[0],pc=AP.slice().sort((a,b)=>b.w-a.w||a.rc-b.rc)[0];
-  if(oc&&(oc.r||pc.w))h+=`<div class="caps"><div class="cap or"><span>🧢 Orange Cap</span><b>${esc(oc.n)}</b><small>${oc.r} runs · ${esc(oc.s)}</small></div><div class="cap pu"><span>🧢 Purple Cap</span><b>${esc(pc.n)}</b><small>${pc.w} wickets · ${esc(pc.s)}</small></div></div>`;
-  h+=`<div class="seg">${[['all','All'],...t.teams.map((tm,i)=>[String(i),tm.short||tm.name])].map(([k,l])=>`<button class="${String(f)===k?'on':''}" style="${String(f)===k&&k!=='all'?`background:${teamCol(t.teams[+k].name,+k)};color:#fff`:''}" onclick="ui.tf='${k}';render()">${esc(l)}</button>`).join('')}</div>`;
-  const bpo=(M&&M.settings&&M.settings.bpo)||6,tn=f==='all';
-  const BAT=FP.filter(p=>p.r>0||p.inn>0).sort((a,b)=>b.r-a.r||(a.inn-b.inn));
-  h+=`<div class="lbrow"><div class="card lbr"><b>🏏 Top Run Scorers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>R</th><th>Inn</th><th>HS</th><th>4s</th><th>6s</th><th>SR</th><th>Avg</th></tr>
-  ${BAT.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="tchip" style="background:${teamCol(t.teams[p.ti].name,p.ti)}">${esc(p.s)}</span>`:''}</td><td><b>${p.r}</b></td><td>${p.inn||'–'}</td><td>${p.inn?p.hs+(p.hsNo?'*':''):'–'}</td><td>${p.inn?p.f4:'–'}</td><td>${p.inn?p.f6:'–'}</td><td>${p.b?(p.ar/p.b*100).toFixed(0):'–'}</td><td>${p.out?(p.ar/p.out).toFixed(1):p.inn?'–':'–'}</td></tr>`).join('')||'<tr><td colspan="9" class="mute">No runs yet</td></tr>'}</table></div></div>`;
-  const BWL=FP.filter(p=>p.w>0||p.bb>0).sort((a,b)=>b.w-a.w||(a.bb?a.rc/a.bb:9)-(b.bb?b.rc/b.bb:9));
-  h+=`<div class="card lbw"><b>🎯 Top Wicket Takers</b><div class="tscroll"><table class="pt lb"><tr><th>#</th><th>Player</th><th>W</th><th>O</th><th>R</th><th>Eco</th><th>Best</th></tr>
-  ${BWL.map((p,k)=>`<tr><td>${k+1}</td><td><b>${esc(p.n)}</b>${tn?` <span class="tchip" style="background:${teamCol(t.teams[p.ti].name,p.ti)}">${esc(p.s)}</span>`:''}</td><td><b>${p.w}</b></td><td>${p.bb?ovs(p.bb,bpo):'–'}</td><td>${p.bb?p.rc:'–'}</td><td>${p.bb?(p.rc/(p.bb/bpo)).toFixed(1):'–'}</td><td>${p.best?p.best[0]+'-'+p.best[1]:'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="mute">No wickets yet</td></tr>'}</table></div>
-  <div class="mute sm2">Inn, HS, 4s, 6s, SR, Avg, overs, economy and best count games scored in the app. Runs and wickets include the earlier games too.</div></div></div>`;
+  const AP=allPlayers(t),FP=AP;
+  const tn=true;
   const DK=FP.filter(p=>p.duck>0).sort((a,b)=>b.duck-a.duck);
   if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
   h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.slice().reverse().map(m=>{const j=t.matches.indexOf(m);return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}${m.potm?' · ⭐ '+esc(m.potm):''}</div></div>${ed?`<button class="mini" onclick="rmMatch(${j})">Remove</button>`:''}</div>`}).join(''):'<p class="mute">None yet. Games are added automatically when they finish.</p>'}</div>`;
@@ -981,7 +970,7 @@ function renderTour(){
   ${ed?'<button class="block" onclick="addTourTeam()">+ Add a team to this tournament</button><button class="block" onclick="editBase()">Edit starting numbers</button>':''}${tourAdminHtml(t)}</div>`;
   app.innerHTML=h}
 function addTourTeam(){const[,t]=curTour();const L=getTeams().filter(x=>!t.teams.some(y=>PK(y.name)===PK(x.name)));
-  ui.modal={title:'Add a team',html:L.length?`<p class="mute">Pick a team from My teams. It starts on 0 points and joins the table, runs and wickets.</p><div class="grid">${L.map(x=>`<button onclick="doAddTourTeam('${x.id}')"><span class="tbadge" style="background:${esc(x.color)}">${esc((x.short||short(x)).slice(0,3))}</span> ${esc(x.name)}</button>`).join('')}</div>`:'<p class="mute">Every saved team is already in this tournament. Make a new team in 👥 My teams first.</p><button class="block" onclick="closeModal();go(\'teams\')">Go to My teams</button>'};showModal()}
+  ui.modal={title:'Add a team',html:L.length?`<p class="mute">Pick a team from My teams. It starts on 0 points and joins the table.</p><div class="grid">${L.map(x=>`<button onclick="doAddTourTeam('${x.id}')"><span class="tbadge" style="background:${esc(x.color)}">${esc((x.short||short(x)).slice(0,3))}</span> ${esc(x.name)}</button>`).join('')}</div>`:'<p class="mute">Every saved team is already in this tournament. Make a new team in 👥 My teams first.</p><button class="block" onclick="closeModal();go(\'teams\')">Go to My teams</button>'};showModal()}
 function doAddTourTeam(id){const[T,t]=curTour();const x=getTeams().find(a=>a.id===id);if(!x)return;
   t.teams.push({name:x.name,short:x.short||short(x)});t.base.t.push({p:0,w:0,l:0,tie:0,nrr:0});t.base.pl.push({});t.baseTs=Date.now();putTours(T);closeModal();render();toast(x.name+' added to the tournament')}
 function createSeed(){const T=getTours();T.push(seedRSSS());putTours(T);render();toast('Tournament loaded 🏆')}
@@ -991,9 +980,6 @@ function rmMatch(j){if(ui.rmArm!==j){ui.rmArm=j;toast('Tap Remove again to take 
 function tourText(t){const sd=standings(t);
   let s=`${t.name} Points table (LIVE)\nTeam Played Won Loss Points NRR\n`;
   sd.forEach(r=>{s+=`${r.name} (${r.short}) ${r.p} ${r.w} ${r.l} ${r.pts} ${fmtN(r.nrr)}\n`});
-  const AP=allPlayers(t);s+=`\nTop run scorers\n`;AP.filter(p=>p.r>0).sort((a,b)=>b.r-a.r).slice(0,10).forEach((p,k)=>{s+=`${k+1}. ${p.n} (${p.s}) ${p.r}\n`});
-  s+=`\nTop wicket takers\n`;AP.filter(p=>p.w>0).sort((a,b)=>b.w-a.w).slice(0,10).forEach((p,k)=>{s+=`${k+1}. ${p.n} (${p.s}) ${p.w}\n`});
-  t.teams.forEach((tm,i)=>{s+=`\n${tm.name} (${tm.short}) — Wickets Taken / Runs Scored\n`;playerTotals(t,i).forEach(p=>{s+=`${p.n} ${p.w} ${p.r}\n`})});
   return s.trim()}
 function shareTour(){const[,t]=curTour();ui.shareText=tourText(t);
   ui.modal={title:'Share table',html:`<textarea id="shtx" rows="12" readonly style="font-size:13px">${esc(ui.shareText)}</textarea>
@@ -1003,8 +989,7 @@ function editBase(){const[,t]=curTour();
   t.teams.forEach((tm,i)=>{const b=t.base.t[i];const pl=t.base.pl[i]||{};
     h+=`<h3>${esc(tm.name)}</h3><div class="grid g4"><div><label>Played</label><input id="bp${i}" type="number" value="${b.p}"></div><div><label>Won</label><input id="bw${i}" type="number" value="${b.w}"></div><div><label>Lost</label><input id="bl${i}" type="number" value="${b.l}"></div><div><label>Tied</label><input id="bt${i}" type="number" value="${b.tie||0}"></div></div>
     <label>NRR</label><input id="bn${i}" inputmode="decimal" value="${b.nrr||0}">
-    <label>Exact NRR (optional): runs scored, overs faced, runs conceded, overs bowled</label><div class="grid g4"><input id="rf${i}" inputmode="decimal" placeholder="runs" value="${b.rf??''}"><input id="of${i}" inputmode="decimal" placeholder="overs" value="${b.of??''}"><input id="ra${i}" inputmode="decimal" placeholder="runs" value="${b.ra??''}"><input id="ob${i}" inputmode="decimal" placeholder="overs" value="${b.ob??''}"></div>
-    <label>Players — one per line: NAME, wickets, runs</label><textarea id="bpl${i}" rows="8" style="font-size:14px">${esc(Object.entries(pl).map(([n,v])=>`${n}, ${v.w}, ${v.r}`).join('\n'))}</textarea>`});
+    <label>Exact NRR (optional): runs scored, overs faced, runs conceded, overs bowled</label><div class="grid g4"><input id="rf${i}" inputmode="decimal" placeholder="runs" value="${b.rf??''}"><input id="of${i}" inputmode="decimal" placeholder="overs" value="${b.of??''}"><input id="ra${i}" inputmode="decimal" placeholder="runs" value="${b.ra??''}"><input id="ob${i}" inputmode="decimal" placeholder="overs" value="${b.ob??''}"></div>`});
   h+=`<button class="pri block" onclick="saveBase()">Save starting numbers</button>`;
   ui.modal={title:'Starting numbers',html:h};showModal()}
 function oversToDec(v){const s=String(v).trim();if(!s)return null;const[o,b]=s.split('.');const bpo=(M&&M.settings&&M.settings.bpo)||6;return(+o||0)+(b?(+b)/bpo:0)}
@@ -1013,9 +998,7 @@ function saveBase(){const[T,t]=curTour();
     const b={p:num('#bp'+i),w:num('#bw'+i),l:num('#bl'+i),tie:num('#bt'+i),nrr:num('#bn'+i)};
     const rf=$('#rf'+i).value.trim(),of=oversToDec($('#of'+i).value),ra=$('#ra'+i).value.trim(),ob=oversToDec($('#ob'+i).value);
     if(rf!==''&&of&&ra!==''&&ob){b.rf=+rf;b.of=of;b.ra=+ra;b.ob=ob}
-    t.base.t[i]=b;const pl={};
-    $('#bpl'+i).value.split('\n').forEach(line=>{const p=line.split(',').map(x=>x.trim());if(!p[0])return;pl[PK(p[0])]={w:parseInt(p[1])||0,r:parseInt(p[2])||0}});
-    t.base.pl[i]=pl});
+    t.base.t[i]=b});
   t.baseTs=Date.now();putTours(T);closeModal();render();toast('Saved')}
 
 /* ================= SCORING SCREEN ================= */
@@ -1585,7 +1568,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=29;
+const APP_VER=30;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
