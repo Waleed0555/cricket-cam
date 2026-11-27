@@ -333,6 +333,7 @@ input,select,textarea{background:#0B1220;border-color:#334155;color:#F1F5F9}
 .prog{background:#1E293B}.err{color:#F87171}
 .tbadge{color:#fff}
 .edrow{display:flex;align-items:center;gap:10px;width:100%;background:transparent!important;border:none;border-bottom:1px solid #1E293B;border-radius:0;padding:8px 2px;margin:0;color:#F1F5F9}.edrow:last-child{border-bottom:none}
+.edp{cursor:pointer}.edp:active td{background:#1E293B}
 </style>
 </head>
 <body>
@@ -504,7 +505,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v32</div>
+  <div class="mute ver">Cricket Cam v34</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -645,7 +646,7 @@ function renderPast(){const L=pastList();ui.past=L;
   let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
   h+=(L.length?'<div class="cgrid">':'')+L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
-    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block" onclick="pastEdit(${i})">✏️ Edit balls</button><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
+    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block" onclick="pastEdit(${i})">✏️ Edit scorecard</button><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
   h+=`<div class="grid g2"><button onclick="saveScore()">⬇ Save score file (to move to another browser)</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
   app.innerHTML=h}
 function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
@@ -1567,7 +1568,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=32;
+const APP_VER=34;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -2040,31 +2041,67 @@ const _renderVideo=renderVideo;renderVideo=function(){_renderVideo();
   const h=exp.querySelector('b');if(h)h.textContent='Old export (plays in real time — not recommended)';nxShow()};
 function nxShow(){const n=$('#nx');if(n&&(VFILE||vURL))n.style.display='block'}
 
-/* ================= v32: EDIT A MATCH AFTER SCORING ================= */
-const ED={m:null,uid:null,orig:'',dirty:false,inn:0};
+/* ================= v34: EDIT A MATCH (scorecard + ball by ball, saves straight away) ================= */
+const ED={m:null,uid:null,orig:'',hist:[],inn:1,view:'card',live:false};
 function edScore(m){let s='';try{withMatch(m,()=>{const S=compute();s=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> (${ovs(I.cnt,m.settings.bpo)})`).join(' &nbsp;v&nbsp; ');const r=result(S);if(r)s+=`<div class="mute" style="margin-top:4px">${esc(r)}</div>`})}catch(e){}return s}
-function edStart(m){ED.m=JSON.parse(JSON.stringify(m));ED.uid=m.uid;ED.orig=edScore(m);ED.dirty=false;ED.inn=0;go('edit')}
+function edStart(m,live){ED.m=JSON.parse(JSON.stringify(m));ED.uid=m.uid;ED.orig=edScore(m);ED.hist=[];ED.inn=1;ED.view='card';ED.live=!!live;go('edit')}
 function pastEdit(i){const m=ui.past[i];if(!m)return;gate(()=>edStart(m),'Enter the team code to edit a match.')}
+function curEdit(){if(!M)return;gate(()=>edStart(M,true),'Enter the team code to edit this match.')}
 function edBalls(){let L=[];withMatch(ED.m,()=>{L=compute().balls});return L}
+function edRows(){const map={};edBalls().forEach(b=>map[b.ix]=b);const rows=[];let inn=0;
+  ED.m.events.forEach((e,ix)=>{if(e.k==='inn'){inn++;return}if(map[ix])rows.push(Object.assign({t:'ball'},map[ix]));else if(e.k==='strike'&&inn)rows.push({t:'strike',ix,inn})});return rows}
+/* every change: remember the old version (for Undo), then save straight away */
+function edMut(fn,msg){ED.hist.push(JSON.stringify(ED.m.events));if(ED.hist.length>60)ED.hist.shift();fn();edSave();if(msg)toast(msg)}
+function edUndo(){const p=ED.hist.pop();if(!p)return;ED.m.events=JSON.parse(p);edSave();closeModal();render();toast('Undone')}
+function edSave(){const m=ED.m;if(!m)return;
+  const h=getHist(),i=h.findIndex(x=>x.uid===m.uid);if(i>=0){h[i]=JSON.parse(JSON.stringify(m));putHist(h)}
+  if(M&&M.uid===m.uid){M.events=JSON.parse(JSON.stringify(m.events));M.teams=JSON.parse(JSON.stringify(m.teams));save()}
+  else{try{withMatch(m,()=>syncTour())}catch(e){}}}
+function edExit(){const live=ED.live;ED.m=null;closeModal();go(live&&M&&!matchDone(M)?'score':'past')}
+function edChip(b){return`<span class="ochip ${b.c||''}" style="min-width:40px;height:40px;font-size:14px">${esc(b.l)}</span>`}
 function renderEdit(){
   if(!ED.m){go('past');return}
-  const m=ED.m,B=edBalls(),inns=[...new Set(B.map(b=>b.inn))];
+  const m=ED.m,inns=m.events.filter(e=>e.k==='inn').map((e,i)=>i+1);
   if(!inns.includes(ED.inn))ED.inn=inns[0]||1;
   let h=`<div class="wrap"><div class="appbar"><button class="abk" aria-label="Back" onclick="edExit()">‹</button><b>Edit match</b></div>`;
-  h+=`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b>
-    <div style="margin-top:8px">${edScore(m)}</div>
-    ${ED.dirty?`<div class="mute sm2">Before your changes: ${ED.orig}</div>`:'<div class="mute sm2">Tap any ball to change the runs or extra, delete it, or add a missed ball after it.</div>'}</div>`;
+  h+=`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div style="margin-top:8px">${edScore(m)}</div>
+    ${ED.hist.length?`<div class="mute sm2">Before your changes: ${ED.orig}</div>`:''}
+    <div class="mute sm2">Changes save straight away.${ED.hist.length?'':' Tap a player to fix their balls or name, or switch to Ball by ball.'}</div>
+    ${ED.hist.length?`<button class="block" style="margin:10px 0 0" onclick="edUndo()">↶ Undo last change</button>`:''}</div>`;
+  h+=`<div class="seg">${[['card','Scorecard'],['balls','Ball by ball']].map(([k,l])=>`<button class="${ED.view===k?'on':''}" onclick="ED.view='${k}';render()">${l}</button>`).join('')}</div>`;
   if(inns.length>1)h+=`<div class="seg">${inns.map(n=>`<button class="${n===ED.inn?'on':''}" onclick="ED.inn=${n};render()">${n===1?'1st':'2nd'} innings</button>`).join('')}</div>`;
-  const rows=B.filter(b=>b.inn===ED.inn);let ov=null;
-  h+=`<div class="card" style="padding:6px 14px">`;
-  if(!rows.length)h+='<p class="mute">No balls in this innings.</p>';
-  rows.forEach(b=>{const o=b.no.split('.')[0];
-    if(o!==ov){ov=o;h+=`<div class="mute" style="font-weight:700;margin:12px 0 4px">Over ${+o+1}${b.bn?' · '+esc(b.bn):''}</div>`}
-    h+=`<button class="edrow" onclick="edBall(${b.ix})"><span class="mute" style="width:34px">${b.no}</span><span class="ochip ${b.c||''}" style="min-width:40px;height:40px;font-size:14px">${esc(b.l)}</span><span style="flex:1;text-align:left">${esc(b.sn||'?')}${b.w?` <span style="color:#F87171">— OUT: ${esc(b.w)}</span>`:''}</span><span class="mute">✏️</span></button>`});
-  h+=`</div><div class="grid g2"><button class="pri" onclick="edSave()" ${ED.dirty?'':'disabled'}>💾 Save changes</button><button onclick="edExit()">${ED.dirty?'Cancel':'Done'}</button></div></div>`;
+  h+=ED.view==='card'?edCardHtml():edBallsHtml();
+  h+=`<button class="block" onclick="edExit()">✓ Done</button></div>`;
   app.innerHTML=h}
-function edBall(ix){const e=ED.m.events[ix];if(!e)return;
-  ui.ed={ix,x:e.x||'',r:e.r||0,rmW:false};edModal()}
+function edCardHtml(){let h='';withMatch(ED.m,()=>{const S=compute(),st=ED.m.settings,I=S.inns[ED.inn-1];
+  if(!I){h='<div class="card mute">Nothing scored in this innings yet.</div>';return}
+  const t=ED.m.teams[I.bat];
+  h=`<div class="card"><b>${esc(t.name)} ${I.runs}-${I.wk}</b> <span class="mute">(${ovs(I.cnt,st.bpo)} ov) · Extras ${I.ext}</span>
+  <table><tr><th>Batter — tap to edit</th><th>R</th><th>B</th><th>4s</th><th>6s</th></tr>`;
+  I.bO.forEach(n=>{const b=I.B[n];h+=`<tr class="edp" onclick="edPlayer('bat',${JSON.stringify(n).replace(/"/g,'&quot;')})"><td><b>${esc(n)}</b> <span class="mute">${esc(howOut(b))}</span> <span class="mute">✏️</span></td><td><b>${b.r}</b></td><td>${b.b}</td><td>${b.f4}</td><td>${b.f6}</td></tr>`});
+  h+=`</table><table><tr><th>Bowler — tap to edit</th><th>O</th><th>R</th><th>W</th></tr>`;
+  I.wO.forEach(n=>{const w=I.W[n];h+=`<tr class="edp" onclick="edPlayer('bowl',${JSON.stringify(n).replace(/"/g,'&quot;')})"><td><b>${esc(n)}</b> <span class="mute">✏️</span></td><td>${ovs(w.balls,st.bpo)}</td><td>${w.r}</td><td><b>${w.w}</b></td></tr>`});
+  h+=`</table><button class="block" style="margin:10px 0 0" onclick="edAddEnd()">➕ Add a ball at the end of this innings</button></div>`});return h}
+function edBallsHtml(){const rows=edRows().filter(b=>b.inn===ED.inn);let ov=null,h=`<div class="card" style="padding:6px 14px">`;
+  if(!rows.length)h+='<p class="mute">No balls in this innings.</p>';
+  rows.forEach(b=>{if(b.t==='strike'){h+=`<button class="edrow" onclick="edStrikeRow(${b.ix})"><span style="width:34px"></span><span style="flex:1;text-align:left;color:#FDE68A">⇄ Strike swapped here</span><span class="mute">✏️</span></button>`;return}
+    const o=b.no.split('.')[0];
+    if(o!==ov){ov=o;h+=`<div class="mute" style="font-weight:700;margin:12px 0 4px">Over ${+o+1}${b.bn?' · '+esc(b.bn):''}</div>`}
+    h+=`<button class="edrow" onclick="edBall(${b.ix})"><span class="mute" style="width:34px">${b.no}</span>${edChip(b)}<span style="flex:1;text-align:left">${esc(b.sn||'?')}${b.w?` <span style="color:#F87171">— OUT: ${esc(b.w)}</span>`:''}</span><span class="mute">✏️</span></button>`});
+  return h+`<button class="block" style="margin:10px 0 4px" onclick="edAddEnd()">➕ Add a ball at the end of this innings</button></div>`}
+/* tap a player on the scorecard */
+function edPlayer(kind,name){ui.edP={kind,name};
+  const B=edBalls().filter(b=>b.inn===ED.inn&&(kind==='bat'?(b.sn===name||(b.w&&b.w.indexOf(name)===0)):b.bn===name));
+  let h=`<p class="mute">${kind==='bat'?'Balls '+esc(name)+' faced':'Balls '+esc(name)+' bowled'} — tap one to change it.</p><div style="margin-bottom:10px">`;
+  h+=B.map(b=>`<button class="edrow" onclick="edBall(${b.ix})"><span class="mute" style="width:34px">${b.no}</span>${edChip(b)}<span style="flex:1;text-align:left">${kind==='bat'?'off '+esc(b.bn||'?'):'to '+esc(b.sn||'?')}${b.w?` <span style="color:#F87171">— OUT</span>`:''}</span><span class="mute">✏️</span></button>`).join('')||'<p class="mute">No balls yet.</p>';
+  h+=`</div><label>Change name (this match only)</label><div class="addrow"><input id="edrn" value="${esc(name)}"><button class="pri" onclick="edRename()">Rename</button></div>`;
+  ui.modal={title:esc(name),html:h};showModal()}
+function edRename(){const o=ui.edP&&ui.edP.name,n=($('#edrn').value||'').trim();if(!o||!n||n===o){closeModal();return}
+  edMut(()=>{ED.m.events.forEach(e=>{if(e.name===o)e.name=n;if(e.w&&e.w.f===o)e.w.f=n});
+    ED.m.teams.forEach(t=>{if(Array.isArray(t.players))t.players=t.players.map(p=>p===o?n:p)})},o+' renamed to '+n);
+  closeModal();render()}
+/* edit one ball */
+function edBall(ix){const e=ED.m.events[ix];if(!e)return;ui.ed={ix,x:e.x||'',r:e.r||0,rmW:false};edModal()}
 function edModal(){const d=ui.ed,e=ED.m.events[d.ix];
   const X=[['','Normal'],['wd','Wide'],['nb','No ball'],['b','Bye'],['lb','Leg bye']];
   const R=d.x==='wd'?[1,2,3,4,5,6,7,8]:d.x==='b'||d.x==='lb'?[1,2,3,4,5,6]:[0,1,2,3,4,5,6,7,8];
@@ -2073,26 +2110,31 @@ function edModal(){const d=ui.ed,e=ED.m.events[d.ix];
   let h=`<label>Type of ball</label><div class="seg" style="flex-wrap:wrap">${X.map(([k,l])=>`<button class="${d.x===k?'on':''}" onclick="ui.ed.x='${k}';edModal()">${l}</button>`).join('')}</div>`;
   h+=`<label>${d.x==='wd'?'Total runs for the wide':d.x==='nb'?'Runs the batter scored off the no ball':d.x==='b'||d.x==='lb'?'Runs run':'Runs'}</label>
   <div class="grid g4">${R.map(r=>`<button class="${d.r===r?'sel':''}" onclick="ui.ed.r=${r};edModal()">${rl(r)}</button>`).join('')}</div>`;
-  if(e.w)h+=`<label class="tog"><input type="checkbox" id="edrw" ${d.rmW?'checked':''} onchange="ui.ed.rmW=this.checked"><span>Remove the wicket on this ball<div class="sm">${esc((e.w.how||'out'))}. The batter who came in next stays in the scorecard.</div></span></label>`;
+  if(e.w)h+=`<label class="tog"><input type="checkbox" id="edrw" ${d.rmW?'checked':''} onchange="ui.ed.rmW=this.checked"><span>Remove the wicket on this ball<div class="sm">${esc(e.w.how||'out')}. The batter who came in next stays in the scorecard.</div></span></label>`;
   h+=`<button class="pri block" onclick="edApply()">Save this ball</button>
-  <div class="grid g2"><button onclick="edInsert(${d.ix})">➕ Add a missed ball after</button><button class="dan" onclick="edDel(${d.ix})">🗑 Delete ball</button></div>`;
+  <div class="grid g2" style="margin-top:8px"><button onclick="edInsert(${d.ix},0)">➕ Add ball before</button><button onclick="edInsert(${d.ix},1)">➕ Add ball after</button></div>
+  <button class="block" onclick="edSwap(${d.ix})">⇄ Swap strike before this ball</button>
+  <button class="dan block" onclick="edDel(${d.ix})">🗑 Delete ball</button>`;
   ui.modal={title:'Edit ball',html:h};showModal()}
-function edApply(){const d=ui.ed,e=ED.m.events[d.ix];if(!e)return;
-  e.x=d.x;e.r=d.r;if(d.x==='wd')e.exact=1;else delete e.exact;
-  if(d.rmW||($('#edrw')&&$('#edrw').checked))delete e.w;
-  ED.dirty=true;closeModal();render();toast('Ball changed — tap Save changes when done')}
+function edApply(){const d=ui.ed,e=ED.m.events[d.ix];if(!e)return;const rmW=d.rmW||($('#edrw')&&$('#edrw').checked);
+  edMut(()=>{e.x=d.x;e.r=d.r;if(d.x==='wd')e.exact=1;else delete e.exact;if(rmW)delete e.w},'Saved ✓');
+  closeModal();render()}
 function edDel(ix){if(ui.edDelArm!==ix){ui.edDelArm=ix;toast('Tap Delete ball again to confirm');return}
-  ui.edDelArm=null;ED.m.events.splice(ix,1);ED.dirty=true;closeModal();render();toast('Ball deleted')}
-function edInsert(ix){const e=ED.m.events[ix];const n={k:'ball',r:0,x:'',t:e.t};ED.m.events.splice(ix+1,0,n);ED.dirty=true;
-  ui.ed={ix:ix+1,x:'',r:0,rmW:false};edModal();toast('New ball added — set its runs')}
-function edExit(){if(ED.dirty&&ui.edExitArm!==1){ui.edExitArm=1;toast('Unsaved changes — tap back again to throw them away');return}
-  ui.edExitArm=0;ED.m=null;go('past')}
-function edSave(){const m=ED.m;if(!m)return;
-  const h=getHist(),i=h.findIndex(x=>x.uid===m.uid);if(i>=0){h[i]=JSON.parse(JSON.stringify(m));putHist(h)}
-  if(M&&M.uid===m.uid){M.events=JSON.parse(JSON.stringify(m.events));save()}
-  else{try{withMatch(m,()=>syncTour())}catch(e){}}
-  ED.dirty=false;ED.orig=edScore(m);ui.edExitArm=0;render();toast('Saved ✓ — scorecard and table updated')}
+  ui.edDelArm=null;edMut(()=>ED.m.events.splice(ix,1),'Ball deleted');closeModal();render()}
+function edCheck(ix){if(!edBalls().some(b=>b.ix===ix))toast('Heads up: that innings was already over, so this ball won\'t count');else toast('Ball added — set its runs')}
+function edInsert(ix,after){const e=ED.m.events[ix];const at=ix+(after?1:0);
+  edMut(()=>ED.m.events.splice(at,0,{k:'ball',r:0,x:'',t:e.t}));render();ui.ed={ix:at,x:'',r:0,rmW:false};edModal();edCheck(at)}
+function edAddEnd(){const R=edRows().filter(b=>b.inn===ED.inn);let at;
+  if(R.length)at=R[R.length-1].ix+1;else{let n=0;at=ED.m.events.findIndex(e=>e.k==='inn'&&++n===ED.inn)+1}
+  const pe=ED.m.events[at-1]||{};edMut(()=>ED.m.events.splice(at,0,{k:'ball',r:0,x:'',t:pe.t||0}));render();
+  ui.ed={ix:at,x:'',r:0,rmW:false};edModal();edCheck(at)}
+function edSwap(ix){const e=ED.m.events[ix];edMut(()=>ED.m.events.splice(ix,0,{k:'strike',t:e.t}),'Strike swapped — batters from this ball on are switched');closeModal();render()}
+function edStrikeRow(ix){ui.modal={title:'Strike swap',html:`<p class="mute">The batters swap ends here, so the other batter is on strike for the next ball.</p><button class="dan block" onclick="edRmStrike(${ix})">Remove this strike swap</button><button class="block" onclick="closeModal()">Keep it</button>`};showModal()}
+function edRmStrike(ix){if(ED.m.events[ix]&&ED.m.events[ix].k==='strike')edMut(()=>ED.m.events.splice(ix,1),'Strike swap removed');closeModal();render()}
 {const _r=render;render=function(){if(screen==='edit')return renderEdit();return _r()}}
+/* ✏️ button on the read-only scorecard (Past matches) and on the scoring screen's Scorecard tab */
+{const _pc=pastCard;pastCard=function(i){_pc(i);const s=document.querySelector('#modal .sheet');if(s&&ui.past[i]){const b=document.createElement('button');b.className='pri block';b.textContent='✏️ Edit this scorecard';b.onclick=()=>{closeModal();pastEdit(i)};const hd=s.querySelector('.shh');if(hd)hd.after(b);else s.prepend(b)}}}
+{const _ch=cardHtml;cardHtml=function(nv){const h=_ch(nv);return(screen==='score'&&M&&h)?`<button class="block" style="margin:10px 0 4px" onclick="curEdit()">✏️ Edit scorecard / fix a ball</button>`+h:h}}
 
 render();try{renderNav()}catch(e){}
 </script>
