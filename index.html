@@ -332,6 +332,7 @@ input,select,textarea{background:#0B1220;border-color:#334155;color:#F1F5F9}
 #toast{background:#F1F5F9;color:#0B1220}
 .prog{background:#1E293B}.err{color:#F87171}
 .tbadge{color:#fff}
+.edrow{display:flex;align-items:center;gap:10px;width:100%;background:transparent!important;border:none;border-bottom:1px solid #1E293B;border-radius:0;padding:8px 2px;margin:0;color:#F1F5F9}.edrow:last-child{border-bottom:none}
 </style>
 </head>
 <body>
@@ -429,7 +430,7 @@ function compute(upto){
         if(w&&e.w.how!=='runout'&&e.w.how!=='other')w.w++;
       }
       if(r%2===1&&!(wd&&(e.exact||!st.wideRuns)))swp(I);
-      S.balls.push({t:e.t,label:`${S.inns.length===1?'1st':'2nd'} inns ${no} · ${bn||'?'} to ${sn||'?'}: ${L.l}  [${fmt(e.t)}]`});
+      S.balls.push({t:e.t,ix:M.events.indexOf(e),inn:S.inns.length,no,bn,sn,l:L.l,c:L.c,w:e.w?(((W0&&W0.nm)||'')+' '+(e.w.how||'out')).trim():'',label:`${S.inns.length===1?'1st':'2nd'} inns ${no} · ${bn||'?'} to ${sn||'?'}: ${L.l}  [${fmt(e.t)}]`});
       const ovEnd=counts&&I.cnt%bpo===0;if(ovEnd){if(I.ovR===0&&I.ovBs.length===1&&w)w.m++;swp(I);I.last=I.bowler;I.bowler=null;I.prev=I.over;I.over=[];I.ovR=0;I.ovBs=[]}
       chk(I,st);
       {const ft=e.t;
@@ -503,7 +504,7 @@ function renderHome(){
     <li>${hasCam?'Hit record and score every ball — sixes, wickets, ducks and scorecards appear on the video as it happens.':'Score every ball.'}</li>
     <li>When the match ends, the camera asks if you want to stop. Then choose <b>Save to Camera Roll</b> or <b>Keep for later</b>.</li></ol>
     ${hasCam?'<p class="mute">The video is saved on the phone every few seconds, so if Safari crashes you can get it back from 🎞 Recordings.</p><p class="mute">Both devices need internet. Keep the camera phone plugged in with the screen on.</p>':''}</details>
-  <div class="mute ver">Cricket Cam v30</div>
+  <div class="mute ver">Cricket Cam v32</div>
   ${hasCam&&!navigator.standalone?'<div class="card mute">Tip: in Safari tap Share → <b>Add to Home Screen</b> so this opens like a normal app.</div>':''}</div>`;
   app.innerHTML=h;if(typeof liveStatus==='function')liveStatus();
 }
@@ -644,7 +645,7 @@ function renderPast(){const L=pastList();ui.past=L;
   let h=`<div class="wrap">${hdr('Past matches')}<p class="mute">Your last ${Math.min(20,L.length)} matches. Open a scorecard, or add the score to a video you filmed.</p>`;
   h+=(L.length?'<div class="cgrid">':'')+L.map((m,i)=>{let res='',sc='';try{withMatch(m,()=>{const S=compute();res=m.abandoned?'Abandoned — not counted':(result(S)||'Not finished')+(potmText(S)?' · ⭐ '+potmText(S):'');sc=S.inns.map(I=>`${m.teams[I.bat].name} ${I.runs}-${I.wk}`).join(' v ')})}catch(e){}
     return`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b><div class="mute">${m.t0?new Date(m.t0).toLocaleDateString():''} · ${esc(sc)}</div><div style="margin:6px 0">${esc(res)}</div>
-    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
+    <div class="grid g2"><button onclick="pastCard(${i})">Scorecard</button><button onclick="pastVideo(${i})">🎬 Add score to video</button></div><button class="block" onclick="pastEdit(${i})">✏️ Edit balls</button><button class="block dan" style="margin-bottom:0" onclick="pastDel(${i})">🗑 Delete match</button></div>`}).join('')+(L.length?'</div>':'<div class="card mute">No finished matches yet.</div>');
   h+=`<div class="grid g2"><button onclick="saveScore()">⬇ Save score file (to move to another browser)</button><label class="filebtn"><button style="width:100%;pointer-events:none">Load score file</button><input type="file" accept=".json,application/json" onchange="loadScore(this)"></label></div></div>`;
   app.innerHTML=h}
 function pastDel(i){const m=ui.past[i];if(!m)return;const inTour=getTours().some(t=>t.matches.some(x=>x.uid===m.uid));
@@ -963,8 +964,6 @@ function renderTour(){
   ${sd.some(r=>r.est)?`<div class="mute sm2">* NRR estimated${ed?' — add the earlier games’ totals in “Edit starting numbers” to make it exact':''}.</div>`:''}${t.matches.length?'<div class="mute sm2">Form = last 5 games scored in the app (newest on the right).</div>':''}</div>`;
   const AP=allPlayers(t),FP=AP;
   const tn=true;
-  const DK=FP.filter(p=>p.duck>0).sort((a,b)=>b.duck-a.duck);
-  if(DK.length)h+=`<div class="card"><b>🦆 Duck Hall of Shame</b><table class="pt">${DK.map(p=>`<tr><td>${esc(p.n)}${tn?` <span class="mute">${esc(p.s)}</span>`:''}</td><td style="text-align:right">${'🦆'.repeat(Math.min(p.duck,6))} <b>${p.duck}</b></td></tr>`).join('')}</table></div>`;
   h+=`<div class="card"><b>Games added from the app</b>${t.matches.length?t.matches.slice().reverse().map(m=>{const j=t.matches.indexOf(m);return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><div><div>${esc(m.score)}</div><div class="mute">${esc(m.date)} · ${esc(m.res)}${m.potm?' · ⭐ '+esc(m.potm):''}</div></div>${ed?`<button class="mini" onclick="rmMatch(${j})">Remove</button>`:''}</div>`}).join(''):'<p class="mute">None yet. Games are added automatically when they finish.</p>'}</div>`;
   h+=`<button class="pri block" onclick="shareTour()">Share table (WhatsApp)</button>
   ${ed?'<button class="block" onclick="addTourTeam()">+ Add a team to this tournament</button><button class="block" onclick="editBase()">Edit starting numbers</button>':''}${tourAdminHtml(t)}</div>`;
@@ -1568,7 +1567,7 @@ function contDone(m,c){
 try{const sc=localStorage.getItem('cc.scorerCode');if(sc&&M)liveStart('score',sc)}catch(e){}
 
 /* ================= v14 ================= */
-const APP_VER=30;
+const APP_VER=32;
 const OFF_KEYS={"pub":{"kty":"EC","crv":"P-256","x":"Ty6cYB5mkiJVEGSKfrgEg-agpf_wx5WFsBz_q7UbudI","y":"FaFXwb0xvx8-pliLlTmZJNh5i74plE-pPNnnNyvNUyI"},"enc":{"s":"DotOHaveMOzXxH7T2Sy9RQ==","iv":"VCUJ1uUs415UBV62","ct":"KkjxotqQXmP9Gc/ecnsUgYJd3Mo5r4eiZ8lcUnDmBKs00KGOafWj4kR7jSq9lg0Q8FKaNeSJwCr5hGXKjwUt+QYCyjjQx1lZyAkFTCFDaF2y1jiOgWNwM1v7QGLsRgsfB1Y5exxjTzb/rPHxPGlVFKX7X2Qlg1TIqaHRqR/MIInYgj37eTxGZTyPM/xDdYNR2y0D4VOeh7hQYqUrgRYD4W9WZkbCqMuBWjJdUEKRmon55/gJ2C/Ng7JkIyolePddGe/R0f6zInlAj0Gf8dvc3Y+Z9OaDRmoW+qAPrJKu"}};
 /* ---------- recordings (crash-proof: saved in pieces on the phone) ---------- */
 const RDB={p:null};
@@ -2040,6 +2039,60 @@ const _renderVideo=renderVideo;renderVideo=function(){_renderVideo();
     <button class="block" id="nxstop" style="display:none" onclick="NX.stop=true">Stop</button><div id="nxdone"></div></div>`);
   const h=exp.querySelector('b');if(h)h.textContent='Old export (plays in real time — not recommended)';nxShow()};
 function nxShow(){const n=$('#nx');if(n&&(VFILE||vURL))n.style.display='block'}
+
+/* ================= v32: EDIT A MATCH AFTER SCORING ================= */
+const ED={m:null,uid:null,orig:'',dirty:false,inn:0};
+function edScore(m){let s='';try{withMatch(m,()=>{const S=compute();s=S.inns.map(I=>`${esc(m.teams[I.bat].name)} <b>${I.runs}-${I.wk}</b> (${ovs(I.cnt,m.settings.bpo)})`).join(' &nbsp;v&nbsp; ');const r=result(S);if(r)s+=`<div class="mute" style="margin-top:4px">${esc(r)}</div>`})}catch(e){}return s}
+function edStart(m){ED.m=JSON.parse(JSON.stringify(m));ED.uid=m.uid;ED.orig=edScore(m);ED.dirty=false;ED.inn=0;go('edit')}
+function pastEdit(i){const m=ui.past[i];if(!m)return;gate(()=>edStart(m),'Enter the team code to edit a match.')}
+function edBalls(){let L=[];withMatch(ED.m,()=>{L=compute().balls});return L}
+function renderEdit(){
+  if(!ED.m){go('past');return}
+  const m=ED.m,B=edBalls(),inns=[...new Set(B.map(b=>b.inn))];
+  if(!inns.includes(ED.inn))ED.inn=inns[0]||1;
+  let h=`<div class="wrap"><div class="appbar"><button class="abk" aria-label="Back" onclick="edExit()">‹</button><b>Edit match</b></div>`;
+  h+=`<div class="card"><b>${esc(m.teams[0].name)} v ${esc(m.teams[1].name)}</b>
+    <div style="margin-top:8px">${edScore(m)}</div>
+    ${ED.dirty?`<div class="mute sm2">Before your changes: ${ED.orig}</div>`:'<div class="mute sm2">Tap any ball to change the runs or extra, delete it, or add a missed ball after it.</div>'}</div>`;
+  if(inns.length>1)h+=`<div class="seg">${inns.map(n=>`<button class="${n===ED.inn?'on':''}" onclick="ED.inn=${n};render()">${n===1?'1st':'2nd'} innings</button>`).join('')}</div>`;
+  const rows=B.filter(b=>b.inn===ED.inn);let ov=null;
+  h+=`<div class="card" style="padding:6px 14px">`;
+  if(!rows.length)h+='<p class="mute">No balls in this innings.</p>';
+  rows.forEach(b=>{const o=b.no.split('.')[0];
+    if(o!==ov){ov=o;h+=`<div class="mute" style="font-weight:700;margin:12px 0 4px">Over ${+o+1}${b.bn?' · '+esc(b.bn):''}</div>`}
+    h+=`<button class="edrow" onclick="edBall(${b.ix})"><span class="mute" style="width:34px">${b.no}</span><span class="ochip ${b.c||''}" style="min-width:40px;height:40px;font-size:14px">${esc(b.l)}</span><span style="flex:1;text-align:left">${esc(b.sn||'?')}${b.w?` <span style="color:#F87171">— OUT: ${esc(b.w)}</span>`:''}</span><span class="mute">✏️</span></button>`});
+  h+=`</div><div class="grid g2"><button class="pri" onclick="edSave()" ${ED.dirty?'':'disabled'}>💾 Save changes</button><button onclick="edExit()">${ED.dirty?'Cancel':'Done'}</button></div></div>`;
+  app.innerHTML=h}
+function edBall(ix){const e=ED.m.events[ix];if(!e)return;
+  ui.ed={ix,x:e.x||'',r:e.r||0,rmW:false};edModal()}
+function edModal(){const d=ui.ed,e=ED.m.events[d.ix];
+  const X=[['','Normal'],['wd','Wide'],['nb','No ball'],['b','Bye'],['lb','Leg bye']];
+  const R=d.x==='wd'?[1,2,3,4,5,6,7,8]:d.x==='b'||d.x==='lb'?[1,2,3,4,5,6]:[0,1,2,3,4,5,6,7,8];
+  if(!R.includes(d.r))d.r=R[0];
+  const rl=r=>d.x==='wd'?(r===1?'Wide':'Wide '+r):d.x==='nb'?'NB +'+r:String(r);
+  let h=`<label>Type of ball</label><div class="seg" style="flex-wrap:wrap">${X.map(([k,l])=>`<button class="${d.x===k?'on':''}" onclick="ui.ed.x='${k}';edModal()">${l}</button>`).join('')}</div>`;
+  h+=`<label>${d.x==='wd'?'Total runs for the wide':d.x==='nb'?'Runs the batter scored off the no ball':d.x==='b'||d.x==='lb'?'Runs run':'Runs'}</label>
+  <div class="grid g4">${R.map(r=>`<button class="${d.r===r?'sel':''}" onclick="ui.ed.r=${r};edModal()">${rl(r)}</button>`).join('')}</div>`;
+  if(e.w)h+=`<label class="tog"><input type="checkbox" id="edrw" ${d.rmW?'checked':''} onchange="ui.ed.rmW=this.checked"><span>Remove the wicket on this ball<div class="sm">${esc((e.w.how||'out'))}. The batter who came in next stays in the scorecard.</div></span></label>`;
+  h+=`<button class="pri block" onclick="edApply()">Save this ball</button>
+  <div class="grid g2"><button onclick="edInsert(${d.ix})">➕ Add a missed ball after</button><button class="dan" onclick="edDel(${d.ix})">🗑 Delete ball</button></div>`;
+  ui.modal={title:'Edit ball',html:h};showModal()}
+function edApply(){const d=ui.ed,e=ED.m.events[d.ix];if(!e)return;
+  e.x=d.x;e.r=d.r;if(d.x==='wd')e.exact=1;else delete e.exact;
+  if(d.rmW||($('#edrw')&&$('#edrw').checked))delete e.w;
+  ED.dirty=true;closeModal();render();toast('Ball changed — tap Save changes when done')}
+function edDel(ix){if(ui.edDelArm!==ix){ui.edDelArm=ix;toast('Tap Delete ball again to confirm');return}
+  ui.edDelArm=null;ED.m.events.splice(ix,1);ED.dirty=true;closeModal();render();toast('Ball deleted')}
+function edInsert(ix){const e=ED.m.events[ix];const n={k:'ball',r:0,x:'',t:e.t};ED.m.events.splice(ix+1,0,n);ED.dirty=true;
+  ui.ed={ix:ix+1,x:'',r:0,rmW:false};edModal();toast('New ball added — set its runs')}
+function edExit(){if(ED.dirty&&ui.edExitArm!==1){ui.edExitArm=1;toast('Unsaved changes — tap back again to throw them away');return}
+  ui.edExitArm=0;ED.m=null;go('past')}
+function edSave(){const m=ED.m;if(!m)return;
+  const h=getHist(),i=h.findIndex(x=>x.uid===m.uid);if(i>=0){h[i]=JSON.parse(JSON.stringify(m));putHist(h)}
+  if(M&&M.uid===m.uid){M.events=JSON.parse(JSON.stringify(m.events));save()}
+  else{try{withMatch(m,()=>syncTour())}catch(e){}}
+  ED.dirty=false;ED.orig=edScore(m);ui.edExitArm=0;render();toast('Saved ✓ — scorecard and table updated')}
+{const _r=render;render=function(){if(screen==='edit')return renderEdit();return _r()}}
 
 render();try{renderNav()}catch(e){}
 </script>
